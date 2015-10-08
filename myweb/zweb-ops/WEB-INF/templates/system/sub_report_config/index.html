@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+#set($parent_id = $P.param('parent_id','0'))
+#set($parent_name = $P.param('parent_name',''))
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title>子报表配置维护</title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+	</head>
+	<body>
+												
+		<div class="mini-splitter" id="search-splitter" style="width:100%;height:100%;">
+			<div size="225" showCollapseButton="true" expanded="false">
+				<div class="mini-panel" showToolbar="true" showHeader="false" style="width:100%;height:100%;">
+				    <div property="toolbar" style="padding:5px 5px 5px 10px;">
+				    	<form id="search-form" onsubmit="return false;">
+							<table>
+								<tr>
+									<td>关联报表：</td>
+									<td>
+										<input style="width:125px;" id="relReportConfig" onenter="search()" class="mini-buttonedit" textName="relReportConfig.title" onbuttonclick="onChooseRelReportConfig" />
+								    </td>
+								</tr>
+							</table>
+							<div style="text-align: center; padding: 10px;">
+								<a class="mini-button" onclick="search()" iconCls="icon-search" style="width: 60px; margin-right: 20px;">查询</a>
+                               <a class="mini-button" onclick="reset()" iconCls="icon-cancel"	style="width: 60px; margin-right: 20px;">清空</a>							
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div>
+										    	
+				<div class="mini-toolbar" style="border-bottom:0;padding:0px;">
+					<table style="width:100%;">
+						<tr>
+							<td style="width:100%;">
+																	
+								<input id="key" class="mini-textbox" emptyText="关键词" style="width:150px;" onenter="searchKey()"/>
+								<a class="mini-button" iconCls="icon-search" onclick="searchKey()">查询</a>
+								<span class="separator"></span>
+																		
+								<a class="mini-button" iconCls="icon-add" onclick="add()">增加</a>
+								<a class="mini-button" iconCls="icon-edit" onclick="edit()">编辑</a>
+								<a class="mini-button" iconCls="icon-remove" onclick="remove()">删除</a>
+								<a class="mini-button" iconCls="icon-search" onclick="highSearch()">高级查询</a>
+																		
+							</td>
+							<td style="white-space:nowrap;">
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="mini-fit">
+					<div id="subReportConfig-treegrid" class="mini-treegrid" style="width:100%;height:100%;"  resultAsTree="false"
+						showTreeIcon="true" showArrow="true" treeColumn="title" idField="id" parentField="pid" 
+						url="${base_url}/system/sub_report_config/list#if(${parent_id} != '0')?reportConfig=${parent_id}#end"
+						multiSelect="false" allowResize="false" expandOnLoad="true">
+						<div property="columns">
+							<div type="indexcolumn" field="indexcolumn" align="right" width="30">序号</div>
+							<div type="checkcolumn" width="25">ID</div>
+																																		
+							<div field="relReportConfig.id" name="relReportConfig" displayField="relReportConfig.title"   width="100" align="left" headerAlign="center" allowSort="true">关联报表</div>
+							<div field="text" width="100" align="left" headerAlign="center" allowSort="true">名称描述</div>
+							<div field="referColumn" width="100" align="left" headerAlign="center" allowSort="true">引用字段</div>
+							<div field="relColumn" width="100" align="left" headerAlign="center" allowSort="true">关联字段</div>
+							<div field="url" width="250" align="left" headerAlign="center" allowSort="true">网页地址</div>
+							<div field="sort"  displayField="sort"   align="right" width="50"  headerAlign="center" allowSort="true">排序</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+								
+		<script type="text/javascript">
+			mini.parse();
+			var grid = mini.get("subReportConfig-treegrid");
+			
+			grid.expandAll();
+										        	        							        						
+			function onChooseRelReportConfig(e) {
+	            var btnEdit = this;
+	            mini.open({
+	                url: "${base_url}/report_config/select",
+	                title: "选择关联报表",
+	                width: 1000,
+	                height: 600,
+	                ondestroy: function (action) {
+	                    if (action == "ok") {
+	                        var iframe = this.getIFrameEl();
+	                        var data = iframe.contentWindow.GetData();
+	                        data = mini.clone(data);    //必须
+	                        if (data) {
+	                            btnEdit.setValue(data.id);
+	                            btnEdit.setText(data.title);
+	                        }
+	                    }
+	                }
+	            });            
+	        }
+			
+			function add() {
+				mini.open({
+					url : "${base_url}/system/sub_report_config/edit",
+					title : "新增子报表配置",
+					width : 600,
+					height : 600,
+					showModal : false,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+						var data = {
+							action : "new",
+							reportConfig : {
+								id : "$parent_id",
+								title: "$parent_name"
+							}
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						grid.reload();
+					}
+				});
+			}
+
+			function edit() {
+				var row = grid.getSelected();
+				if(row) {
+					mini.open({
+						url : "${base_url}/system/sub_report_config/edit",
+						title : "编辑子报表配置",
+						width : 600,
+						height : 600,
+						showModal : false,
+						onload : function() {
+							var iframe = this.getIFrameEl();
+							var data = {
+								action : "edit",
+								id : row.id,
+								reportConfig : {
+									id : "$parent_id",
+									title: "$parent_name"
+								}
+							};
+							iframe.contentWindow.SetData(data);
+						},
+						ondestroy : function(action) {
+							grid.reload();
+						}
+					});
+
+				} else {
+					mini.alert("请选中一条记录","提示");
+				}
+			}
+			
+			function remove() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定删除选中记录？", "提示",
+			            function (action) {
+			                if (action == "ok") {
+			                    var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								grid.loading("操作中，请稍后......");
+								$.ajax({
+									url : "${base_url}/system/sub_report_config/delete?id=" + id,
+									type : 'post',
+									success : function(text) {
+										mini.alert("删除选中记录，操作成功","提示");
+										grid.reload();
+									},
+									error : function(jqXHR, textStatus, errorThrown) {
+										grid.unmask();
+										//400,403,500错误已经统一在sys.js处理
+										if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+											return;
+										var text = "操作失败，" + jqXHR.responseText;
+										mini.alert(text,"提示");
+									}
+								});
+			                }
+			            }
+			        );
+				} else {
+					mini.alert("请选中一条记录","提示");
+				}
+			}
+									
+			function searchKey() {
+				var key = mini.get("key").getFormValue();
+				grid.load({
+					key : key
+				});
+								
+			}
+			
+			function highSearch(){
+				var index = 1;
+				var splitter = mini.get("search-splitter");
+				var pane = splitter.getPane(index);
+				if (pane.expanded) {
+					splitter.collapsePane(index);
+				} else {
+					splitter.expandPane(index);
+				}
+			}
+			
+			function search() {
+				var json = _getSearchJSON();
+				grid.load(json);
+			}
+			function reset(){
+				var form = new mini.Form("search-form");
+				form.reset();
+			}
+			function _getSearchJSON() {
+				var relReportConfig = mini.get("relReportConfig").getFormValue();
+				var key = mini.get("key").getFormValue();
+				
+				return {
+					relReportConfig:relReportConfig,key:key
+				};
+			}
+									
+			//导出
+			function exportExcel(){
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定导出选中记录？", "提示",
+			            function (action) {
+			                if (action == "ok") {
+								var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								location.href="${base_url}/system/sub_report_config/export?ids=" + id;
+							}
+						});
+				} else {
+					if(grid.totalCount>0){
+						mini.confirm("确定导出记录？", "提示",
+				            function (action) {
+				                if (action == "ok") {
+									var json = _getSearchJSON();
+									var queryString = $.param(json) ;
+									var url = "${base_url}/system/sub_report_config/export?"+queryString;
+									location.href=url;
+								}
+							});
+					} else {
+						mini.alert("没有数据可以导出","提示");
+					}
+				}
+			}
+			
+		</script>
+	</body>
+</html>

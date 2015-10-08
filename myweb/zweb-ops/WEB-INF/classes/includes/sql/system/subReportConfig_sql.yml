@@ -1,0 +1,41 @@
+SubReportConfig:
+  list: > 
+    SELECT
+      *
+    FROM
+        ${app.solidbase_catalog}.sys_sub_report_config t0
+    WHERE 1=1
+          
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #else
+        
+        #if ($args[0].reportConfig && $args[0].reportConfig!="")
+        AND report_config_id = :reportConfig
+        #end
+        
+        #if ($args[0].relReportConfig && $args[0].relReportConfig!="") 
+        AND rel_report_config_id = :relReportConfig 
+        #end 
+                         
+        #end
+                
+  app_list: > 
+    SELECT
+      *
+    FROM
+        ${app.solidbase_catalog}.sys_sub_report_config t0
+    WHERE 1=1
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #else
+        
+        #if ($args[0].reportConfig && $args[0].reportConfig!="")
+        AND report_config_id = :reportConfig
+        #end
+        
+        #if ($args[0].relReportConfig && $args[0].relReportConfig!="") 
+        AND rel_report_config_id = :relReportConfig 
+        #end 
+        
+        #end

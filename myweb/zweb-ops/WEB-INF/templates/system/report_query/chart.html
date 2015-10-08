@@ -1,0 +1,367 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title></title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+		<!-- ECharts单文件引入 -->
+    	<script src="${base_url}/js/echarts.js"></script>
+	</head>
+	<body>
+		<div class="mini-fit">
+			#set($width = 800)
+			#set($height = 600)
+			#if($reportConfig.width>0)
+			#set($width = ${reportConfig.width}*1.6)
+			#end
+			#if($reportConfig.height>0)
+			#set($height = ${reportConfig.height})
+			#end
+			<div id="main" style="width:${width}px; height:${height}px;">
+			</div>
+		</div>
+								
+		<script type="text/javascript">
+		
+			// 路径配置
+	        require.config({
+	            paths: {
+	                echarts: '${base_url}/js'
+	            }
+	        });
+	        
+	        // 使用
+	        require(
+	            [
+	                'echarts',
+	                'echarts/chart/bar',
+	                'echarts/chart/line',
+	                'echarts/chart/pie',
+	                //'echarts/chart/funnel',
+	            ],
+	            function (ec) {
+	                // 基于准备好的dom，初始化echarts图表
+	                var myChart = ec.init(document.getElementById('main'));
+	                $.ajax({
+						url : "${base_url}/system/report/list/${reportConfig.code}",
+						type : 'get',
+						data : {
+							invite_code : "$!{inviteCode}"
+						},
+						cache : false,
+						success : function(resp) {
+							var data = resp.data;
+							if (data && data.length > 0) {
+								// debugger;
+								// 坐标轴
+								var _axis = [
+									#set($xindex = -1)
+									#set($yindex = -1)
+									#foreach($o in $reportConfig.axisConfigs)
+									#if($o.direction == 'x')
+									#set($xindex = $xindex+1)
+									#end
+									#if($o.direction == 'y')
+									#set($yindex = $yindex+1)
+									#end
+									
+									{
+										id : ${o.id},
+										#if($o.direction == 'x')
+										
+										index : $xindex,
+										#end
+										#if($o.direction == 'y')
+										
+										index : $yindex,
+										#end
+										
+										columnName : "$!{o.columnConfig.columnName}",
+								    	type : "$o.type",
+								    	name : "$o.name",
+								    	direction : "$o.direction",
+								    	position : "$o.position",
+								    	show : ${o.show},
+								    	splitLine : {
+								    		show : ${o.showSplitLine}
+								    	},
+								    	#if(${o.columnConfig})
+								    	
+								    	data : [],
+								    	#else
+								    	
+								    	data : [
+								    		#set($splitNumber = 1)
+								    		#if($o.splitNumber > 0)
+								    		#set($splitNumber = $o.splitNumber)
+								    		#end
+								    		#foreach($foo in [1..${splitNumber}])
+								    		
+								    		'',
+								    		#end
+								    		
+								    	],
+								    	#end
+								    	#if($o.type == 'category')
+								    	
+								    	boundaryGap : true,
+								    	#else
+								    	  #if(${o.gap_min} > 0 && ${o.gap_max} > 0)
+								    	
+								    	boundaryGap : [${o.gap_min}, ${o.gap_max}],
+								    	  #else
+								    	
+								    	  boundaryGap : [0, 0.2],
+								    	  #end
+								    	#end
+								    	#if(${o.min} != '' && ${o.max} != '')
+								    	
+								    	min : "${o.min}",
+								    	max : "${o.max}",
+								    	#end
+								    	#if(${o.splitNumber} > 0)
+								    	
+								    	splitNumber : ${o.splitNumber},
+								    	#end
+								            
+							            axisLabel : {
+							            	#if(${o.labelRotate} > 0)
+							            	
+							            	rotate : ${o.labelRotate},
+							            	#end
+							            	#if(${o.labelFormatter} && ${o.labelFormatter} != '')
+							            	
+							            	formatter : ${o.labelFormatter},
+							            	#end
+							            	
+							            	interval : 0,
+							            	margin : 20,
+							            }
+									},
+									#end
+									
+								];
+								
+								// 定义一个用于查找给定ID值的坐标轴函数
+								var findAxis = function(id) {
+									for (var i = 0; i < _axis.length; i++) {
+										if (_axis[i].id == id) {
+											return _axis[i];
+										}
+									}
+								}
+								
+								// 系列
+								var _all_series = [
+			                		#foreach($s in $reportConfig.seriesConfigs)
+			                		
+				                	{
+				                		#if(${s.filter} && ${s.filter} != '')
+				                		
+				                		filter : ${s.filter},
+				                		#end
+				                		
+				                		valueColumnName : "${s.valueColumn.columnName}",
+				                		#if($s.categoryColumn)
+				                		
+				                		categoryColumnName : "${s.categoryColumn.columnName}",
+				                		#end
+				                		
+					                	name : "${s.name}",
+							            type : "${s.type}",
+							            data : [],
+							            itemStyle: {
+							                normal: {
+							                	#if(${s.labelShow})
+							                	
+							                    label : {
+							                        show: ${s.labelShow}, 
+							                        position: "${s.labelPosition}",
+							                        textStyle: {
+							                        	color: "${s.labelColor}",
+							                        },
+							                    },
+							                    #end
+							                    #if(${s.areaStyle})
+							                    
+							                    areaStyle: {
+							                    	type: 'default'
+							                    }
+							                    #end
+							                    
+							                }
+							            },
+							            xAxis : {
+							            	id : ${s.xAxis.id}
+								        },
+								        yAxis : {
+								        	id : ${s.yAxis.id}
+								        },
+								        validator : null
+						            },
+				                	#end
+			                	
+			                	];
+			                	
+								// 遍历,根据配置找出有用信息
+								debugger;
+								var _validSeries = [];
+								for (var i = 0; i < _all_series.length; i++) {
+							    	var _series = _all_series[i];
+							    	var _x = findAxis(_series.xAxis.id);
+							    	_series.xAxisIndex = _x.index;
+							    	var _y = findAxis(_series.yAxis.id);
+							    	_series.yAxisIndex = _y.index;
+							    	
+							    	var _found = false;
+							    	for (var j = 0; j < data.length; j++) {
+										var _row = data[j];
+										// 数据过滤条件
+								    	var _filter = _series.filter;
+								    	if ((typeof _filter != 'undefined') && _filter != '') {
+								    		var _row = data[j];
+								    		var _args = {row: _row, index: j, data: data, resp: resp, series: _series};
+								    		var ok = _filter(_args);
+								    		if (!ok) {
+												continue;
+											} else if(!_found){
+												_found = true;
+												_validSeries.push(_series);
+											}
+								    	} else if(!_found){
+											_found = true;
+											_validSeries.push(_series);
+										}
+								    	
+										for(var _key in _row) {
+									    	var _value = _row[_key];
+											if (_key == _x.columnName) {
+												if (typeof _x.axisLabel.formatter != 'undefined') {
+										    		_value = _x.axisLabel.formatter(_value);
+										    	}
+										    	// 不能重复
+										    	if (!_x.data.contains(_value)) {
+										    		_x.data.push(_value);
+												}
+											}
+											if (_key == _y.columnName) {
+												if (typeof _y.axisLabel.formatter != 'undefined') {
+										    		_value = _y.axisLabel.formatter(_value);
+										    	}
+										    	// 不能重复
+										    	if (!_y.data.contains(_value)) {
+										    		_y.data.push(_value);
+												}
+											}
+											// TODO 将坐标轴的Category下标考虑进去
+									    	if (_key == _series.valueColumnName) {
+									    		_series.data.push(_value);
+									    	}
+									    }
+									}
+							    }
+								
+								// 筛选X、Y轴
+								var _xAxis = [];
+								var _yAxis = [];
+								for (var i = 0; i < _axis.length; i++) {
+									if (_axis[i].direction == 'x') {
+										_xAxis.push(_axis[i]);
+									} else if (_axis[i].direction == 'y') {
+										_yAxis.push(_axis[i]);
+									}
+								}
+								
+								// 图例
+			                	var _legend = {
+			                		data: []
+			                	};
+			                	for (var i = 0; i < _validSeries.length; i++) {
+			                		debugger;
+			                		if (_validSeries[i].data.length > 0) {
+			                			_legend.data.push(_validSeries[i].name);
+			                		}
+			                	}
+			                	
+			                	var _grid = {
+						    		x: ${reportConfig.x},
+						    		y: ${reportConfig.y},
+						    		x2: '200',
+						    		y2: 80,
+						    	};
+			                	// 当图例的个数超过四个，排版改为竖向列表
+			                	if (_legend.data.length > 4) {
+			                		_legend.orient = 'vertical';
+			                		_legend.x = ${reportConfig.width}+40;
+			                		_legend.y = $reportConfig.y + 15;
+			                		_grid.x2 = '38%';
+			                	}
+								
+								// 构建配置信息
+								
+							    option = {
+							    	grid: _grid,
+							    	tooltip: {
+				                        show: true,
+				                        //trigger: 'axis'
+				                    },
+								    title : {
+								        #set($title = ${reportConfig.title})
+								    	#if(${reportConfig.chartTitle} && ${reportConfig.chartTitle.trim()} != "")
+								    	#set($title = ${reportConfig.chartTitle})
+								    	#end
+								        
+								        text: "$title",
+								    },
+								    legend: _legend,
+								    toolbox: {
+								        show : true,
+								        orient : 'vertical',
+								        x : 10,
+								        y : 120,
+								        feature : {
+								            magicType : {
+								            	show: true, 
+								            	type: ['line', 'bar'],
+								            },
+								            restore : {show: true},
+								            saveAsImage : {show: true}
+								        }
+								    },
+								    animation : true,
+								    calculable : true,
+								    xAxis : _xAxis,
+								    yAxis : _yAxis,
+								    series : _validSeries
+								};
+								
+								if (_validSeries.length == 0) {
+									option.grid = undefined;
+									option.xAxis = undefined;
+									option.yAxis = undefined;
+								}
+								debugger;
+				                // 为echarts对象加载数据 
+				                myChart.setOption(option); 
+						   }
+						},
+						error : function(jqXHR, textStatus, errorThrown) {
+							alert("获取数据失败");
+						}
+	                });
+	            }
+	        );
+		</script>
+	</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title>选择字典</title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+	</head>
+	<body>
+	<div class="mini-panel" style="width:100%;height:100%;"
+			showToolbar="true" showHeader="false" showCloseButton="false" showFooter="true"
+		>
+			<div property="footer" style="">
+				<div style="text-align:center;padding:5px 3px 8px 3px;">
+					<a class="mini-button" onclick="onOk" style="width:60px;margin-right:15px;">确定</a>
+					<a class="mini-button" onclick="onCancel" style="width:60px;">取消</a>
+				</div>
+			</div>
+		<div class="mini-splitter" style="width:100%;height:100%;">
+			<div size="220">
+				<div class="mini-toolbar" style="padding:3px 2px 3px 2px;">
+					<span style="padding-left:3px;"></span>
+					<input id="dictTypeKey" style="width:120px" emptyText="字典名/字典值" class="mini-textbox" onenter="searchTree()" />
+					<a class="mini-button" iconCls="icon-search" onclick="searchTree()">过滤类型</a>
+				</div>
+				<div class="mini-fit">
+					<ul id="dict-type-tree" class="mini-tree" url="${base_url}/system/dict/categories?show_value=true" style="width:100%;"
+						showTreeIcon="true" textField="dictCode" idField="id" parentField="pid" resultAsTree="false"
+					></ul>
+				</div>
+			</div>
+			<div>
+				<div class="mini-toolbar" style="border-bottom:0;padding:0px;">
+					<table style="width:100%;">
+						<tr>
+							<td style="width:100%;">
+								<input id="key" class="mini-textbox" emptyText="字典名/字典值" style="width:150px;" onenter="onKeyEnter"/>
+								<a class="mini-button" iconCls="icon-search" onclick="search()">查询</a>
+							</td>
+							<td style="white-space:nowrap;">
+								
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="mini-fit">
+					<div id="dict-grid" class="mini-datagrid" style="width:100%;height:100%;" allowResize="false"
+						url="${base_url}/system/dict/list"  idField="id" multiSelect="false" sortMode="client" onrowdblclick="onRowDblClick"
+						sizeList="[15,50,100,300,500]" pageSize="15"  showColumnsMenu="true" contextMenu="#contextMenu"
+					>
+						<div property="columns">
+							<div type="indexcolumn" field="indexcolumn" align="right" width="30"></div>
+							<div type="checkcolumn" width="25"></div>
+							<div field="dictCode" hideable="true" width="100%" headerAlign="center" >
+								字典名
+							</div>
+							<div field="dictValue" hideable="true" width="60" headerAlign="center" >
+								字典值
+							</div>
+							<div field="isType" width="60" align="center" headerAlign="center" >
+								是否分类
+							</div>
+							<div field="pidPath" width="60" align="center" headerAlign="center" >
+								父节点
+							</div>
+							<div field="sort" width="30" align="right" headerAlign="center" >
+								排序
+							</div>
+							<div field="remark" width="60" headerAlign="center" >
+								备注
+							</div>
+							<div field="tenant" displayField="tenant.name" width="60" align="left" headerAlign="center" >
+								所属机构
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		</div>
+		<script type="text/javascript">
+			mini.parse();
+			
+			var tree = mini.get("dict-type-tree");
+			var grid = mini.get("dict-grid");
+			grid.on("drawcell", function(e){
+	        	if (e.field == "indexcolumn") {
+	                e.cellStyle = "background:#ecedef";
+	            }
+	            if(e.field == "isType") {
+					var c = "";
+					if(e.value == true)
+						c = "checked=checked";
+					e.cellHtml = "<center><input disabled=disabled type='checkbox' " + c + "/></center>";
+				}
+	        });
+	        
+			tree.on("nodeselect", function(e) {
+				var key = mini.get("key").getValue();
+				grid.load({
+					pid : e.node.id,
+					key : key
+				});
+			});
+
+			grid.load();
+			
+			function search() {
+				var key = mini.get("key").getValue();
+				try {
+					var dictType = tree.getSelectedNode().id;
+				} catch (e){
+					var dictType = '';
+				}
+				grid.load({
+					key : key,
+					pid : dictType
+				});
+			}
+			
+			function searchTree() {
+				var dictTypeKey = mini.get("dictTypeKey").getValue();
+				tree.load({
+					key : dictTypeKey
+				});
+			}
+
+			function onKeyEnter(e) {
+				search();
+			}
+			
+			function GetCheckedNodes() {
+		        var nodes = grid.getCheckedNodes();
+		        return nodes;
+		    }
+		    function GetSelecteds() {
+		        var nodes = grid.getCheckedNodes();
+		        var ids = [], names = [];
+		        for (var i = 0, l = nodes.length; i < l; i++) {
+		            var node = nodes[i];
+		            ids.push(node.id);
+		            names.push(node.dictCode);
+		        }
+		        var data = {};
+		        data.id = ids.join(",");
+		        data.name = names.join(",");
+		        return data;
+		    }
+		    
+		    function GetSelected() {
+		        var node = grid.getSelected();
+		        return node;
+		    }
+		    
+		    function GetData() {
+		    	return GetSelected();
+		    }
+		    
+			function onRowDblClick(e) {
+				onOk();
+			}
+
+			function CloseWindow(action) {
+				if(window.CloseOwnerWindow)
+					return window.CloseOwnerWindow(action);
+				else
+					window.close();
+			}
+
+			function onOk() {
+				CloseWindow("ok");
+			}
+
+			function onCancel() {
+				CloseWindow("cancel");
+			}
+			function SetData(data) {
+				tree.load({
+					key : data.key
+				});
+				grid.load({
+					pid : tree.getList()[0].id,
+				});
+			}
+
+		</script>
+	</body>
+</html>

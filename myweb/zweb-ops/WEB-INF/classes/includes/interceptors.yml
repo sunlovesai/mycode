@@ -1,0 +1,48 @@
+before: 
+  - class: system.filter.TemplateToolboxSetter
+    uri_rule: .*
+  - class: system.filter.ActionLogger
+    uri_rule: .*
+    jump_last: 1
+  - class: system.filter.LoginChecker
+    uri_rule: .*
+    exclude: 
+      - /login
+      - /system/user/login
+      - /system/user/logout
+      - /system/user/save_pwd
+      - /system/user/save_profile
+      - "/system/user/\{id\}"
+      - /system/tenant/options
+      - /system/dict/options/.*
+      - /api/dicts/\{type\}
+      - /api/users/sessions
+      - /api/users
+      - /system/job/execute
+  - class: system.filter.ZWallSetup
+    uri_rule: .*
+    exclude: 
+      - /login
+      - /system/user/login
+      - /system/user/logout
+      - /system/tenant/options
+      - /system/dict/options/.*
+      - /api/dicts/\{type\}
+      - /api/users/sessions
+      - /api/users
+      - /system/job/execute 
+  - class: system.filter.PrivilegeChecker
+    uri_rule: .*
+    exclude: 
+      - /login
+      - /system/user/login
+      - /system/user/logout
+      - /system/user/save_pwd
+      - /system/user/save_profile
+      - "/system/user/\{id\}"
+      - /system/tenant/options
+      - /system/dict/options/.*
+      - /api/dicts/\{type\}
+      - /api/users/sessions
+      - /api/users
+      - /system/job/execute

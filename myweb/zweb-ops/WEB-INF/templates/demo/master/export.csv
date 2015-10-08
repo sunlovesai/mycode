@@ -1,0 +1,5 @@
+																																								
+序号,姓名,是否启用,职业,性别,生日,版本
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,,,
+${status.index+1},${item.name},${item.enableStatus},${item.positionDesc},${item.genderDesc},${item.birthday},${item.version}
+</jx:forEach>,,,,,,

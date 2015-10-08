@@ -1,0 +1,5 @@
+																				
+序号,名称,单位,价格
+<jx:forEach items="${data}" var="item" varStatus="status">,,,
+${status.index+1},${item.name},${item.unitDesc},${item.price}
+</jx:forEach>,,,

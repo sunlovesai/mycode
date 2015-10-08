@@ -1,0 +1,380 @@
+#set($parent_id = $P.param('parent_id','0'))
+#set($parent_name = $P.param('parent_name',''))
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title>任务日志维护</title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+	</head>
+	<body>
+
+		<div class="mini-splitter" id="search-splitter" style="width:100%;height:100%;">
+			<div size="225" showCollapseButton="true" expanded="true">
+				<div class="mini-panel" showToolbar="true" showHeader="false" style="width:100%;height:100%;">
+					<div property="toolbar" style="padding:5px 5px 5px 10px;">
+						<form id="search-form">
+							<table>
+								<tr>
+									<td>执行结果：</td>
+									<td>
+									<input style="width:125px;" id="result" onenter="search()" class="mini-combobox" emptyText="请选择执行状态"
+										data='[{text:"", value:""},{text:"执行中", value:1}, {text:"执行成功", value:2}, {text:"执行失败", value:3}]'
+										textField="text" valueField="value"/>
+									</td>
+								</tr>
+								<tr>
+									<td>起始时间：</td>
+									<td>
+									<input style="width:125px;" id="startAtStart" onenter="search()" class="mini-datepicker" nullValue="null" format="yyyy-MM-dd HH:mm:ss" showTime="true" showOkButton="false" showClearButton="false" emptyText="请选择起始日期"/>
+									</td>
+								</tr>
+								<tr>
+									<td></td>
+									<td>
+									<input style="width:125px;" id="startAtEnd" onenter="search()" class="mini-datepicker" nullValue="null" format="yyyy-MM-dd HH:mm:ss" showTime="true" showOkButton="false" showClearButton="false" emptyText="请选择截止日期"/>
+									</td>
+								</tr>
+
+								<tr>
+									<td>结束时间：</td>
+									<td>
+									<input style="width:125px;" id="endAtStart" onenter="search()" class="mini-datepicker" nullValue="null" format="yyyy-MM-dd" showTime="false" showOkButton="false" showClearButton="false" emptyText="请选择起始日期"/>
+									</td>
+								</tr>
+								<tr>
+									<td></td>
+									<td>
+									<input style="width:125px;" id="endAtEnd" onenter="search()" class="mini-datepicker" nullValue="null" format="yyyy-MM-dd" showTime="false" showOkButton="false" showClearButton="false" emptyText="请选择截止日期"/>
+									</td>
+								</tr>
+								<tr>
+									<td>结果描述：</td>
+									<td>
+										<input style="width:125px;" enabled="true" class="mini-textbox"  id="description" emptyText="请输入结果描述"/>
+									</td>
+								</tr>
+							</table>
+							<div style="text-align: center; padding: 10px;">
+								<a class="mini-button" onclick="search()" iconCls="icon-search" style="width: 60px; margin-right: 20px;">查询</a>
+								<a class="mini-button" onclick="reset()" iconCls="icon-cancel"	style="width: 60px; margin-right: 20px;">清空</a>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div>
+
+				<div class="mini-toolbar" style="border-bottom:0;padding:0px;">
+					<table style="width:100%;">
+						<tr>
+							<td style="width:100%;">
+								<!-- <input id="key" class="mini-textbox" emptyText="关键词" style="width:150px;" onenter="searchKey()"/> 
+								<a class="mini-button" iconCls="icon-search" onclick="searchKey()">查询</a> 
+								<span class="separator"></span>-->
+								<a class="mini-button" iconCls="icon-edit" onclick="edit()">详细</a>
+								<a class="mini-button" iconCls="icon-remove" onclick="remove()">删除</a>
+								<a class="mini-button" iconCls="icon-export" onclick="exportExcel()">导出</a>
+								<!-- <a class="mini-button" iconCls="icon-search" onclick="highSearch()">高级查询</a> -->
+							</td>
+							<td style="white-space:nowrap;"></td>
+						</tr>
+					</table>
+				</div>
+				<div class="mini-fit">
+					<div id="taskLog-datagrid" class="mini-datagrid" style="width:100%;height:100%;" allowResize="false"
+					url="${base_url}/system/task/log/list#if(${parent_id} != '0')?task=${parent_id}#end"  idField="id" multiSelect="true"
+					sizeList="[20,50,100,300,500]" pageSize="20" contextMenu="#contextMenu" showColumnsMenu="true" 							>
+						<div property="columns">
+							<div type="indexcolumn" field="indexcolumn" align="right" width="30"></div>
+							<div type="checkcolumn" width="25"></div>
+							<div field="count" displayField="countDesc" width="60" align="center"  headerAlign="center" allowSort="true">
+								执行次数
+							</div>
+							<div field="startAt"  dateFormat="yyyy-MM-dd HH:mm:ss"  width="130" hideable="true"  headerAlign="center" allowSort="true">
+								起始时间
+							</div>
+							<div field="endAt"  dateFormat="yyyy-MM-dd HH:mm:ss"  width="130"  headerAlign="center" allowSort="true">
+								结束时间
+							</div>
+							<div field="duration" width="90" align="left"  headerAlign="center" allowSort="true">
+								持续时间
+							</div>
+							<div field="result"  displayField="resultDesc"   width="60" align="center"  headerAlign="center" allowSort="true">
+								执行结果
+							</div>
+							<div field="description" width="100%"  headerAlign="center" allowSort="true">
+								结果描述
+							</div>
+						</div>
+					</div>
+					<ul id="contextMenu" class="mini-contextmenu">
+						<li name="fix" iconCls="icon-unlock" onclick="onFix" >
+							锁定列
+						</li>
+						<li name="unfix" iconCls="icon-lock" onclick="onUnfix" >
+							取消锁定列
+						</li>
+					</ul>
+				</div>
+
+			</div>
+		</div>
+
+		<script type="text/javascript">
+			mini.parse();
+			var grid = mini.get("taskLog-datagrid");
+			function onUnfix() {
+				grid.unFrozenColumns();
+			}
+
+			function onFix() {
+				mini.prompt("请输入要锁定的列数,比如：2", "请输入", function(action, value) {
+					if(action == "ok" && value) {
+						try {
+							var end = parseInt(value);
+							if(end < 0)
+								end = 0;
+							grid.frozenColumns(0, end);
+						} catch(e) {
+						}
+					}
+				});
+			}
+
+			grid.on("drawcell", function(e) {
+				if(e.field == "indexcolumn") {
+					e.cellStyle = "background:#ecedef";
+				}
+				if (e.field == 'result') {
+					if (e.value == '1') {
+						//执行中
+						e.cellStyle = "background: blue; color: white";
+					} else if (e.value == '2') {
+						//执行成功
+						e.cellStyle = "background: green; color: white";
+					} else if (e.value == '3') {
+						//执行失败
+						e.cellStyle = "background: red; color: white";
+					}
+				}
+			});
+
+			grid.load();
+
+			function onChooseTask(e) {
+				var btnEdit = this;
+				mini.open({
+					url : "${base_url}/system/task/select",
+					title : "选择定时任务",
+					width : 1000,
+					height : 600,
+					ondestroy : function(action) {
+						if(action == "ok") {
+							var iframe = this.getIFrameEl();
+							var data = iframe.contentWindow.GetData();
+							data = mini.clone(data);
+							//必须
+							if(data) {
+								btnEdit.setValue(data.id);
+								btnEdit.setText(data.name);
+							}
+						}
+					}
+				});
+			}
+
+			function add() {
+
+				mini.open({
+					url : "${base_url}/system/task/log/edit",
+					title : "新增任务日志",
+					width : 810,
+					height : 295,
+					showModal : false,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+
+						var data = {
+							action : "new",
+
+							task : {
+
+								id : "${parent_id}",
+								name : "${parent_name}"
+							},
+
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						grid.reload();
+					}
+				});
+			}
+
+			function edit() {
+
+				var row = grid.getSelected();
+				if(row) {
+					mini.open({
+						url : "${base_url}/system/task/log/edit",
+						title : "查看任务日志",
+						width : 680,
+						height : 450,
+						showModal : false,
+						onload : function() {
+							var iframe = this.getIFrameEl();
+							var data = {
+								action : "edit",
+								id : row.id
+							};
+							iframe.contentWindow.SetData(data);
+						},
+						ondestroy : function(action) {
+							grid.reload();
+						}
+					});
+
+				} else {
+					mini.alert("请选中一条记录", "提示");
+				}
+			}
+
+			function remove() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定删除选中记录？", "确定？", function(action) {
+						if(action == "ok") {
+							var ids = [];
+							for(var i = 0, l = rows.length; i < l; i++) {
+								var r = rows[i];
+								ids.push(r.id);
+							}
+							var id = ids.join(',');
+							grid.loading("操作中，请稍后......");
+							$.ajax({
+								url : "${base_url}/system/task/log/delete?id=" + id,
+								type : 'post',
+								success : function(text) {
+									mini.alert("删除选中记录，操作成功", "提示");
+									grid.reload();
+								},
+								error : function(jqXHR, textStatus, errorThrown) {
+									grid.unmask();
+									//400,403,500错误已经统一在sys.js处理
+									if(400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+										return;
+									var text = "操作失败，" + jqXHR.responseText;
+									mini.alert(text, "提示");
+								}
+							});
+						}
+					});
+				} else {
+					mini.alert("请选中一条记录", "提示");
+				}
+			}
+
+			function searchKey() {
+				var key = mini.get("key").getFormValue();
+				/* if(key.indexOf('执行') != -1) {
+					
+				} else if(key.indexOf('执行中') != -1) {
+					key = 1;
+				} else if(key.indexOf('成功') != -1) {
+					key = 2;
+				} else if(key.indexOf('失败') != -1) {
+					key = 3;
+				} */
+				grid.load({
+					key : key
+				});
+
+			}
+
+			function highSearch() {
+				var index = 1;
+				var splitter = mini.get("search-splitter");
+				var pane = splitter.getPane(index);
+				if(pane.expanded) {
+					splitter.collapsePane(index);
+				} else {
+					splitter.expandPane(index);
+				}
+			}
+
+			function search() {
+				var json = _getSearchJSON();
+				grid.load(json);
+			}
+
+			function reset() {
+				var form = new mini.Form("search-form");
+				form.reset();
+			}
+
+			function _getSearchJSON() {
+				var result = mini.get("result").getFormValue();
+				var startAtStart = mini.get("startAtStart").getFormValue();
+				var startAtEnd = mini.get("startAtEnd").getFormValue();
+				var endAtStart = mini.get("endAtStart").getFormValue();
+				var endAtEnd = mini.get("endAtEnd").getFormValue();
+				var description = mini.get("description").getFormValue();
+
+				return {
+					result : result,
+					startAtStart : startAtStart,
+					startAtEnd : startAtEnd,
+					endAtStart : endAtStart,
+					endAtEnd : endAtEnd,
+					description : description
+				};
+
+			}
+
+			//导出
+			function exportExcel() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定导出选中记录？", "确定？", function(action) {
+						if(action == "ok") {
+							var ids = [];
+							for(var i = 0, l = rows.length; i < l; i++) {
+								var r = rows[i];
+								ids.push(r.id);
+							}
+							var id = ids.join(',');
+							location.href = "${base_url}/system/task/log/export?ids=" + id;
+						}
+					});
+				} else {
+					if(grid.totalCount > 0) {
+						mini.confirm("确定导出记录？", "确定？", function(action) {
+							if(action == "ok") {
+								var json = _getSearchJSON();
+								var queryString = $.param(json);
+								var url = "${base_url}/system/task/log/export?" + queryString;
+								location.href = url;
+							}
+						});
+					} else {
+						mini.alert("没有数据可以导出", "提示");
+					}
+				}
+			}
+
+		</script>
+	</body>
+</html>

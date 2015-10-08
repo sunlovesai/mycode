@@ -1,0 +1,24 @@
+#set($headerFields = "序号")
+#set($valueFields = "$"+"{status.index+1}")
+#set($emptyFields = "")
+#foreach($field in $model.getUpdatableFields())
+	#if($field.ext.skip || !$field.text || $field.text.trim().length() == 0)
+	#else
+		#set($fieldName = $field.fieldName)		
+		#set($displayField = $field.fieldName)
+		#if($field.isFk())
+		#set($displayField = $fieldName+"."+$field.reference.model.getNameField().fieldName)
+		#end
+		#if($field.isDict())
+		#set($displayField = $fieldName+"Desc")
+		#end						
+		#set($headerFields = ${headerFields}+","+${field.text})
+		#set($valueFields = ${valueFields}+",$"+"{item."+${displayField}+"}")
+		#set($emptyFields = ${emptyFields}+",")			
+	#end
+#end
+
+${headerFields}
+<jx:forEach items="${data}" var="item" varStatus="status">${emptyFields}
+${valueFields}
+</jx:forEach>${emptyFields}

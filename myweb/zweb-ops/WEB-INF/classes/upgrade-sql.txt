@@ -1,0 +1,41 @@
+-- 2015-07-29
+
+CREATE TABLE `demo_chart` ( `report_date`  datetime NOT NULL , `employ_name`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL , `total`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL , `daily`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL , `total2`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL  ) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci ROW_FORMAT=Compact ;
+
+CREATE TABLE `demo_chart2` ( `report_date`  datetime NOT NULL , `daily_number`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL , `daily_money`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL , `total_number`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL , `total_money`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL , PRIMARY KEY (`report_date`) ) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci ROW_FORMAT=Compact ;
+
+CREATE TABLE `demo_duowei` ( `report_date`  date NOT NULL , `project_type`  varchar(0) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL , `witness_income`  double NULL DEFAULT NULL , `listing_income`  double NULL DEFAULT NULL  ) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci ROW_FORMAT=Compact ;
+
+ALTER TABLE `demo_master` ADD COLUMN `enabled`  tinyint(1) NULL DEFAULT NULL AFTER `version` ;
+
+ALTER TABLE `demo_master` ADD COLUMN `position`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL AFTER `enabled` ;
+
+ALTER TABLE `demo_master` ADD COLUMN `gender`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL AFTER `position` ;
+
+ALTER TABLE `demo_master` ADD COLUMN `birthday`  datetime NULL DEFAULT NULL AFTER `gender` ;
+
+ALTER TABLE `demo_master` DROP COLUMN `tenant_code`
+
+ALTER TABLE `sys_column_config` ADD COLUMN `column_group_id`  bigint(20) NULL DEFAULT NULL AFTER `column_where_tmpl` ;
+
+ALTER TABLE `sys_column_config` ADD COLUMN `column_remark`  text CHARACTER SET utf8 COLLATE utf8_general_ci NULL AFTER `is_show_app_list` ;
+
+ALTER TABLE `sys_column_config` ADD COLUMN `renderer`  text CHARACTER SET utf8 COLLATE utf8_general_ci NULL AFTER `column_remark` ;
+
+ALTER TABLE `sys_column_group_config` ADD COLUMN `group_name`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL AFTER `id` ;
+
+ALTER TABLE `sys_column_group_config` ADD COLUMN `width`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL AFTER `report_config_id` ;
+
+ALTER TABLE `sys_privilege` ADD COLUMN `group_id`  bigint(20) NULL DEFAULT NULL AFTER `menu_id` ;
+
+ALTER TABLE `sys_report_config` ADD COLUMN `name_field`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL AFTER `id_name` ;
+
+ALTER TABLE `sys_report_config` ADD COLUMN `is_group`  tinyint(4) NULL DEFAULT NULL AFTER `release_user_name` ;
+
+ALTER TABLE `sys_report_config` ADD COLUMN `split_type`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL AFTER `col_num_one_row` ;
+
+ALTER TABLE `sys_report_config` ADD COLUMN `split_size`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL AFTER `split_type` ;
+
+ALTER TABLE `sys_report_config` ADD COLUMN `is_high_search_enabled`  tinyint(2) NULL DEFAULT NULL AFTER `split_size` ;
+
+CREATE TABLE `sys_sub_report_config` ( `id`  bigint(20) NOT NULL AUTO_INCREMENT , `report_config_id`  bigint(20) NOT NULL , `rel_report_config_id`  bigint(20) NULL DEFAULT NULL , `url`  varchar(1024) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL , `text`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL , `sort`  tinyint(2) NULL DEFAULT NULL , `refer_column`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL , `rel_column`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL , PRIMARY KEY (`id`) ) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci ROW_FORMAT=Compact 

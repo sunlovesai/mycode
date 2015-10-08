@@ -1,0 +1,116 @@
+MultiDS:
+  get_columns: >
+    #if("PostgreSQL" == ${args[0].dbType}) 
+    SELECT
+      COLUMN_NAME, DATA_TYPE AS COLUMN_TYPE, COLUMN_NAME AS COLUMN_COMMENT
+    FROM information_schema.COLUMNS
+    WHERE
+      TABLE_SCHEMA = :schema
+      AND TABLE_NAME = :table
+    #else
+    SELECT 
+      COLUMN_NAME, COLUMN_TYPE, COLUMN_COMMENT 
+    FROM information_schema.COLUMNS 
+    WHERE 
+      TABLE_SCHEMA = :schema 
+      AND TABLE_NAME = :table
+    #end
+  get_tables: >
+    #if("PostgreSQL" == ${args[0].dbType})
+    SELECT 
+      table_catalog AS catalog, 
+      table_schema AS schema,
+      table_name AS object
+    FROM information_schema.tables
+    WHERE
+      #set($tt = "BASE TABLE")
+      #if("VIEWS" == ${args[0].tableType})
+      #set($tt = "VIEW")
+      #end
+      table_type = '${tt}'
+      AND 
+      ( 
+        table_catalog LIKE :%key%
+        OR table_schema LIKE :%key%
+        OR table_name LIKE :%key%
+      )
+    ORDER BY table_schema,table_name ASC
+    #set($p = ${args[0].pageIndex}*${args[0].pageSize})
+    LIMIT ${args[0].pageSize} OFFSET ${p}
+    #else
+    SELECT 
+      TABLE_SCHEMA AS `schema`, TABLE_NAME AS object
+    FROM information_schema.${args[0].tableType}
+    WHERE
+      TABLE_SCHEMA LIKE :%key% 
+      OR TABLE_NAME LIKE :%key%
+    ORDER BY TABLE_SCHEMA,TABLE_NAME ASC
+    #set($p = ${args[0].pageIndex}*${args[0].pageSize})
+    LIMIT ${p}, ${args[0].pageSize}
+    #end
+  count_tables: >
+    #if("PostgreSQL" == ${args[0].dbType})
+    SELECT 
+      COUNT(*)
+    FROM information_schema.tables
+    WHERE 
+      #set($tt = "BASE TABLE")
+      #if("VIEWS" == ${args[0].tableType})
+      #set($tt = "VIEW")
+      #end
+      table_type = '${tt}'
+      AND 
+      ( 
+        table_catalog LIKE :%key%
+        OR table_schema LIKE :%key%
+        OR table_name LIKE :%key%
+      )
+    #else
+    SELECT 
+      COUNT(*) 
+    FROM information_schema.${args[0].tableType}
+    WHERE
+      TABLE_SCHEMA like :%key% 
+      OR TABLE_NAME like :%key%
+    #end
+  get_procedures: >
+    #if("PostgreSQL" == ${args[0].dbType})
+    SELECT 
+      routine_catalog AS catalog,
+      routine_schema AS schema, 
+      routine_name AS object 
+    FROM information_schema.routines 
+    WHERE
+      routine_catalog like :%key% 
+      OR routine_name like :%key%
+    ORDER BY routine_catalog,routine_name ASC
+    #set($p = ${args[0].pageIndex}*${args[0].pageSize})
+    LIMIT ${args[0].pageSize} OFFSET ${p}
+    #else
+    SELECT 
+      db AS `schema`, specific_name AS object 
+    FROM mysql.proc 
+    WHERE 
+      db like :%key% 
+      OR specific_name like :%key%
+    ORDER BY db,specific_name ASC
+    #set($p = ${args[0].pageIndex}*${args[0].pageSize})
+    LIMIT ${p}, ${args[0].pageSize}
+    #end
+  count_procedures: >
+    #if("PostgreSQL" == ${args[0].dbType})
+    SELECT 
+      COUNT(*)
+    FROM information_schema.routines 
+    WHERE
+      routine_catalog like :%key% 
+      OR routine_name like :%key%
+    #else
+    SELECT 
+      COUNT(*)
+    FROM mysql.proc 
+    WHERE 
+      db like :%key% 
+      OR specific_name like :%key%
+    #end
+    

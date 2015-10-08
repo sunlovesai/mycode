@@ -1,0 +1,562 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title>在线功能配置</title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+	</head>
+	<body>
+		<div class="mini-splitter" id="search-splitter" style="width:100%;height:100%;">
+			<div size="225" showCollapseButton="true" expanded="false">
+				<div class="mini-panel" showToolbar="true" showHeader="false" style="width:100%;height:100%;">
+				    <div property="toolbar" style="padding:5px 5px 5px 10px;">
+				    	<form id="search-form" onsubmit="return false;">
+							<table>
+
+								<tr>
+									<td>功能标题：</td>
+									<td>
+										<input style="width:125px;" id="title" onenter="search()" class="mini-textbox" emptyText="请输入报表标题"/>
+									</td>
+								</tr>
+
+								<tr>
+									<td>功能编码：</td>
+									<td>
+										<input style="width:125px;" id="code" onenter="search()" class="mini-textbox" emptyText="请输入报表编码"/>
+									</td>
+								</tr>
+								#*
+								<tr>
+									<td>表名：</td>
+									<td>
+										<input style="width:125px;" id="tableName" onenter="search()" class="mini-textbox" emptyText="请输入表名"/>
+									</td>
+								</tr>
+								*#
+
+							</table>
+							<div style="text-align: center; padding: 10px;">
+								<a class="mini-button" onclick="search()" iconCls="icon-search" style="width: 60px; margin-right: 20px;">查询</a>
+                               <a class="mini-button" onclick="reset()" iconCls="icon-cancel"	style="width: 60px; margin-right: 20px;">清空</a>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div>
+
+			<div class="mini-splitter" style="width:100%;height:100%;" vertical="true">
+	    		<div size="50%">
+
+				<div id="toolbar" class="mini-toolbar" style="border-bottom:0;padding:0px;">
+					<table style="width:100%;">
+						<tr>
+							<td style="width:100%;">
+
+								<input id="key" class="mini-textbox" emptyText="关键词" style="width:150px;" onenter="searchKey()"/>
+								<a class="mini-button" iconCls="icon-search" onclick="searchKey()">查询</a>
+								<span class="separator"></span>
+								<a name="add" class="mini-button" iconCls="icon-add" onclick="add()">增加</a>
+								<a name="update" class="mini-button" iconCls="icon-edit" onclick="edit()">编辑</a>
+								<a name="remove" class="mini-button" iconCls="icon-remove" onclick="remove()">删除</a>
+								<a name="clear" class="mini-button" iconCls="icon-trash" onclick="clear()">清理</a>
+								<a name="release" class="mini-button" iconCls="icon-ok" onclick="release()">发布</a>
+								<a name="takeBack" class="mini-button" iconCls="icon-no" onclick="takeBack()">收回</a>
+								<a name="exportBundle" class="mini-button" iconCls="icon-export" onclick="exportBundle()">导出</a>
+								<a name="importBundle" class="mini-button" iconCls="icon-import" onclick="importBundle()">导入</a>
+								<a id="lock" class="mini-button" iconCls="icon-lock" onclick="frozen(true)">锁定</a>
+								<a id="unlock" class="mini-button" iconCls="icon-unlock" onclick="frozen(false)">解锁</a>
+								<span class="separator"></span>
+								<a name="highSearch" class="mini-button" iconCls="icon-search" onclick="highSearch()">高级查询</a>
+							</td>
+							<td style="white-space:nowrap;">
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="mini-fit">
+					<div id="reportConfig-datagrid" class="mini-datagrid" style="width:100%;height:100%;" allowResize="false"
+						url="${base_url}/system/report_config/list#if(${parent_id} != '0')?#end"  idField="id" multiSelect="true"
+						sizeList="[20,50,100,300,500]" pageSize="20" contextMenu="#contextMenu" showColumnsMenu="true" onselect="onRowSelect" 							>
+						<div property="columns">
+							<div type="indexcolumn" field="indexcolumn" align="right" width="30"></div>
+							<div type="checkcolumn" width="30"></div>
+							<div field="title"  displayField="title"   width="150"  headerAlign="center" allowSort="true">功能标题</div>
+							<div field="code"  displayField="code"   width="150"  headerAlign="center" allowSort="true">功能编码</div>
+							<div field="reportType"  displayField="reportTypeDesc"   width="80" align="center" headerAlign="center" allowSort="true">展示类型</div>
+							<div field="status"  displayField="statusDesc"   width="80" align="center" headerAlign="center" allowSort="true">状态</div>
+							##<div field="inviteCode"  displayField="inviteCode"   width="100"  headerAlign="center" allowSort="true">邀请码</div>
+							##<div field="dataSource"  displayField="dataSource"   width="120"  headerAlign="center" allowSort="true">数据源</div>
+							<div field="tableType"  displayField="tableType" align="center" width="100"  headerAlign="center" allowSort="true">数据生产方式</div>
+							<div field="tableName"  displayField="tableName"   width="150"  headerAlign="center" allowSort="true">表名</div>
+							<div field="createUserName" width="100"  headerAlign="center" allowSort="true">创建人</div>
+							<div field="createTime" width="130"  headerAlign="center" allowSort="true" dateFormat="yyyy-MM-dd HH:mm:ss" >创建时间</div>
+							<div field="releaseUserName"  width="100"  headerAlign="center" allowSort="true">发布人</div>
+							<div field="releaseTime" width="130"  headerAlign="center" allowSort="true" dateFormat="yyyy-MM-dd HH:mm:ss" >发布时间</div>
+							<div type="checkboxcolumn" trueValue="1" falseValue="0" field="isLock" width="60"  headerAlign="center">是否锁定</div>
+							<div name="action" width="80" headerAlign="center" align="center" renderer="onActionRenderer" cellStyle="padding:0;">锁定详情</div>
+							<div field="version"  displayField="version"   width="60" align="right" headerAlign="center" allowSort="true">版本号</div>
+						</div>
+					</div>
+					<ul id="contextMenu" class="mini-contextmenu">
+						<li name="fix" iconCls="icon-unlock" onclick="onFix" >锁定列</li>
+						<li name="unfix" iconCls="icon-lock" onclick="onUnfix" >取消锁定列</li>
+				    </ul>
+				</div>
+
+				</div>
+				<div showCollapseButton="true">
+					<div id="detail-tabs" class="mini-tabs" activeIndex="0" onactivechanged="onTabChange" contextMenu="#refreshTabMenu" style="width:100%;height:100%;" >
+
+	    				<div name="${base_url}/system/column_config" title="列配置">请选择上面的一条记录</div>
+	    				<div name="${base_url}/system/button_config" title="功能按钮配置">请选择上面的一条记录</div>
+	    				<div name="${base_url}/system/page_column_relation" title="字段关联配置">请选择上面的一条记录</div>
+	    				<!-- <div name="${base_url}/system/report_config/edit_row_click_script" title="行单击脚本">请选择上面的一条记录</div> -->
+	    				<div name="${base_url}/system/report_config/edit_method" title="主页面函数">请选择上面的一条记录</div>
+	    				<div name="${base_url}/system/report_config/edit_before_save_script" title="保存前置函数">请选择上面的一条记录</div>
+	    				<div name="${base_url}/system/report_config/edit_after_save_script" title="保存后置函数">请选择上面的一条记录</div>
+	    				<div name="${base_url}/system/report_config/edit_html" title="头部模板">请选择上面的一条记录</div>
+	    				<div name="${base_url}/system/procedure_param_config" title="存储过程参数配置">请选择上面的一条记录</div>
+	    				<div name="${base_url}/system/http_request_param_config" title="HTTP请求参数配置">请选择上面的一条记录</div>
+	    				<div name="${base_url}/system/sub_report_config" title="子报表配置">请选择上面的一条记录</div>
+	    				<div name="${base_url}/system/axis_config" title="坐标轴配置">请选择上面的一条记录</div>
+	    				<div name="${base_url}/system/series_config" title="系列配置">请选择上面的一条记录</div>
+	    				<div name="${base_url}/system/column_group_config" title="列分组配置">请选择上面的一条记录</div>
+	    			</div>
+	    			<ul id="refreshTabMenu" class="mini-contextmenu" onbeforeopen="onBeforeOpen">
+						<li iconCls="icon-reload" onclick="reloadTab">
+							刷新标签页
+						</li>
+					</ul>
+				</div>
+			</div>
+
+			</div>
+		</div>
+
+		<script type="text/javascript">
+			mini.parse();
+			var grid = mini.get("reportConfig-datagrid");
+
+			function onActionRenderer(e) {
+	            var grid = e.sender;
+	            var record = e.record;
+	            var id = record.id;
+	            var rowIndex = e.rowIndex;
+	            var s = '<a class="log_Button" href="javascript:showLog(\'' + id + '\')">详情</a>';
+	            return s;
+	        }
+
+			function showLog(id) {
+				mini.open({
+					url : "${base_url}/system/log/lock_log?parent_id=" + id,
+					title : "查看在线报表锁定记录",
+					width : 800,
+					height : 400,
+					showModal : false,
+					ondestroy : function(action) {
+						grid.reload();
+					}
+				});
+			}
+
+			function onUnfix() {
+				grid.unFrozenColumns();
+			}
+			function onFix() {
+				mini.prompt("请输入要锁定的列数,比如：2", "请输入",
+		            function (action, value) {
+		                if (action == "ok" && value) {
+		                	try {
+			                	var end = parseInt(value);
+			                	if (end < 0) end = 0;
+			                    grid.frozenColumns(0, end);
+		                  	} catch(e) {
+		                  	}
+		                }
+		            }
+		        );
+			}
+			grid.on("drawcell", function(e){
+	        	if (e.field == 'isUseTemplate') {
+	        		var c= "";
+	        		if (e.value == true)
+	        			c = "checked=checked";
+	        		e.cellHtml = "<center><input disabled=disabled type='checkbox' "+c+"/></center>";
+	        	} else if (e.field == "indexcolumn") {
+	                e.cellStyle = "background:#ecedef";
+	            } else if (e.field == "status") {
+	            	if (e.value == 'release') {
+	           			e.cellStyle = "background:green; color:white;";
+	           		} else if(e.value == 'dev' || e.value == 'redev') {
+	           			e.cellStyle = "background:gray; color:black;";
+	           		} else if(e.value == 'alpha') {
+	           			e.cellStyle = "background:blue; color:white;";
+	           		} else if(e.value == 'beta') {
+	           			e.cellStyle = "background:orange; color:black;";
+	           		}
+	           	} else if (e.field == "isLock") {
+	           		if (e.value == '1') {
+	           			e.rowStyle = "background:#CFCFCF; color:black;";
+	           		}
+	           	}
+	        });
+
+			grid.load();
+
+			function add() {
+
+				mini.open({
+					url : "${base_url}/system/report_config/edit",
+					title : "新增报表配置",
+					width : 600,
+					height : 580,
+					showModal : false,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+
+						var data = {
+							action : "new",
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						grid.reload();
+					}
+				});
+			}
+
+			function edit() {
+
+				var row = grid.getSelected();
+				if(row) {
+					mini.open({
+						url : "${base_url}/system/report_config/edit",
+						title : "编辑配置",
+						width : 600,
+						height : 580,
+						showModal : false,
+						onload : function() {
+							var iframe = this.getIFrameEl();
+							var data = {
+								action : "edit",
+								id : row.id
+							};
+							iframe.contentWindow.SetData(data);
+						},
+						ondestroy : function(action) {
+							grid.reload();
+						}
+					});
+
+				} else {
+					mini.alert("请选中一条记录","提示");
+				}
+			}
+
+			function remove() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定删除选中记录？", "确定？",
+			            function (action) {
+			                if (action == "ok") {
+			                    var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								grid.loading("操作中，请稍后......");
+								$.ajax({
+									url : "${base_url}/system/report_config/delete?id=" + id,
+									type : 'post',
+									success : function(text) {
+										mini.alert("删除选中记录，操作成功","提示");
+										grid.reload();
+									},
+									error : function(jqXHR, textStatus, errorThrown) {
+										grid.unmask();
+										//400,403,500错误已经统一在sys.js处理
+										if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+											return;
+										var text = "操作失败，" + jqXHR.responseText;
+										mini.alert(text,"提示");
+									}
+								});
+			                }
+			            }
+			        );
+				} else {
+					mini.alert("请选中一条记录","提示");
+				}
+			}
+
+			function release() {
+				var row = grid.getSelected();
+				if(row) {
+					mini.open({
+						url : "${base_url}/system/report_config/release",
+						title : "发布功能",
+						width : 550,
+						height : 200,
+						showModal : false,
+						onload : function() {
+							var iframe = this.getIFrameEl();
+							var data = {
+								action : "release",
+								id : row.id
+							};
+							iframe.contentWindow.SetData(data);
+						},
+						ondestroy : function(action) {
+							grid.reload();
+						}
+					});
+
+				} else {
+					mini.alert("请选中一条记录","提示");
+				}
+			}
+
+			function takeBack() {
+				var row = grid.getSelected();
+				if(row) {
+					mini.confirm("确定收回选中记录？", "提醒",
+		            function (action) {
+		                if (action == "ok") {
+							$.ajax({
+								url : "${base_url}/system/report_config/take_back?id=" + row.id,
+								type : 'post',
+								success : function(text) {
+									mini.alert("收回成功","提示");
+									grid.reload();
+								},
+								error : function(jqXHR, textStatus, errorThrown) {
+									grid.unmask();
+									//400,403,500错误已经统一在sys.js处理
+									if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+										return;
+									var text = "操作失败，" + jqXHR.responseText;
+									mini.alert(text,"提示");
+								}
+							});
+		                }
+		             })
+
+				} else {
+					mini.alert("请选中一条记录","提示");
+				}
+			}
+
+			function clear() {
+				mini.confirm("开始清理脏数据？", "提醒",
+	            	function (action) {
+	                	if (action == "ok") {
+	                		grid.loading("清理中，请稍后......");
+							$.ajax({
+								url : "${base_url}/system/report_config/clear",
+								type : 'post',
+								success : function(text) {
+									grid.unmask();
+									mini.alert("清理完毕","提示");
+								},
+								error : function(jqXHR, textStatus, errorThrown) {
+									grid.unmask();
+									//400,403,500错误已经统一在sys.js处理
+									if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+										return;
+									var text = "操作失败，" + jqXHR.responseText;
+									mini.alert(text,"提示");
+								}
+							});
+	                	}
+	             	}
+	             )
+			}
+
+			function searchKey() {
+				var key = mini.get("key").getFormValue();
+				grid.load({
+					key : key
+				});
+			}
+
+			function highSearch(){
+				var index = 1;
+				var splitter = mini.get("search-splitter");
+				var pane = splitter.getPane(index);
+				if (pane.expanded) {
+					splitter.collapsePane(index);
+				} else {
+					splitter.expandPane(index);
+				}
+			}
+
+			function search() {
+				var json = _getSearchJSON();
+				grid.load(json);
+			}
+			function reset(){
+				var form = new mini.Form("search-form");
+				form.reset();
+			}
+			function _getSearchJSON() {
+
+				var title = mini.get("title").getFormValue();
+
+				var code = mini.get("code").getFormValue();
+
+				var tableName = mini.get("tableName").getFormValue();
+
+				return {
+					title:title,code:code,tableName:tableName
+				};
+
+			}
+
+			var tabs = mini.get("detail-tabs");
+			var currentTab;
+			function onBeforeOpen(e) {
+				currentTab = tabs.getTabByEvent(e.htmlEvent);
+				if(!currentTab) {
+					e.cancel = true;
+				}
+			}
+
+			function reloadTab() {
+				tabs.reloadTab(currentTab);
+			}
+			var onRowSelect = function(sender){
+				var row = grid.getSelected();
+				if(!row){
+					return false;
+				}
+				var isLock = row.isLock;
+				if(isLock) {
+					enabled = false;
+				} else {
+					enabled = true;
+				}
+				mini.getbyName('add').setEnabled(enabled);
+				mini.getbyName('update').setEnabled(enabled);
+				mini.getbyName('remove').setEnabled(enabled);
+				mini.getbyName('clear').setEnabled(enabled);
+				mini.getbyName('release').setEnabled(enabled);
+				mini.getbyName('takeBack').setEnabled(enabled);
+				mini.getbyName('exportBundle').setEnabled(enabled);
+				mini.getbyName('importBundle').setEnabled(enabled);
+				mini.getbyName('highSearch').setEnabled(enabled);
+				if(isLock)
+					return;
+				var activeTab = tabs.getActiveTab();
+				if (typeof activeTab === 'undefined' || !activeTab) {
+					activeTab = tabs.getTab(0);
+					tabs.activeTab(activeTab);
+				}
+				var url = activeTab.name + "?parent_id=" + row.id + "&parent_name=" + row.title;
+				tabs.loadTab(url, activeTab);
+			}
+			var onTabChange = function(sender){
+				var row = grid.getSelected();
+				if(!row){
+					return false;
+				}
+				var tab = tabs.getTab(sender.index);
+				var url = tab.name + "?parent_id=" + row.id + "&parent_name=" + row.title;
+				tabs.loadTab(url, tab);
+				currentTab = tab;
+			}
+
+			//导出
+			function exportBundle(){
+				var row = grid.getSelected();
+				if(row) {
+					mini.confirm("确定导出选中记录的配置包？", "确定？",
+			            function (action) {
+			                if (action == "ok") {
+								var id = row.id;
+								location.href="${base_url}/system/report_config/export_bundle?id="+id;
+							}
+						});
+				} else {
+					mini.alert("请选择一条记录","提示");
+				}
+			}
+
+			//导入
+			function importBundle() {
+				mini.open({
+					url : "${base_url}/system/report_config/import",
+					title : "导入配置包",
+					width : 400,
+					height : 300,
+					showModal: false,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+						var data = {
+							action : "import",
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						if ("success" == action) {
+							grid.reload();
+							mini.alert("导入配置包成功");
+						}
+					}
+				});
+			}
+
+			function frozen(lock) {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定操作选中记录？", "确定？",
+			            function (action) {
+			                if (action == "ok") {
+			                    var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								grid.loading("操作中，请稍后......");
+								$.ajax({
+									url : "${base_url}/system/report_config/frozen?id=" + id + "&lock=" + lock,
+									type : 'post',
+									success : function(text) {
+										mini.alert("操作选中记录，操作成功","提示");
+										grid.reload();
+									},
+									error : function(jqXHR, textStatus, errorThrown) {
+										grid.unmask();
+										//400,403,500错误已经统一在sys.js处理
+										if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+											return;
+										var text = "操作失败，" + jqXHR.responseText;
+										mini.alert(text,"提示");
+									}
+								});
+			                }
+			            }
+			        );
+				} else {
+					mini.alert("请选中一条记录","提示");
+				}
+
+			}
+
+		</script>
+	</body>
+</html>

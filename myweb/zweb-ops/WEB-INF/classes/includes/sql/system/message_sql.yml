@@ -1,0 +1,41 @@
+Message:
+  list: > 
+    SELECT
+      *
+    FROM
+        ${app.solidbase_catalog}.sys_message t0
+    WHERE 1=1
+          
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #elseif ($args[0].key && $args[0].key!="")
+        AND ( 1<>1
+                                
+            OR sender_user_id = :key
+                                          
+            OR receiver_user_id = :key
+                                     
+            OR title like :%key% 
+                                          
+            OR type = :key
+                                
+        )
+        #else
+                   
+        #if ($args[0].sender && $args[0].sender!="") 
+        AND sender_user_id = :sender
+        #end 
+                         
+        #if ($args[0].receiver && $args[0].receiver!="") 
+        AND receiver_user_id = :receiver
+        #end 
+                         
+        #if ($args[0].title && $args[0].title!="") 
+        AND title like :%title% 
+        #end 
+                         
+        #if ($args[0].type && $args[0].type!="") 
+        AND type = :type
+        #end 
+                
+        #end

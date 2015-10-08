@@ -1,0 +1,33 @@
+ResourceOperation:
+  list: > 
+    SELECT
+        resource_id,
+        name,
+        code,
+        sort,
+        id
+    FROM
+        ${app.solidbase_catalog}.sys_resource_operation t0
+    WHERE 1=1
+              
+        #if ($args[0].resource && $args[0].resource!="")
+        AND resource_id = :resource
+        #end
+          
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #elseif ($args[0].key && $args[0].key!="")
+        AND ( 1<>1
+            OR name like :%key% 
+            OR code like :%key% 
+        )
+        #else
+                   
+        #if ($args[0].name && $args[0].name!="") 
+        AND name like :%name% 
+        #end 
+                         
+        #if ($args[0].code && $args[0].code!="") 
+        AND code like :%code% 
+        #end 
+        #end

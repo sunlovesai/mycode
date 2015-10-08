@@ -1,0 +1,613 @@
+#if($model.getParentField())
+#literal()
+#set($parent_id = $P.param('parent_id','0'))
+#set($parent_name = $P.param('parent_name',''))
+#end
+#end
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title>$model.text维护</title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+	</head>
+	<body>
+		#set($cateField = $model.getCategoryField())
+		#if($cateField)
+		
+		<div class="mini-splitter" style="width:100%;height:100%;">
+			<div size="225" showCollapseButton="true">
+				<div class="mini-toolbar" style="padding:3px 2px 3px 2px;">
+					<span style="padding-left:3px;"></span>
+					<input id="${cateField.fieldName}_key" class="mini-textbox" style="width:120px;" emptyText="${cateField.text}" onenter="searchCategory()" />
+					<a class="mini-button" iconCls="icon-search" onclick="searchCategory()">过滤${cateField.text}</a>
+				</div>
+				<div class="mini-fit">
+					<ul id="${cateField.fieldName}-tree" class="mini-tree" url="${base_url}${model.ext.path}/categories" style="width:100%; height:100%"
+						showTreeIcon="true" textField="text" idField="id" parentField="pid" resultAsTree="false"
+					></ul>
+				</div>
+			</div>
+			<div>
+		#end
+				#if($model.ext.searchable)
+				
+				<div class="mini-splitter" id="search-splitter" style="width:100%;height:100%;">
+					<div size="225" showCollapseButton="true" expanded="false">
+						<div class="mini-panel" showToolbar="true" showHeader="false" style="width:100%;height:100%;">
+						    <div property="toolbar" style="padding:5px 5px 5px 10px;">
+						    	<form id="search-form" onsubmit="return false;">
+									<table>
+									#foreach($field in $model.getSearchableFields())
+										#set($upFieldName = $CommonUtil.toUpCaseFirst($field.fieldName))
+										#if($field.isDict())
+											#set($data = "")
+											#if($field.getDicts() && $field.getDicts().size()>0)
+											#set($data = $JSON.toJSONString($field.getDicts()))
+											#end
+										
+										<tr>
+											<td>$field.text：</td>
+											<td>
+												<input style="width:125px;" id="$field.fieldName" onvaluechanged="on${upFieldName}Changed" showNullItem="true" emptyText="请选择$field.text" nullItemText="请选择$field.text" onenter="search()" class="mini-combobox" #if($data && $data.length()>0)data='$data' textField="text" valueField="value" #elseif($field.cascadeBy && $field.cascadeBy != '') textField="dictCode" valueField="dictValue" enabled="false" #else url="${base_url}/system/dict/options/${field.ext.dict_type}" textField="dictCode" valueField="dictValue" #end />
+											</td>
+										</tr>
+										#elseif($field.isFk())
+										
+										<tr>
+											<td>$field.text：</td>
+											<td>
+												
+										#set($textField = ${field.fieldName}+"."+${field.reference.model.getNameField().fieldName})
+										#if($field.ext.textField) #set($textField = $field.ext.textField) #end
+										
+												<input style="width:125px;" id="${field.fieldName}" onenter="search()" class="mini-buttonedit" textName="$textField" onbuttonclick="onChoose${upFieldName}" />
+										    </td>
+										</tr>
+										#elseif($field.isNumber())
+										
+										<tr>
+											<td>${field.text}(最小)：</td>
+											<td>
+												<input style="width:125px;" id="${field.fieldName}Start" onenter="search()" class="mini-textbox" emptyText="请输入最小$field.text"/>
+											</td>
+										</tr>
+										<tr>
+											<td>${field.text}(最大)：</td>
+											<td>
+												<input style="width:125px;" id="${field.fieldName}End" onenter="search()" class="mini-textbox" emptyText="请输入最大$field.text"/>
+											</td>
+										</tr>
+										#elseif($field.isBoolean())
+										
+										<tr>
+											<td>${field.text}:</td>
+											<td>
+												<input style="width:125px;" id="$field.fieldName" onenter="search()" class="mini-checkbox" checked="false" text="允许" emptyText="请选择$field.text"/>
+											</td>
+										</tr>
+										#elseif($field.isDate())
+										
+										<tr>
+											<td>${field.text}(起始)：</td>
+											<td>
+												<input style="width:125px;" id="${field.fieldName}Start" onenter="search()" class="mini-datepicker" nullValue="null" format="yyyy-MM-dd" showTime="false" showOkButton="false" showClearButton="false" emptyText="请选择起始日期"/>
+											</td>
+										</tr>
+										<tr>
+											<td>${field.text}(截止)：</td>
+											<td>
+												<input style="width:125px;" id="${field.fieldName}End" onenter="search()" class="mini-datepicker" nullValue="null" format="yyyy-MM-dd" showTime="false" showOkButton="false" showClearButton="false" emptyText="请选择截止日期"/>
+											</td>
+										</tr>
+										#else
+										
+										<tr>
+											<td>$field.text：</td>
+											<td>
+												<input style="width:125px;" id="$field.fieldName" onenter="search()" class="mini-textbox" emptyText="请输入$field.text"/>
+											</td>
+										</tr>
+										#end
+									#end
+									
+									</table>
+									<div style="text-align: center; padding: 10px;">
+										<a class="mini-button" onclick="search()" iconCls="icon-search" style="width: 60px; margin-right: 20px;">查询</a>
+		                               <a class="mini-button" onclick="reset()" iconCls="icon-cancel"	style="width: 60px; margin-right: 20px;">清空</a>							
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+					<div>
+				#end
+					#if($model.hasMany())
+					
+					<div class="mini-splitter" style="width:100%;height:100%;" vertical="true">
+			    		<div size="50%">
+			    	#end
+			    	
+						<div class="mini-toolbar" style="border-bottom:0;padding:0px;">
+							<table style="width:100%;">
+								<tr>
+									<td style="width:100%;">
+										#if($model.ext.searchable)
+									
+										<input id="key" class="mini-textbox" emptyText="关键词" style="width:150px;" onenter="searchKey()"/>
+										<a class="mini-button" iconCls="icon-search" onclick="searchKey()">查询</a>
+										<span class="separator"></span>
+										#end
+										
+										<a class="mini-button" iconCls="icon-add" onclick="add()">增加</a>
+										<a class="mini-button" iconCls="icon-edit" onclick="edit()">编辑</a>
+										<a class="mini-button" iconCls="icon-remove" onclick="remove()">删除</a>
+										<a class="mini-button" iconCls="icon-export" onclick="exportExcel()">导出</a>
+										#if($model.ext.searchable)
+									
+										<a class="mini-button" iconCls="icon-search" onclick="highSearch()">高级查询</a>
+										#end
+										
+									</td>
+									<td style="white-space:nowrap;">
+									</td>
+								</tr>
+							</table>
+						</div>
+						<div class="mini-fit">
+							<div id="${model.ext.name}-datagrid" class="mini-datagrid" style="width:100%;height:100%;" allowResize="false"
+								url="${base_url}${model.ext.path}/list\#if(${parent_id} != '0')?#if(${model.getParentField()})${model.getParentField().fieldName}=#literal()${parent_id}#{end}#{end}\#end"  idField="id" multiSelect="true"
+								sizeList="[15,50,100,300,500]" pageSize="15" contextMenu="#contextMenu" showColumnsMenu="true" #if($model.hasMany())onselect="onRowSelect" #end
+							>
+								<div property="columns">
+									<div type="indexcolumn" field="indexcolumn" align="right" width="30"></div>
+									<div type="checkcolumn" width="25"></div>
+									#foreach($field in $model.getUpdatableFields())
+									#if($field.ext.skip || !$field.text || $field.text.trim().length() == 0)
+									#else
+									#set($fieldName = $field.fieldName)
+									#set($displayField = $field.fieldName)
+									#if($field.isFk())
+									#set($displayField = $fieldName+"."+$field.reference.model.getNameField().fieldName)
+									#end
+									
+									<div field="$fieldName" #if($field.isDict()) displayField="${fieldName}Desc"#elseif(!$field.isDate()) displayField="$displayField"#end #if($field.isDate())dateFormat="yyyy-MM-dd HH:mm:ss"#end #if($field.isNumber()) align="right"#end #if($field.isName())width="300" hideable="true" #{else}width="120" #end headerAlign="center" allowSort="true">$field.text</div>
+									#end
+									#end
+									
+								</div>
+							</div>
+							<ul id="contextMenu" class="mini-contextmenu">
+								<li name="fix" iconCls="icon-unlock" onclick="onFix" >锁定列</li>
+								<li name="unfix" iconCls="icon-lock" onclick="onUnfix" >取消锁定列</li>
+						    </ul>
+						</div>
+					#if($model.hasMany())
+					
+						</div>
+						<div showCollapseButton="true">
+							<div id="detail-tabs" class="mini-tabs" activeIndex="0" onactivechanged="onTabChange" contextMenu="#refreshTabMenu" style="width:100%;height:100%;" >
+			    				#foreach($f in $model.getHasManyFields())
+			    				
+			    				<div name="${base_url}${f.mappedBy.model.ext.path}" title="${f.mappedBy.model.text}">请选择上面的${model.text}</div>
+			    				#end
+			    				
+			    			</div>
+			    			<ul id="refreshTabMenu" class="mini-contextmenu" onbeforeopen="onBeforeOpen">
+								<li iconCls="icon-reload" onclick="reloadTab">
+									刷新标签页
+								</li>
+							</ul>
+						</div>
+					</div>
+					#end
+				#if($model.ext.searchable)
+				
+					</div>
+				</div>
+				#end
+		#if($cateField)
+			
+			</div>
+		</div>
+		#end
+		
+		<script type="text/javascript">
+			mini.parse();
+			var grid = mini.get("${model.ext.name}-datagrid");
+			grid.setFrozenStartColumn(0);
+			grid.setFrozenEndColumn(4);
+			function onUnfix() {
+				grid.unFrozenColumns();
+			}
+			function onFix() {
+				mini.prompt("请输入要锁定的列数,比如：2", "请输入",
+		            function (action, value) {
+		                if (action == "ok" && value) {
+		                	try {
+			                	var end = parseInt(value);
+			                	if (end < 0) end = 0;
+			                    grid.frozenColumns(0, end);
+		                  	} catch(e) {
+		                  	}
+		                }
+		            }
+		        );
+			}
+			grid.on("drawcell", function(e){
+	        	if ( false #foreach($field in $model.getUpdatableFields()) #if($field.ext.skip || !$field.text || $field.text.trim().length() == 0) #elseif($field.isBoolean()) || e.field == "$field.fieldName" #end #end ) {
+	        		var c= "";
+	        		if (e.value == true)
+	        			c = "checked=checked";
+	        		e.cellHtml = "<center><input disabled=disabled type='checkbox' "+c+"/></center>";
+	        	}
+	        	if (e.field == "indexcolumn") {
+	                e.cellStyle = "background:#ecedef";
+	            }
+	        });
+			#if($cateField)
+			
+			var tree = mini.get("${cateField.fieldName}-tree");
+			tree.on("nodeselect", function(e) {
+				var key = mini.get("${cateField.fieldName}_key").getFormValue();
+				grid.load({
+					${cateField.fieldName} : e.node.value,
+					key : key
+				});
+			});
+			#end
+			
+			grid.load();
+			
+			#foreach($field in $model.getUpdatableFields())
+			#if($field.ext.skip || !$field.text || $field.text.trim().length() == 0)
+			#else
+			#set($upFieldName = $CommonUtil.toUpCaseFirst($field.fieldName))
+			#if($field.isFk())
+
+			function onChoose${upFieldName}(e) {
+	            var btnEdit = this;
+	            mini.open({
+	                url: "${base_url}${field.reference.model.ext.path}/select",
+	                title: "选择${field.reference.model.text}",
+	                width: 1000,
+	                height: 600,
+	                ondestroy: function (action) {
+	                    if (action == "ok") {
+	                        var iframe = this.getIFrameEl();
+	                        var data = iframe.contentWindow.GetData();
+	                        data = mini.clone(data);    //必须
+	                        if (data) {
+	                            btnEdit.setValue(data.${field.reference.fieldName});
+	                            btnEdit.setText(data.${field.reference.model.getNameField().fieldName});
+	                        }
+	                    }
+	                }
+	            });            
+	        }
+	        #elseif($field.isDict() && $field.cascadeBy && $field.cascadeBy != '')
+	        
+	        function on${CommonUtil.toUpCaseFirst($field.cascadeBy)}Changed(e) {
+	            var parent = mini.getbyName("${field.cascadeBy}");
+	            var pid = parent.getValue();
+				var curr = mini.getbyName("${field.fieldName}");
+	            curr.setValue("");
+	            curr.setEnabled(true);
+	            
+	            var url = "${base_url}/system/dict/options/${field.ext.dict_type}?cascadeBy=" + pid
+	            curr.setUrl(url);
+	            curr.select(0);
+	        }
+	        #end
+	        #end
+	        #end
+	        
+			function add() {
+				#set($height = (${model.getUpdatableFields().size()}) * 28 + 155)
+				
+				mini.open({
+					url : "${base_url}${model.ext.path}/edit",
+					title : "新增${model.text}",
+					width : 810,
+					height : $height,
+					showModal : false,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+						#if($cateField)
+						
+						var ${cateField.fieldName} = "";
+						if (tree.getSelected()) {
+							${cateField.fieldName} = tree.getSelected();
+						}
+						#end
+							
+						var data = {
+							action : "new",
+							#if($cateField)
+							#if($cateField.isFk())
+							
+							${cateField.fieldName} : {
+								${cateField.reference.model.getIdField().fieldName} : ${cateField.fieldName}.value,
+								${cateField.reference.model.getNameField().fieldName} : ${cateField.fieldName}.text
+							},
+							#else
+							
+							${cateField.fieldName} : ${cateField.fieldName}.value,
+							#end
+							#end
+							#if($model.getParentField())
+							
+							${model.getParentField().fieldName} : {
+								
+								${model.getParentField().reference.model.getIdField().fieldName} : #literal()"${parent_id}"#end
+								,
+								${model.getParentField().reference.model.getNameField().fieldName} : #literal() "${parent_name}"#end
+								
+							},
+							#end
+							
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						grid.reload();
+					}
+				});
+			}
+
+			function edit() {
+				#set($height = (${model.getUpdatableFields().size()}) * 28 + 155)
+				
+				var row = grid.getSelected();
+				if(row) {
+					mini.open({
+						url : "${base_url}${model.ext.path}/edit",
+						title : "编辑${model.text}",
+						width : 810,
+						height : $height,
+						showModal : false,
+						onload : function() {
+							var iframe = this.getIFrameEl();
+							var data = {
+								action : "edit",
+								id : row.id
+							};
+							iframe.contentWindow.SetData(data);
+						},
+						ondestroy : function(action) {
+							grid.reload();
+						}
+					});
+
+				} else {
+					mini.alert("请选中一条记录","提示");
+				}
+			}
+			
+			function remove() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定删除选中记录？", "提示",
+			            function (action) {
+			                if (action == "ok") {
+			                    var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								grid.loading("操作中，请稍后......");
+								$.ajax({
+									url : "${base_url}${model.ext.path}/delete?id=" + id,
+									type : 'post',
+									success : function(text) {
+										mini.alert("删除选中记录，操作成功","提示");
+										grid.reload();
+									},
+									error : function(jqXHR, textStatus, errorThrown) {
+										grid.unmask();
+										//400,403,500错误已经统一在sys.js处理
+										if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+											return;
+										var text = "操作失败，" + jqXHR.responseText;
+										mini.alert(text,"提示");
+									}
+								});
+			                }
+			            }
+			        );
+				} else {
+					mini.alert("请选中一条记录","提示");
+				}
+			}
+			#if($cateField)
+			
+			function searchCategory() {
+				var ${cateField.fieldName} = mini.get("${cateField.fieldName}_key").getValue();
+				tree.load({
+					${cateField.fieldName} : ${cateField.fieldName}
+				});
+			}
+			#end
+			#if($model.ext.searchable)
+			
+			function searchKey() {
+				var key = mini.get("key").getFormValue();
+				
+				#if ($cateField)
+				
+				var ${cateField.fieldName} = "";
+				if (tree.getSelected()) {
+					${cateField.fieldName} = tree.getSelected().value;
+				}
+				grid.load({
+					${cateField.fieldName} : ${cateField.fieldName},
+					key : key
+				});
+				#else
+				
+				grid.load({
+					key : key
+				});
+				#end
+				
+			}
+			
+			function highSearch(){
+				var index = 1;
+				var splitter = mini.get("search-splitter");
+				var pane = splitter.getPane(index);
+				if (pane.expanded) {
+					splitter.collapsePane(index);
+				} else {
+					splitter.expandPane(index);
+				}
+			}
+			
+			function search() {
+				var json = _getSearchJSON();
+				grid.load(json);
+			}
+			function reset(){
+				var form = new mini.Form("search-form");
+				form.reset();
+			}
+			function _getSearchJSON() {
+				#set($keys = "")
+				#foreach($field in $model.getSearchableFields())
+				#if($field.isDate() || (!$field.isDict() && $field.isNumber()))
+				
+				var ${field.fieldName}Start = mini.get("${field.fieldName}Start").getFormValue();
+				#if($keys.length() > 0)
+				    #set($keys = $keys + ","+${field.fieldName}+"Start:"+${field.fieldName}+"Start")
+				#else
+					#set($keys = ${field.fieldName}+"Start:"+${field.fieldName}+"Start")
+				#end
+				
+				var ${field.fieldName}End = mini.get("${field.fieldName}End").getFormValue();
+				#if($keys.length() > 0)
+				    #set($keys = $keys + ","+${field.fieldName}+"End:"+${field.fieldName}+"End")
+				#else
+					#set($keys = ${field.fieldName}+"End:"+${field.fieldName}+"End")
+				#end
+				#else
+				
+				var $field.fieldName = mini.get("$field.fieldName").getFormValue();
+				#if($keys.length() > 0)
+				    #set($keys = $keys + ","+$field.fieldName+":"+$field.fieldName)
+				#else
+					#set($keys = $field.fieldName+":"+$field.fieldName)
+				#end
+				#end
+				#end
+				#if ($cateField)
+				
+				var ${cateField.fieldName} = "";
+				if (tree.getSelected()) {
+					${cateField.fieldName} = tree.getSelected().value;
+				}
+				return {
+					${cateField.fieldName}: ${cateField.fieldName},
+					$keys
+				};
+				#else
+					var key = mini.get("key").getFormValue();
+					
+				var sf = grid.sortField;
+				var so = grid.sortOrder;
+				return {
+					$keys,
+					key:key,
+					sortField: sf,
+					sortOrder: so
+				};
+				#end
+				
+			}
+			#end
+			#if($model.hasMany())
+			
+			var tabs = mini.get("detail-tabs");
+			var currentTab;
+			function onBeforeOpen(e) {
+				currentTab = tabs.getTabByEvent(e.htmlEvent);
+				if(!currentTab) {
+					e.cancel = true;
+				}
+			}
+			
+			function reloadTab() {
+				tabs.reloadTab(currentTab);
+			}
+			var onRowSelect = function(sender){
+				var row = grid.getSelected();
+				if(!row){
+					return false;
+				}
+				var activeTab = tabs.getActiveTab();
+				if (typeof activeTab === 'undefined' || !activeTab) {
+					activeTab = tabs.getTab(0);
+					tabs.activeTab(activeTab);
+				}
+				var url = activeTab.name + "?parent_id=" + row.${model.getIdField().fieldName} + "&parent_name=" + row.${model.getNameField().fieldName};
+				tabs.loadTab(url, activeTab);
+			}
+			var onTabChange = function(sender){
+				var row = grid.getSelected();
+				if(!row){
+					return false;
+				}
+				var tab = tabs.getTab(sender.index);
+				var url = tab.name + "?parent_id=" + row.${model.getIdField().fieldName} + "&parent_name=" + row.${model.getNameField().fieldName};
+				tabs.loadTab(url, tab);
+				currentTab = tab;
+			}
+			#end
+			
+			//导出
+			function exportExcel(){
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定导出选中记录？", "提示",
+			            function (action) {
+			                if (action == "ok") {
+								var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								location.href="${base_url}${model.ext.path}/export?ids=" + id;
+							}
+						});
+				} else {
+					if(grid.totalCount>0){
+						mini.confirm("确定导出记录？", "提示",
+				            function (action) {
+				                if (action == "ok") {
+									var json = _getSearchJSON();
+									var queryString = $.param(json) ;
+									var url = "${base_url}${model.ext.path}/export?"+queryString;
+									location.href=url;
+								}
+							});
+					} else {
+						mini.alert("没有数据可以导出","提示");
+					}
+				}
+			}
+			
+		</script>
+	</body>
+</html>

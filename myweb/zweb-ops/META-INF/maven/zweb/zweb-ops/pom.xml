@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>zweb-parent</artifactId>
+		<groupId>zweb</groupId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+	<artifactId>zweb-ops</artifactId>
+	<packaging>war</packaging>
+	<name>zweb-ams Maven Webapp</name>
+	<url>http://maven.apache.org</url>
+	<dependencies>
+		<dependency>
+            <groupId>org.eclipse.jetty.aggregate</groupId>
+            <artifactId>jetty-all</artifactId>
+            <version>8.1.13.v20130916</version>
+	    <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-webapp</artifactId>
+            <version>8.1.13.v20130916</version>
+	    <scope>provided</scope>
+        </dependency>
+		<dependency>
+			<groupId>org.mortbay.jetty</groupId>
+			<artifactId>jsp-2.1-glassfish</artifactId>
+			<version>2.1.v20100127</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>zweb</groupId>
+			<artifactId>zweb-ops-java</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+	<build>
+		<finalName>zweb-ops</finalName>
+	</build>
+</project>

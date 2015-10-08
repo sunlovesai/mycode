@@ -1,0 +1,5 @@
+																										
+序号,所属报表,操作人,操作时间,操作方式
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,
+${status.index+1},${item.reportConfig.title},${item.userName},${item.lockTime},${item.operate}
+</jx:forEach>,,,,

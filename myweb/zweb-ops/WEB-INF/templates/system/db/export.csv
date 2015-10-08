@@ -1,0 +1,5 @@
+																																												
+序号,连接名,数据源类型,主机名/IP,端口,用户名,密码,驱动
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,,,,
+${status.index+1},${item.name},${item.typeDesc},${item.host},${item.port},${item.user},${item.pwd},${item.driver}
+</jx:forEach>,,,,,,,

@@ -1,0 +1,340 @@
+#set($parent_id = $P.param('parent_id','0'))
+#set($parent_name = $P.param('parent_name',''))
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title>资源权限策略维护</title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+	</head>
+	<body>
+
+		<div class="mini-splitter" id="search-splitter" style="width:100%;height:100%;">
+			<div size="225" showCollapseButton="true" expanded="false">
+				<div class="mini-panel" showToolbar="true" showHeader="false" style="width:100%;height:100%;">
+					<div property="toolbar" style="padding:5px 5px 5px 10px;">
+						<form id="search-form">
+							<table>
+
+								<tr>
+									<td>策略名称：</td>
+									<td>
+									<input style="width:125px;" id="name" onenter="search()" class="mini-textbox" emptyText="请输入策略名称"/>
+									</td>
+								</tr>
+
+								<tr>
+									<td>用户规则：</td>
+									<td>
+									<input style="width:125px;" id="who" onenter="search()" class="mini-buttonedit" textName="who.name" onbuttonclick="onChooseWho" />
+									</td>
+								</tr>
+
+							</table>
+							<div style="text-align: center; padding: 10px;">
+								<a class="mini-button" onclick="search()" iconCls="icon-search" style="width: 60px; margin-right: 20px;">查询</a>
+								<a class="mini-button" onclick="reset()" iconCls="icon-cancel"	style="width: 60px; margin-right: 20px;">清空</a>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div>
+
+				<div class="mini-toolbar" style="border-bottom:0;padding:0px;">
+					<table style="width:100%;">
+						<tr>
+							<td style="width:100%;">
+								<input id="key" class="mini-textbox" emptyText="策略名称" style="width:150px;" onenter="searchKey()"/>
+								<a class="mini-button" iconCls="icon-search" onclick="searchKey()">查询</a>
+								<span class="separator"></span>
+								<a class="mini-button" iconCls="icon-add" onclick="add()">增加</a>
+								<a class="mini-button" iconCls="icon-edit" onclick="edit()">编辑</a>
+								<a class="mini-button" iconCls="icon-remove" onclick="remove()">删除</a>
+								<a class="mini-button" iconCls="icon-export" onclick="exportExcel()">导出</a>
+								<a class="mini-button" iconCls="icon-search" onclick="highSearch()">高级查询</a>
+							</td>
+							<td style="white-space:nowrap;"></td>
+						</tr>
+					</table>
+				</div>
+				<div class="mini-fit">
+					<div id="resourcePolicy-datagrid" class="mini-datagrid" style="width:100%;height:100%;" allowResize="false"
+					url="${base_url}/system/resource_policy/list#if(${parent_id} != '0')?resource=${parent_id}#end"  idField="id" multiSelect="true"
+					sizeList="[20,50,100,300,500]" pageSize="20" showColumnsMenu="true" 							>
+						<div property="columns">
+							<div type="indexcolumn" field="indexcolumn" align="right" width="30"></div>
+							<div type="checkcolumn" width="25"></div>
+							<div field="name"  displayField="name"   width="100%" hideable="true"  headerAlign="center" allowSort="true">
+								策略名称
+							</div>
+							<div field="who"  displayField="who.name"   width="150"  headerAlign="center" allowSort="true">
+								用户规则
+							</div>
+							<div field="data"  displayField="data.name"   width="150"  headerAlign="center" allowSort="true">
+								数据规则
+							</div>
+							<div field="allowOperations"  displayField="allowOperations"  width="120"  headerAlign="center" allowSort="true">
+								允许操作
+							</div>
+							<div field="resource"  displayField="resource.name"   width="120"  headerAlign="center" allowSort="true">
+								所属资源
+							</div>
+							<div field="sort"  displayField="sort"  width="60"  align="right" headerAlign="center" allowSort="true">
+								排序
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<script type="text/javascript">
+			mini.parse();
+			var grid = mini.get("resourcePolicy-datagrid");
+			grid.on("drawcell", function(e) {
+				if(e.field == "indexcolumn") {
+					e.cellStyle = "background:#ecedef";
+				}
+			});
+
+			grid.load();
+
+			function onChooseResource(e) {
+				var btnEdit = this;
+				mini.open({
+					url : "${base_url}/system/resource/select",
+					title : "选择资源",
+					width : 1000,
+					height : 600,
+					ondestroy : function(action) {
+						if(action == "ok") {
+							var iframe = this.getIFrameEl();
+							var data = iframe.contentWindow.GetData();
+							data = mini.clone(data);
+							//必须
+							if(data) {
+								btnEdit.setValue(data.id);
+								btnEdit.setText(data.name);
+							}
+						}
+					}
+				});
+			}
+
+			function onChooseWho(e) {
+				var btnEdit = this;
+				mini.open({
+					url : "${base_url}/system/rule/select",
+					title : "选择用户规则",
+					width : 1000,
+					height : 600,
+					ondestroy : function(action) {
+						if(action == "ok") {
+							var iframe = this.getIFrameEl();
+							var data = iframe.contentWindow.GetData();
+							data = mini.clone(data);
+							//必须
+							if(data) {
+								btnEdit.setValue(data.id);
+								btnEdit.setText(data.name);
+							}
+						}
+					}
+				});
+			}
+
+			function onChooseData(e) {
+				var btnEdit = this;
+				mini.open({
+					url : "${base_url}/system/rule/select",
+					title : "选择数据规则",
+					width : 1000,
+					height : 600,
+					ondestroy : function(action) {
+						if(action == "ok") {
+							var iframe = this.getIFrameEl();
+							var data = iframe.contentWindow.GetData();
+							data = mini.clone(data);
+							//必须
+							if(data) {
+								btnEdit.setValue(data.id);
+								btnEdit.setText(data.name);
+							}
+						}
+					}
+				});
+			}
+
+			function add() {
+				mini.open({
+					url : "${base_url}/system/resource_policy/edit?resource_id=${parent_id}",
+					title : "新增资源权限策略",
+					width : 330,
+					height : 330,
+					showModal : false,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+
+						var data = {
+							action : "new",
+							resource : {
+								id : "${parent_id}",
+								name : "${parent_name}"
+							}
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						grid.reload();
+					}
+				});
+			}
+
+			function edit() {
+				var row = grid.getSelected();
+				if(row) {
+					mini.open({
+						url : "${base_url}/system/resource_policy/edit?resource_id=${parent_id}&id="+row.id,
+						title : "编辑资源权限策略",
+						width : 330,
+						height : 330,
+						showModal : false,
+						onload : function() {
+							var iframe = this.getIFrameEl();
+							var data = {
+								action : "edit",
+								id : row.id
+							};
+							iframe.contentWindow.SetData(data);
+						},
+						ondestroy : function(action) {
+							grid.reload();
+						}
+					});
+
+				} else {
+					alert("请选中一条记录");
+				}
+			}
+
+			function remove() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定删除选中记录？", "确定？", function(action) {
+						if(action == "ok") {
+							var ids = [];
+							for(var i = 0, l = rows.length; i < l; i++) {
+								var r = rows[i];
+								ids.push(r.id);
+							}
+							var id = ids.join(',');
+							grid.loading("操作中，请稍后......");
+							$.ajax({
+								url : "${base_url}/system/resource_policy/delete?id=" + id,
+								type : 'post',
+								success : function(text) {
+									mini.alert("删除选中记录，操作成功");
+									grid.reload();
+								},
+								error : function(jqXHR, textStatus, errorThrown) {
+									//400,403,500错误已经统一在sys.js处理
+									if(400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+										return;
+									var text = "操作失败，" + jqXHR.responseText;
+									mini.alert(text);
+								}
+							});
+						}
+					});
+				} else {
+					alert("请选中一条记录");
+				}
+			}
+
+			function searchKey() {
+				var key = mini.get("key").getFormValue();
+				grid.load({
+					key : key
+				});
+			}
+
+			function highSearch() {
+				var index = 1;
+				var splitter = mini.get("search-splitter");
+				var pane = splitter.getPane(index);
+				if(pane.expanded) {
+					splitter.collapsePane(index);
+				} else {
+					splitter.expandPane(index);
+				}
+			}
+
+			function search() {
+				var json = _getSearchJSON();
+				grid.load(json);
+			}
+
+			function reset() {
+				var form = new mini.Form("search-form");
+				form.reset();
+			}
+
+			function _getSearchJSON() {
+
+				var name = mini.get("name").getFormValue();
+
+				var who = mini.get("who").getFormValue();
+
+				return {
+					name : name,
+					who : who
+				};
+			}
+
+			//导出
+			function exportExcel() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定导出选中记录？", "确定？", function(action) {
+						if(action == "ok") {
+							var ids = [];
+							for(var i = 0, l = rows.length; i < l; i++) {
+								var r = rows[i];
+								ids.push(r.id);
+							}
+							var id = ids.join(',');
+							location.href = "${base_url}/system/resource_policy/export?ids=" + id;
+						}
+					});
+				} else {
+					if(grid.totalCount > 0) {
+						mini.confirm("确定导出记录？", "确定？", function(action) {
+							if(action == "ok") {
+								var json = _getSearchJSON();
+								var queryString = $.param(json);
+								var url = "${base_url}/system/resource_policy/export?" + queryString;
+								location.href = url;
+							}
+						});
+					} else {
+						mini.alert("没有数据可以导出");
+					}
+				}
+			}
+
+		</script>
+	</body>
+</html>

@@ -1,0 +1,361 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>${reportConfig.title}-编辑面板</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+		<style type="text/css">
+			html, body {
+				font-size: 12px;
+				padding: 0;
+				margin: 0;
+				border: 0;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script>
+		var g_base_url = "${base_url}";
+		var g_invite_code = "${inviteCode}";
+		var g_report_code = "${reportConfig.code}";
+		</script>
+	</head>
+	<body>
+		<div class="mini-panel" style="width:100%;height:100%;"
+			showToolbar="true" showHeader="false" showCloseButton="false" showFooter="true"
+		>
+			<div property="footer" style="">
+				<div style="text-align:center;padding:5px 3px 8px 3px;">
+					<a class="mini-button" id="btn-save" onclick="onOk" style="width:60px;margin-right:15px;">确定</a>
+					<a class="mini-button" id="btn-cancel" onclick="onCancel" style="width:60px;">取消</a>
+				</div>
+			</div>
+			<form id="edit-${reportConfig.code}-form" method="post" style="padding:15px 15px 15px 5px;">
+				<input name="id" class="mini-hidden" />
+				<input name="ignoreVersionConflict" class="mini-hidden" />
+				<fieldset style="border:solid 1px #aaa;padding:3px; margin-bottom:5px;">
+					<legend >
+						${reportConfig.title}信息
+					</legend>
+					<div style="padding:5px;">
+						<table style="table-layout:fixed;">
+							#set($index = 0)
+							#foreach($field in $reportConfig.editColumns)
+							#if($field.isNewRow)
+							#set($index = 0)
+							    <tr>
+									<td style="min-width:100px;">$field.text：</td>
+									<td #if($field.isNewRow)colspan="$reportConfig.colNumOneRow3"#end style="width:${reportConfig.rowWidth}px;">
+										#set($upFieldName = $CommonUtil.toUpCaseFirst($field.columnName))
+										#if($field.dataType == 'dict')
+											#set($data = $field.dictJson)
+											
+										<input style="width:${reportConfig.rowWidth}px;" showNullItem="true" name="$field.columnName" emptyText="请选择$field.text" nullItemText="" onvaluechanged="on${upFieldName}Changed" class="mini-combobox" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end #if($data && $data.length()>0)data='$data' textField="text" valueField="value" #else url="${base_url}/system/dict/options/${field.dictType}" textField="dictCode" valueField="dictValue" #end #if($field.cascadeBy && $field.cascadeBy != '') enabled="false" #else enabled="$field.getEditable()" #end />
+										#elseif($field.dataType == 'fk')
+										#set($textField = $field.referTextName)
+										#set($valueField = $field.referValueName)
+										
+										<input style="width:${reportConfig.rowWidth}px;" textName="_g_row.${textField}" name="$field.columnName" enabled="$field.getEditable()" class="mini-buttonedit" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end onbuttonclick="onChoose${upFieldName}" />
+										#elseif($field.dataType == 'int')
+										
+										<input style="width:${reportConfig.rowWidth}px;" enabled="$field.getEditable()" class="mini-spinner" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end minValue="0" maxValue="9999999999999" allowLimitValue="true"  name="$field.columnName" emptyText="请输入$field.text"/>
+										#elseif($field.dataType == 'float')
+										
+										<input style="width:${reportConfig.rowWidth}px;" enabled="$field.getEditable()" class="mini-spinner" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end minValue="0" maxValue="9999999999999" decimalPlaces="2" name="$field.columnName" emptyText="请输入$field.text"/>
+										#elseif($field.dataType == 'boolean')
+										
+										<input style="width:${reportConfig.rowWidth}px;" enabled="$field.getEditable()" class="mini-checkbox" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end checked="false" name="$field.columnName" emptyText="请选择$field.text"/>
+										#elseif($field.dataType == 'date')
+										
+										<input style="width:${reportConfig.rowWidth}px;" enabled="$field.getEditable()" class="mini-datepicker" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end nullValue="null" name="$field.columnName" format="$field.dateFormat" showTime="false" showOkButton="false" showClearButton="false" emptyText="请选择$field.text"/>
+										#else
+										
+										<input style="width:${reportConfig.rowWidth}px; #if($field.isMultiRow)height:${field.height}px#end" enabled="$field.getEditable()" #if($field.isMultiRow)class="mini-textarea"#else class="mini-textbox" #end #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end name="$field.columnName" emptyText="请输入$field.text"/>
+										#end
+										
+									</td>
+								</tr>
+							#else
+							
+								#set($index = $index+1)
+							    #if($index==$reportConfig.colNumOneRow2) #set($index = 1) #end
+							    
+				#if($index==1) <tr> #end
+								
+									<td style="width:100px;">$field.text：</td>
+									<td style="width:170px;">
+										#set($upFieldName = $CommonUtil.toUpCaseFirst($field.columnName))
+										#if($field.dataType == 'dict')
+											#set($data = $field.dictJson)
+											
+										<input style="width:160px;" showNullItem="true" name="$field.columnName" emptyText="请选择$field.text" nullItemText="" onvaluechanged="on${upFieldName}Changed" class="mini-combobox" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end #if($data && $data.length()>0)data='$data' textField="text" valueField="value" #else url="${base_url}/system/dict/options/${field.dictType}" textField="dictCode" valueField="dictValue" #end #if($field.cascadeBy && $field.cascadeBy != '') enabled="false" #else enabled="$field.getEditable()" #end />
+										#elseif($field.dataType == 'fk')
+										#set($textField = $field.referTextName)
+										#set($valueField = $field.referValueName)
+										
+										<input style="width:160px;" enabled="$field.getEditable()" class="mini-buttonedit" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end name="$field.columnName" textName="_g_row.${textField}" onbuttonclick="onChoose${upFieldName}" />
+										#elseif($field.dataType == 'int')
+										
+										<input style="width:160px;" enabled="$field.getEditable()" class="mini-spinner" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end minValue="0" maxValue="9999999999999" allowLimitValue="true"  name="$field.columnName" emptyText="请输入$field.text"/>
+										#elseif($field.dataType == 'float')
+										
+										<input style="width:160px;" enabled="$field.getEditable()" class="mini-spinner" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end minValue="0" maxValue="9999999999999" decimalPlaces="2" name="$field.columnName" emptyText="请输入$field.text"/>
+										#elseif($field.dataType == 'boolean')
+										
+										<input style="width:160px;" enabled="$field.getEditable()" class="mini-checkbox" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end checked="false" name="$field.columnName" emptyText="请选择$field.text"/>
+										#elseif($field.dataType == 'date')
+										
+										<input style="width:160px;" enabled="$field.getEditable()" class="mini-datepicker" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end nullValue="null" name="$field.columnName" format="$field.dateFormat" showTime="false" showOkButton="false" showClearButton="false" emptyText="请选择$field.text"/>
+										#else
+										
+										<input style="width:160px;" enabled="$field.getEditable()" class="mini-textbox" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end name="$field.columnName" emptyText="请输入$field.text"/>
+										#end
+										
+									</td>
+				#if($index==$reportConfig.colNumOneRow2-1) </tr> #end
+							#end
+							
+						#end
+						</table>
+					</div>
+				</fieldSet>
+			</form>
+		</div>
+		<script type="text/javascript">
+			mini.parse();
+
+			var form = new mini.Form("edit-${reportConfig.code}-form");
+			var el = mini.getbyName("${reportConfig.editColumns[0].columnName}");
+			zweb.onESC(form.el, el, function(){
+				CloseWindow("close")
+			});
+			zweb.onEnter(form.el, el, function(){
+				SaveData()
+			});
+			#foreach($field in $reportConfig.editColumns)
+			#set($upFieldName = $CommonUtil.toUpCaseFirst($field.columnName))
+			#if($field.dataType == 'fk')
+			
+			function onChoose${upFieldName}(e) {
+	            var btnEdit = this;
+	            mini.open({
+	                url: "${base_url}${field.referPath}",
+	                title: "选择${field.text}",
+	                width: 1000,
+	                height: 600,
+	                ondestroy: function (action) {
+	                    if (action == "ok") {
+	                        var iframe = this.getIFrameEl();
+	                        var data = iframe.contentWindow.GetData();
+	                        data = mini.clone(data);    //必须
+	                        if (data) {
+	                        	btnEdit.setValue(data.${field.referValueName});
+	                            btnEdit.setText(data.${field.referTextName});
+	                        }
+	                    }
+	                }
+	            });            
+	        }
+	        #elseif($field.dataType == 'dict' && $field.cascadeBy && $field.cascadeBy != '')
+	        
+	        function on${CommonUtil.toUpCaseFirst($field.cascadeBy)}Changed(e) {
+	            var parent = mini.getbyName("${field.cascadeBy}");
+	            var pid = parent.getValue();
+				var curr = mini.getbyName("${field.columnName}");
+	            curr.setValue("");
+	            curr.setEnabled(true);
+	            
+	            var url = "${base_url}/system/dict/options/${field.dictType}?cascadeBy=" + pid
+	            curr.setUrl(url);
+	            curr.select(0);
+	        }
+	        #end
+	        #end
+	        
+	        function showErrorTexts(errorTexts) {
+	            var s = errorTexts.join('<br/>');
+	
+	            var win = window.open('', "", 'height=200,width=400,top=200,left=400,toolbar=no,menubar=no,scrollbars=no, resizable=no,location=no, status=no, titlebar=no');
+	            win.document.open('text/html', 'replace');
+	            win.document.write(s);
+	            win.document.close();
+	        }
+	        
+			function SaveData() {
+				var o = form.getData();
+				form.validate();
+				if(form.isValid() == false) {
+					var errorTexts = form.getErrorTexts();
+                	showErrorTexts(errorTexts);
+					return;
+				}
+				//---控制表单数据不能重复提交
+				var btnSave = mini.get("btn-save");
+				if (!btnSave.getEnabled())
+				    return ;
+				
+				#if ($buttonConfig.saveUrl && $buttonConfig.saveUrl != '') 
+			    var saveUrl = "${base_url}${buttonConfig.saveUrl}";
+			    #else
+			    var saveUrl = "${base_url}/system/report/save/${reportConfig.code}";
+			    #end
+				btnSave.setEnabled(false);
+				//-----------------------
+				var ctx = {formData:{invite_code : "${inviteCode}"},saveUrl:saveUrl,button:{name:"${buttonConfig.name}"},form:form,loginUser:${loginUser},baseUrl:"${base_url}", data:o};
+				// FIXME before save
+				#if("$!{reportConfig.beforeSaveScript}" != "")
+				
+				function beforeSaveScript(ctx){
+					$!{reportConfig.beforeSaveScript}
+					return true;
+				}
+				if(!beforeSaveScript(ctx)) return;
+				#end
+				
+				var json = mini.encode(ctx.data);
+				ctx.formData.data = json;
+				$.ajax({
+					url : ctx.saveUrl,
+					type : 'POST',
+					data : ctx.formData,
+					cache : false,
+					success : function(text) {
+						// FIXME after save
+						#if("$!{reportConfig.afterSaveScript}" != "")
+						ctx.success = true;
+						function afterSaveScript(ctx){
+							$!{reportConfig.afterSaveScript}
+							return true;
+						}
+						if(!afterSaveScript(ctx)) return;
+						#end
+						
+						CloseWindow("save");
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						// FIXME after save
+						#if("$!{reportConfig.afterSaveScript}" != "")
+						ctx.success = false;
+						function afterSaveScript(ctx){
+							$!{reportConfig.afterSaveScript}
+							return true;
+						}
+						if(!afterSaveScript(ctx)) return;
+						#end
+						
+						btnSave.setEnabled(true);
+						if (409 == jqXHR.status){
+							mini.showMessageBox({
+								title : "数据版本冲突",
+								message : jqXHR.responseText+"，获取最新数据？",
+								buttons : ["是", "否"],
+								iconCls : "mini-messagebox-question",
+								allowResize : true,
+					            callback: function (action) {            
+					                if (action == "是") {
+					                	var _data = mini.clone(o);
+					                	_data.action = "edit";
+					                	SetData(_data);
+					                } else if (action == "否"){
+					                	mini.showMessageBox({
+											title : "数据版本冲突",
+											message : "保留本地数据并提交覆盖最新数据？",
+											buttons : ["是", "否"],
+											iconCls : "mini-messagebox-question",
+											callback: function (action) {
+												if (action == "是") {
+													#set($lor = $zwall.judge('local_override_remote'))
+													#if($lor.ok)
+													mini.getbyName("ignoreVersionConflict").setValue("true");
+					                				SaveData();
+					                				#else
+					                				mini.alert($lor.denyReason);
+					                				#end
+												}
+											}
+										});
+				                	}
+					            }
+					        });						
+						} else {
+							//400,403,500错误已经统一在sys.js处理
+							if (400 != jqXHR.status && 403 != jqXHR.status && 500 != jqXHR.status) {
+								var text = "操作失败，" + jqXHR.responseText;
+								mini.alert(text);
+							}
+						}
+					}
+				});
+			}
+
+			////////////////////
+			//标准方法接口定义
+			function SetData(data) {
+				if(data.isRowSelected) {
+					//跨页面传递的数据对象，克隆后才可以安全使用
+					data = mini.clone(data);
+					$.ajax({
+						url : "${base_url}/system/report/get/${reportConfig.code}?invite_code=${inviteCode}&id=" + data.row.${reportConfig.idName},
+						cache : false,
+						success : function(text) {
+							var o = mini.decode(text);
+							o._g_row = data._g_row;
+							form.setData(o);
+							form.setChanged(false);
+							form.validate();
+						}
+					});
+				} else {
+					//跨页面传递的数据对象，克隆后才可以安全使用
+					data = mini.clone(data);
+					for (var _k in data._queryObj) {
+						if (typeof data[_k] == 'undefined') {
+						    data[_k] = data._queryObj[_k];
+						}
+					}
+					//alert("set data->"+JSON.stringify(data));
+					//处理默认值
+					#foreach($f in $reportConfig.editColumns)
+					#if($f.defaultValue && $f.defaultValue != '')
+					data["$f.columnName"] = "$f.defaultValue";
+					#end
+					#end
+					form.setData(data);
+					form.setChanged(false);
+				}
+				if(data.action == 'get') {
+					var save_btn = mini.get('btn-save');
+					var cancel_btn = mini.get('btn-cancel');
+					save_btn.setVisible(false);
+					cancel_btn.setText('确定');
+					form.setEnabled(false);
+				}
+			}
+
+			function GetData() {
+				var o = form.getData();
+				return o;
+			}
+
+			function CloseWindow(action) {
+				if(action == "close" && form.isChanged()) {
+					if(confirm("数据被修改了，是否先保存？")) {
+						return false;
+					}
+				}
+				if(window.CloseOwnerWindow)
+					return window.CloseOwnerWindow(action);
+				else
+					window.close();
+			}
+
+			function onOk(e) {
+				SaveData();
+			}
+
+			function onCancel(e) {
+				CloseWindow("cancel");
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,33 @@
+TaskParam:
+  list: > 
+    SELECT
+        param_key,
+        param_value,
+        task_id,
+        id
+    FROM
+        ${app.solidbase_catalog}.sys_task_param t0
+    WHERE 1=1
+              
+        #if ($args[0].task && $args[0].task!="")
+        AND task_id = :task
+        #end
+          
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #elseif ($args[0].key && $args[0].key!="")
+        AND ( 1<>1
+            OR param_key like :%key% 
+            OR param_value like :%key% 
+        )
+        #else
+                   
+        #if ($args[0].key && $args[0].key!="") 
+        AND param_key like :%key% 
+        #end 
+                         
+        #if ($args[0].value && $args[0].value!="") 
+        AND param_value like :%value% 
+        #end 
+                
+        #end

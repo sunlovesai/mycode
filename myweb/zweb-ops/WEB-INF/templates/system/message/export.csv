@@ -1,0 +1,5 @@
+																																																																								
+序号,发送者,接收者,消息标题,消息内容,消息类型,数据,是否已读,是否删除,创建时间,删除时间,已读时间
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,,,,,,,,
+${status.index+1},${item.sender.name},${item.receiver.name},${item.title},${item.content},${item.typeDesc},${item.data},${item.hasRead},${item.isDelete},${item.createAt},${item.deleteAt},${item.readAt}
+</jx:forEach>,,,,,,,,,,,

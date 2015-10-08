@@ -1,0 +1,5 @@
+																										
+序号,资源名称,资源编码,所属菜单,排序
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,
+${status.index+1},${item.name},${item.code},${item.menu.name},${item.sort}
+</jx:forEach>,,,,

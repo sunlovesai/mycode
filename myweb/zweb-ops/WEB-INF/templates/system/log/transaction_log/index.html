@@ -1,0 +1,249 @@
+#set($parent_id = $P.param('parent_id','0'))
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title>事务日志</title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+	</head>
+	<body>
+												
+		<div class="mini-splitter" id="search-splitter" style="width:100%;height:100%;">
+			<div size="250" showCollapseButton="true" expanded="false">
+				<div class="mini-panel" showToolbar="true" showHeader="false" style="width:100%;height:100%;">
+				    <div property="toolbar" style="padding:5px 5px 5px 10px;">
+				    	<form id="search-form" onsubmit="return false;">
+							<table>
+								<tr>
+									<td>状态：</td>
+									<td>																																															  																	
+										<input style="width:125px;" id="status" onenter="search()" class="mini-combobox" data="[{text:'BEGIN', value:'1'},{text:'RUN', value:'2'},{text:'RUN_EXCEPTION', value:'3'},{text:'COMMIT', value:'4'},{text:'ROLLBACK', value:'5'},{text:'ROLLBACK_EXCEPTION', value:'6'},{text:'CLOSE', value:'7'}]" textField="text" valueField="value" showNullItem="true" emptyText="请选择" nullItemText="请选择"/>
+									</td>
+								</tr>
+								<tr>
+									<td>事务开始时间：</td>
+									<td>
+										<input style="width:125px;" id="startTime" onenter="search()" class="mini-datepicker" nullValue="null" format="yyyy-MM-dd HH:mm" showTime="true" showOkButton="false" showClearButton="false" emptyText="请选择起始日期"/>
+									</td>
+								</tr>
+								<tr>
+									<td>事务结束时间：</td>
+									<td>
+										<input style="width:125px;" id="endTime" onenter="search()" class="mini-datepicker" nullValue="null" format="yyyy-MM-dd HH:mm" showTime="true" showOkButton="false" showClearButton="false" emptyText="请选择截止日期"/>
+									</td>
+								</tr>
+								<tr>
+									<td>操作耗时(最小)：</td>
+									<td>
+										<input style="width:125px;" id="timeCostStart" onenter="search()" class="mini-spinner" maxValue="99999999" value="0" emptyText="请输入最小操作耗时"/>
+									</td>
+								</tr>
+								<tr>
+									<td>操作耗时(最大)：</td>
+									<td>
+										<input style="width:125px;" id="timeCostEnd" onenter="search()" class="mini-spinner" maxValue="99999999" value="0" emptyText="请输入最大操作耗时"/>
+									</td>
+								</tr>
+									
+							</table>
+							<div style="text-align: center; padding: 10px;">
+								<a class="mini-button" onclick="search()" iconCls="icon-search" style="width: 60px; margin-right: 20px;">查询</a>
+                               <a class="mini-button" onclick="reset()" iconCls="icon-cancel"	style="width: 60px; margin-right: 20px;">清空</a>							
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div>
+										    	
+				<div class="mini-toolbar" style="border-bottom:0;padding:0px;">
+					<table style="width:100%;">
+						<tr>
+							<td style="width:100%;">
+																	
+								<input id="key" class="mini-textbox" emptyText="关键词" style="width:150px;" onenter="searchKey()"/>
+								<a class="mini-button" iconCls="icon-search" onclick="searchKey()">查询</a>
+								<span class="separator"></span>
+								<a class="mini-button" iconCls="icon-edit" onclick="edit()">查看</a>
+								<span class="separator"></span>	
+								<a class="mini-button" iconCls="icon-search" onclick="highSearch()">高级查询</a>
+																		
+							</td>
+							<td style="white-space:nowrap;">
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="mini-fit">
+					<div id="transaction-log-datagrid" class="mini-datagrid" style="width:100%;height:100%;" allowResize="false"
+						url="${base_url}/system/log/transaction_log/list#if(${parent_id} != '0')?actionLog=${parent_id}#end"  idField="id" multiSelect="true"
+						sizeList="[20,50,100,300,500,1000,2000]" pageSize="20" contextMenu="#contextMenu" showColumnsMenu="true"
+						onrowdblclick="edit()">
+						<div property="columns">
+							<div type="indexcolumn" field="indexcolumn" align="right" width="30"></div>
+							<div type="checkcolumn" width="25"></div>
+							<div field="id" width="50"  align="right" headerAlign="center" allowSort="true">ID</div>
+							<div field="status" displayField="statusDesc" width="80"  headerAlign="center" allowSort="true">当前状态</div>
+							<div field="tid"  displayField="tid" width="120"  align="center" headerAlign="center" allowSort="true">事务ID</div>
+							<div field="timeCost" width="80" align="right"  headerAlign="center" allowSort="true">耗时(ms)</div>
+							<div field="afterBeginAt" width="130" dataType="date" dateFormat="yyyy-MM-dd HH:mm:ss" align="center"  headerAlign="center" allowSort="true">开始完成时间点</div>			
+							<div field="afterRunAt" width="130" dataType="date" dateFormat="yyyy-MM-dd HH:mm:ss" align="center"  headerAlign="center" allowSort="true">运行完成时间点</div>
+							<div field="afterRunExceptionAt" width="130" dataType="date" dateFormat="yyyy-MM-dd HH:mm:ss" align="center"  headerAlign="center" allowSort="true">运行异常时间点</div>
+							<div field="runException"  displayField="runException" width="100"  headerAlign="center" allowSort="true">运行异常信息</div>
+							<div field="afterRollbackAt" width="130" dataType="date" dateFormat="yyyy-MM-dd HH:mm:ss" align="center"  headerAlign="center" allowSort="true">回滚完成时间点</div>
+							<div field="afterRollbackExceptionAt" width="130" dataType="date" dateFormat="yyyy-MM-dd HH:mm:ss" align="center"  headerAlign="center" allowSort="true">回滚异常时间点</div>
+							<div field="rollbackException"  displayField="rollbackException" width="100"  headerAlign="center" allowSort="true">回滚异常信息</div>
+							<div field="afterCommitAt" width="130" dataType="date" dateFormat="yyyy-MM-dd HH:mm:ss" align="center"  headerAlign="center" allowSort="true">提交完成时间点</div>
+							<div field="afterCloseAt" width="130" dataType="date" dateFormat="yyyy-MM-dd HH:mm:ss" align="center"  headerAlign="center" allowSort="true">释放连接完成时间点</div>
+							<div field="updateAt" width="130" dataType="date" dateFormat="yyyy-MM-dd HH:mm:ss" align="center"  headerAlign="center" allowSort="true">最后更新时间</div>
+							<div field="memo" width="120"  align="left" headerAlign="center" allowSort="true">备注</div>
+						</div>
+					</div>
+				</div>
+											
+			</div>
+		</div>
+								
+		<script type="text/javascript">
+			mini.parse();
+			var grid = mini.get("transaction-log-datagrid");
+			
+			grid.on("drawcell", function(e){
+	        	if (e.field == "indexcolumn") {
+	                e.cellStyle = "background:#ecedef";
+	            } if (e.field == "status") {
+	            	if (e.value == "4")
+	                e.rowStyle = "background:green;color:#ffffff;";
+	            } else if (e.field == "timeCost") {
+	        		var value = e.value;
+	        		if(value >= 100 && value < 500) {
+	        			e.rowStyle = "background:#FFDDDD";
+	        		} else if (value >= 500 && value < 1000) {
+	        			e.rowStyle = "background:#FFAAAA";
+	        		} else if (value >= 1000 && value < 5000) {
+	        			e.rowStyle = "background:#FF8888";
+	        		} else if (value >= 5000) {
+	        			e.rowStyle = "background:#FF0000";
+	        		}
+	        	}
+	        });
+						
+			grid.load();
+										        	        							        	        							        	        							        	        							        	        							        	        							        	        							        	        	        
+			function edit() {
+				var row = grid.getSelected();
+				if(row) {
+					mini.open({
+						url : "${base_url}/system/log/transaction_log/edit",
+						title : "查看事务日志",
+						width : 900,
+						height : 420,
+						showModal : false,
+						onload : function() {
+							var iframe = this.getIFrameEl();
+							var data = {
+								action : "edit",
+								id : row.id
+							};
+							iframe.contentWindow.SetData(data);
+						},
+						ondestroy : function(action) {
+							grid.reload();
+						}
+					});
+
+				} else {
+					mini.alert("请选中一条记录","提示");
+				}
+			}
+			
+			function searchKey() {
+				var key = mini.get("key").getFormValue();
+				grid.load({
+					key : key
+				});
+			}
+			
+			function highSearch(){
+				var index = 1;
+				var splitter = mini.get("search-splitter");
+				var pane = splitter.getPane(index);
+				if (pane.expanded) {
+					splitter.collapsePane(index);
+				} else {
+					splitter.expandPane(index);
+				}
+			}
+			
+			function search() {
+				var json = _getSearchJSON();
+				grid.load(json);
+			}
+			function reset(){
+				var form = new mini.Form("search-form");
+				form.reset();
+			}
+			function _getSearchJSON() {
+				var key = mini.get("key").getFormValue();
+				var status = mini.get("status").getFormValue();
+				var timeCostStart = mini.get("timeCostStart").getFormValue();
+				var timeCostEnd = mini.get("timeCostEnd").getFormValue();
+				if (timeCostEnd < 0 || timeCostEnd <= 0) {
+					timeCostEnd = "";
+					timeCostStart = "";
+				}
+				var startTime = mini.get("startTime").getFormValue();
+				var endTime = mini.get("endTime").getFormValue();
+				return {
+					status:status,timeCostStart:timeCostStart,timeCostEnd:timeCostEnd,key:key,startTime:startTime,endTime:endTime
+				};
+								
+			}
+									
+			//导出
+			function exportExcel(){
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定导出选中记录？", "提示",
+			            function (action) {
+			                if (action == "ok") {
+								var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								location.href="${base_url}/system/log/transaction_log/export?ids=" + id;
+							}
+						});
+				} else {
+					if(grid.totalCount>0){
+						mini.confirm("确定导出记录？", "提示",
+				            function (action) {
+				                if (action == "ok") {
+									var json = _getSearchJSON();
+									var queryString = $.param(json) ;
+									var url = "${base_url}/system/log/transaction_log/export?"+queryString;
+									location.href=url;
+								}
+							});
+					} else {
+						mini.alert("没有数据可以导出","提示");
+					}
+				}
+			}
+			
+		</script>
+	</body>
+</html>

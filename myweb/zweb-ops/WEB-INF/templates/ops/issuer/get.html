@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>issuer-编辑面板</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script src="http://192.168.1.110:8083/js/boot.js" type="text/javascript"></script>
+		<style type="text/css">
+			html, body {
+				font-size: 12px;
+				padding: 0;
+				margin: 0;
+				border: 0;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script>
+		var g_base_url = "http://192.168.1.110:8083";
+		var g_invite_code = "111";
+		var g_report_code = "sec_issuer";
+		</script>
+	</head>
+	<body>
+		<div class="mini-panel" style="width:100%;height:100%;"
+			showToolbar="true" showHeader="false" showCloseButton="false" showFooter="true">
+			<div property="footer" style="">
+				<div style="text-align:center;padding:5px 3px 8px 3px;">
+					<a class="mini-button" id="btn-save" onclick="onOk" style="width:60px;margin-right:15px;">确定</a>
+					<a class="mini-button" id="btn-cancel" onclick="onCancel" style="width:60px;">取消</a>
+				</div>
+			</div>
+			<form id="edit-sec_issuer-form" method="post" style="padding:15px 15px 15px 5px;">
+				<input name="id" class="mini-hidden" />
+				<input name="ignoreVersionConflict" class="mini-hidden" />
+				<fieldset style="border:solid 1px #aaa;padding:3px; margin-bottom:5px;">
+					<legend >issuer信息</legend>
+					<div style="padding:5px;">
+						<table style="table-layout:fixed;">
+				 			<tr> 								
+								<td style="width:100px;">id：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" enabled="true" class="mini-spinner"  minValue="0" maxValue="9999999999999" allowLimitValue="true"  name="id" emptyText="请输入id"/>
+								</td>
+								<td style="width:100px;">Issuer：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" enabled="true" class="mini-textbox" required="true" requiredErrorText="Issuer不能为空" name="issuer" emptyText="请输入Issuer"/>
+								</td>
+							</tr>
+							<tr>
+								<td style="min-width:100px;">Address：</td>
+								<td colspan="3" style="width:439px;">
+									<input style="width:439px; " enabled="true"  class="mini-textbox"   name="address" emptyText="请输入Address"/>
+								</td>
+							</tr>
+				 			<tr> 								
+								<td style="width:100px;">City：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" enabled="true" class="mini-textbox"  name="city" emptyText="请输入City"/>
+								</td>
+								<td style="width:100px;">Postal Code：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" enabled="true" class="mini-textbox"  name="postal_code" emptyText="请输入Postal Code"/>
+								</td>
+							</tr>
+							<tr>
+								<td style="min-width:100px;">Description：</td>
+								<td colspan="3" style="width:439px;">
+									<input style="width:439px; " enabled="true"  class="mini-textbox"   name="description" emptyText="请输入Description"/>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</fieldSet>
+			</form>
+		</div>
+		<script type="text/javascript">
+			mini.parse();
+
+			var form = new mini.Form("edit-sec_issuer-form");
+			var el = mini.getbyName("id");
+			zweb.onESC(form.el, el, function(){
+				CloseWindow("close")
+			});
+			zweb.onEnter(form.el, el, function(){
+				SaveData()
+			});
+							        				        				        				        				        				        	        
+	        function showErrorTexts(errorTexts) {
+	            var s = errorTexts.join('<br/>');
+	
+	            var win = window.open('', "", 'height=200,width=400,top=200,left=400,toolbar=no,menubar=no,scrollbars=no, resizable=no,location=no, status=no, titlebar=no');
+	            win.document.open('text/html', 'replace');
+	            win.document.write(s);
+	            win.document.close();
+	        }
+	        
+			function SaveData() {
+				var o = form.getData();
+				form.validate();
+				if(form.isValid() == false) {
+					var errorTexts = form.getErrorTexts();
+                	showErrorTexts(errorTexts);
+					return;
+				}
+				//---控制表单数据不能重复提交
+				var btnSave = mini.get("btn-save");
+				if (!btnSave.getEnabled())
+				    return ;
+				
+				var saveUrl = "http://192.168.1.110:8083/system/report/save/sec_issuer";
+			    btnSave.setEnabled(false);
+				//-----------------------
+				var ctx = {formData:{invite_code : "111"},saveUrl:saveUrl,button:{name:"get"},form:form,loginUser:{"age":0,"email":"","gender":0,"genderDesc":"保密","id":1732661443,"loginName":"admin","mobile":"","name":"超级管理员","status":"1","statusDesc":"正常"},baseUrl:"http://192.168.1.110:8083", data:o};
+				// FIXME before save
+								
+				var json = mini.encode(ctx.data);
+				ctx.formData.data = json;
+				$.ajax({
+					url : ctx.saveUrl,
+					type : 'POST',
+					data : ctx.formData,
+					cache : false,
+					success : function(text) {
+						// FIXME after save
+												
+						CloseWindow("save");
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						// FIXME after save
+												
+						btnSave.setEnabled(true);
+						if (409 == jqXHR.status){
+							mini.showMessageBox({
+								title : "数据版本冲突",
+								message : jqXHR.responseText+"，获取最新数据？",
+								buttons : ["是", "否"],
+								iconCls : "mini-messagebox-question",
+								allowResize : true,
+					            callback: function (action) {            
+					                if (action == "是") {
+					                	var _data = mini.clone(o);
+					                	_data.action = "edit";
+					                	SetData(_data);
+					                } else if (action == "否"){
+					                	mini.showMessageBox({
+											title : "数据版本冲突",
+											message : "保留本地数据并提交覆盖最新数据？",
+											buttons : ["是", "否"],
+											iconCls : "mini-messagebox-question",
+											callback: function (action) {
+												if (action == "是") {
+																																							mini.getbyName("ignoreVersionConflict").setValue("true");
+					                				SaveData();
+					                																}
+											}
+										});
+				                	}
+					            }
+					        });						
+						} else {
+							//400,403,500错误已经统一在sys.js处理
+							if (400 != jqXHR.status && 403 != jqXHR.status && 500 != jqXHR.status) {
+								var text = "操作失败，" + jqXHR.responseText;
+								mini.alert(text);
+							}
+						}
+					}
+				});
+			}
+
+			////////////////////
+			//标准方法接口定义
+			function SetData(data) {
+				if(data.isRowSelected) {
+					//跨页面传递的数据对象，克隆后才可以安全使用
+					data = mini.clone(data);
+					$.ajax({
+						url : "http://192.168.1.110:8083/system/report/get/sec_issuer?invite_code=111&id=" + data.row.id,
+						cache : false,
+						success : function(text) {
+							var o = mini.decode(text);
+							o._g_row = data._g_row;
+							form.setData(o);
+							form.setChanged(false);
+							form.validate();
+						}
+					});
+				} else {
+					//跨页面传递的数据对象，克隆后才可以安全使用
+					data = mini.clone(data);
+					for (var _k in data._queryObj) {
+						if (typeof data[_k] == 'undefined') {
+						    data[_k] = data._queryObj[_k];
+						}
+					}
+					//alert("set data->"+JSON.stringify(data));
+					//处理默认值
+																																																																						form.setData(data);
+					form.setChanged(false);
+				}
+				if(data.action == 'get') {
+					var save_btn = mini.get('btn-save');
+					var cancel_btn = mini.get('btn-cancel');
+					save_btn.setVisible(false);
+					cancel_btn.setText('确定');
+					form.setEnabled(false);
+				}
+			}
+
+			function GetData() {
+				var o = form.getData();
+				return o;
+			}
+
+			function CloseWindow(action) {
+				if(action == "close" && form.isChanged()) {
+					if(confirm("数据被修改了，是否先保存？")) {
+						return false;
+					}
+				}
+				if(window.CloseOwnerWindow)
+					return window.CloseOwnerWindow(action);
+				else
+					window.close();
+			}
+
+			function onOk(e) {
+				SaveData();
+			}
+
+			function onCancel(e) {
+				CloseWindow("cancel");
+			}
+		</script>
+	</body>
+</html>

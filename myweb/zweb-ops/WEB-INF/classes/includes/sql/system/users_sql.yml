@@ -1,0 +1,29 @@
+Users: 
+  index: >
+    SELECT
+      t0.*
+    FROM
+      ${app.solidbase_catalog}.sys_user t0
+    WHERE 1=1
+      #if ($args[0].ids && $args[0].ids!="")
+      AND t0.id in ($args[0].ids)
+      #elseif ($args[0].keyword && $args[0].keyword!="")
+      AND t0.name like :%keyword% 
+      #end
+      
+      ORDER BY t0.name asc
+       
+      #if ($args[0].pageNo && $args[0].pageNo != "")
+      LIMIT  $args[0].fromIndex , $args[0].pageSize
+      #end
+  index_count: >
+    SELECT
+      COUNT(*)
+    FROM
+      ${app.solidbase_catalog}.sys_user t0
+    WHERE 1=1
+      #if ($args[0].ids && $args[0].ids!="")
+      AND t0.id in ($args[0].ids)
+      #elseif ($args[0].keyword && $args[0].keyword!="")
+      AND t0.name like :%keyword% 
+      #end

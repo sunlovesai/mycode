@@ -1,0 +1,50 @@
+Master:
+  list: > 
+    SELECT
+            
+        name,
+                  
+        enabled,
+                  
+        position,
+                  
+        gender,
+                  
+        birthday,
+                  
+        version,
+            
+        id
+    FROM
+        ${app.solidbase_catalog}.demo_master t0
+    WHERE 1=1
+          
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #elseif ($args[0].key && $args[0].key!="")
+        AND ( 1<>1
+            OR name like :%key% 
+        )
+        #else
+                   
+        #if ($args[0].name && $args[0].name!="") 
+        AND name like :%name% 
+        #end 
+                         
+        #if ($args[0].enableStatus && $args[0].enableStatus!="") 
+        AND enabled = :enableStatus
+        #end 
+                         
+        #if ($args[0].gender && $args[0].gender!="") 
+        AND gender = :gender
+        #end 
+                     
+        #if ($args[0].birthdayStart && $args[0].birthdayStart!="") 
+        AND birthday >= :birthdayStart
+        #end 
+        
+        #if ($args[0].birthdayEnd && $args[0].birthdayEnd!="") 
+        AND birthday <= :birthdayEnd
+        #end 
+                
+        #end

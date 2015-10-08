@@ -1,0 +1,354 @@
+﻿<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>ZWeb SolidBase</title>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<link rel="shortcut icon" type="image/x-icon" href="${base_url}/images/${site}/fav.ico">
+		<script type="text/javascript">
+			var base_url = "${base_url}";
+		</script>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+		<script src="${base_url}/js/core.js" type="text/javascript"></script>
+		<style type="text/css">
+			html, body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+			.header {
+				background: url(${base_url}/images/header.gif) repeat-x;
+			}
+			.header div {
+				font-family: 'Trebuchet MS', Arial, sans-serif;
+				font-size: 14px;
+				padding-left: 10px;
+				font-weight: bold;
+				color: #333;
+			}
+			body .header .topNav {
+				position: absolute;
+				right: 5px;
+				top: 10px;
+				font-size: 12px;
+				line-height: 25px;
+			}
+			.header .topNav a {
+				text-decoration: none;
+				color: #222;
+				font-weight: normal;
+				font-size: 12px;
+				line-height: 25px;
+				margin-left: 3px;
+				margin-right: 3px;
+			}
+			.header .topNav a:hover {
+				text-decoration: underline;
+				color: Blue;
+			}
+			.mini-layout-region-south img {
+				vertical-align: top;
+			}
+		</style>
+	</head>
+	<body>
+
+		<!--Layout-->
+		<div id="layout1" class="mini-layout" style="width:100%;height:100%;">
+			<div class="header" region="north" height="50" showSplit="false" showHeader="false">
+				<div class="logo">
+					<img src="${base_url}/images/zweb-logo.png" height="30" style="margin:10px 0 0 -15px;" />
+				</div>
+				<div class="topNav">
+					#if($isLogin)
+					<a class="mini-button editable" plain="true">当前用户：<b>$!{loginUser.name}</b>#if($loginUser.tenant)&nbsp;&nbsp;机构：$!{loginUser.tenant.name}#end</a>| 
+					<a class="mini-button" plain="true" onclick="change_profile">个人信息</a>| 
+					<a id="change_pwd_btn" class="mini-button" plain="true" onclick="change_pwd">修改密码</a>|
+					#if($zwall.isSuper())<a class="mini-button" plain="true" onclick="change_user">切换用户</a>|#end
+					#if($open_multi_tenant == 1 && $TenantService.canChangeTenant($loginUser.loginName))<a class="mini-button" plain="true" onclick="change_tenant">切换机构</a>|#end
+					<a class="mini-button logout" href="${base_url}/system/user/logout" plain="true" >退出</a>
+					#else
+					<a class="mini-button" plain="true" href="${base_url}/login">登录</a>
+					#end
+				</div>
+			</div>
+			<div title="south" region="south" showSplit="false" showHeader="false" height="30" >
+				<div style="line-height:28px;text-align:center;cursor:default">
+					Copyright © ZWeb Framework 版权所有
+				</div>
+			</div>
+			<div title="center" region="center" style="border:0;" bodyStyle="overflow:hidden;">
+				<!--Splitter-->
+				<div class="mini-splitter" style="width:100%;height:100%;" borderStyle="border:0;">
+					<div size="160" maxSize="250" minSize="100" showCollapseButton="true" style="border:0;">
+						<!--OutlookTree-->
+						<div id="leftTree" contextMenu="#treeMenu" class="mini-outlooktree" url="${base_url}/system/menu/tree" onnodeclick="onNodeSelect"
+						textField="name" idField="id" parentField="pid"
+						></div>
+						<ul id="treeMenu" class="mini-contextmenu"  onbeforeopen="onTreeBeforeOpen">
+							<li iconCls="icon-reload" onclick="refreshLeftTree">
+								刷新菜单
+							</li>
+						</ul>
+					</div>
+					<div showCollapseButton="false" style="border:0;">
+						<!--Tabs-->
+						<div id="mainTabs" class="mini-tabs" activeIndex="0" style="width:100%;height:100%;"
+						contextMenu="#tabsMenu"
+						plain="false" onactivechanged="onTabsActiveChanged"
+						>
+							<div name="first" title="首页" url="${base_url}/welcome" ></div>
+						</div>
+						<ul id="tabsMenu" class="mini-contextmenu" onbeforeopen="onBeforeOpen">
+							<li iconCls="icon-reload" onclick="reloadTab">
+								刷新当前
+							</li>
+							<li iconCls="icon-close" onclick="closeTab">
+								关闭当前
+							</li>
+							<li iconCls="icon-close" onclick="closeAll">
+								关闭所有
+							</li>
+							<li iconCls="icon-close" onclick="closeAllButFirst">
+								关闭其他
+							</li>
+							<li iconCls="icon-addnew" onclick="openBlank">
+								新窗口打开
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script type="text/javascript">
+			mini.parse();
+			var leftTree = mini.get("leftTree");
+			var tabs = mini.get("mainTabs");
+			var currentTab = null;
+			function onTreeBeforeOpen(e) {
+				e.cancel = false;
+			}
+
+			function refreshLeftTree() {
+				leftTree.load(leftTree.url);
+			}
+
+			function onBeforeOpen(e) {
+				currentTab = tabs.getTabByEvent(e.htmlEvent);
+				if(!currentTab) {
+					e.cancel = true;
+				}
+			}
+			
+			//隐藏掉左侧菜单那些没有任何叶子的父菜单
+			var hideNodes = function() {
+				leftTree.findNodes(function(parent){
+					var name = parent.name;
+					if (!parent.isLeaf) {
+						var hasChild = false;
+						leftTree.findNodes(function(node){
+							if (node.id != parent.id && node.isLeaf) {
+								if (node.pidPath) {
+									$.each(node.pidPath.split(","), function(i){
+										if (this == parent.id) {
+											hasChild = true;
+											return;
+										}
+									});
+								}
+							}
+						});
+						if (!hasChild) {
+							parent.visible = false;
+						}
+					}
+				});
+			}
+			hideNodes();
+			function refreshLeftTree() {
+				leftTree.load(leftTree.url);
+				hideNodes();
+			}
+
+			function onBeforeOpen(e) {
+				currentTab = tabs.getTabByEvent(e.htmlEvent);
+				if(!currentTab) {
+					e.cancel = true;
+				}
+			}
+
+			///////////////////////////
+			function reloadTab() {
+				tabs.reloadTab(currentTab);
+			}
+
+			function closeTab() {
+				tabs.removeTab(currentTab);
+			}
+
+			function closeAllBut() {
+				tabs.removeAll(currentTab);
+			}
+
+			function closeAll() {
+				tabs.removeAll();
+			}
+
+			function closeAllButFirst() {
+				var but = [currentTab];
+				but.push(tabs.getTab("first"));
+				tabs.removeAll(but);
+			}
+			function openBlank() {
+				var url = currentTab.url;
+				window.open(url);
+			}
+
+			var tree = mini.get("leftTree");
+
+			function showTab(node) {
+				var id = "tab$" + node.id;
+				var tab = tabs.getTab(id);
+				if(!tab) {
+					tab = {};
+					tab._nodeid = node.id;
+					tab.name = id;
+					tab.title = node.text;
+					tab.showCloseButton = true;
+					tab.url = node.url;
+					tabs.addTab(tab);
+				}
+				tabs.activeTab(tab);
+			}
+
+			function onNodeSelect(e) {
+				var node = e.node;
+				var isLeaf = e.isLeaf;
+				if(isLeaf) {
+					showTab(node);
+					zweb.changeUrl("/?path=" + node.link);
+				}
+			}
+
+			function onClick(e) {
+				var text = this.getText();
+			}
+
+			function onQuickClick(e) {
+				tree.expandPath("datagrid");
+				tree.selectNode("datagrid");
+			}
+
+			function onTabsActiveChanged(e) {
+				var tabs = e.sender;
+				var tab = tabs.getActiveTab();
+				if(tab && tab._nodeid) {
+					var node = tree.getNode(tab._nodeid);
+					tree.findNodes(function(node){
+					    if(node.id == tab._nodeid){
+					    	tree.selectNode(node);
+						    return true;
+						}
+					});
+				}
+			}
+
+			function change_profile() {
+				mini.open({
+					url : "${base_url}/system/user/change_profile",
+					title : "修改个人资料",
+					width : 330,
+					height : 280,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+						var data = {
+							action : "edit",
+							id : "${loginUser.id}"
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+					}
+				});
+			}
+
+			function change_user() {
+				mini.open({
+					url : "${base_url}/system/user/change_user",
+					title : "切换用户",
+					width : 330,
+					height : 250,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+						var data = {
+							action : "edit"
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						if (action == "reload") {
+							window.location.reload();
+						}
+					}
+				});
+			}
+
+			function change_tenant() {
+				mini.open({
+					url : "${base_url}/system/user/change_tenant",
+					title : "切换机构",
+					width : 330,
+					height : 250,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+						var data = {
+							action : "edit"
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						if (action == "reload") {
+							window.location.reload();
+						}
+					}
+				});
+			}
+
+			#if($isMustChangePwd)
+			var cp_btn = mini.get("change_pwd_btn");
+			var msg = "您现在使用的是系统分配的初始密码，现在修改密码?";
+			mini.confirm(msg, "系统提示",
+				function (action) {
+					if (action != "ok") return;
+					cp_btn.doClick();
+				}
+			);
+			#end
+
+			function change_pwd() {
+				mini.open({
+					url : "${base_url}/system/user/change_pwd",
+					title : "修改密码",
+					width : 330,
+					height : 250,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+						var data = {
+							action : "edit",
+							id : "${loginUser.id}"
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						if (action == "reload") {
+							window.location.reload();
+						}
+					}
+				});
+			}
+		</script>
+	</body>
+</html>

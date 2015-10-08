@@ -1,0 +1,5 @@
+																																				
+序号,所属资源,允许操作,策略名称,用户规则,数据规则
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,,
+${status.index+1},${item.resource.name},${item.allowOperations},${item.name},${item.who.name},${item.data.name}
+</jx:forEach>,,,,,

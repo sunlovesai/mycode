@@ -1,0 +1,50 @@
+includes: 
+  - includes/plugins.yml
+  - includes/scaffold.yml
+listeners: 
+  - system.listener.AppStarter
+  - system.listener.MultiDSInit
+  - system.listener.SqlLogListener
+  - system.listener.TransactionListener
+app: 
+  mode: dev
+  root: "${root}/src/main/webapp"
+  name: zweb
+  solidbase_catalog: public
+  spider_catalog: public
+  ops_catalog: ops
+  cookie: __appid__
+  secret: ef0e4b32-a6ee-4d33-ab72-1434d4c0ac03
+  #dynamic_cookie: 1
+  multi_tenant: 0
+  #scan_jars:
+  #  - .*
+  classpath: 
+    - "D:/workspace/zweb-framework/zweb-solidbase-java/target/classes"
+    - "D:/workspace/buttonwood/zweb-ops-java/target/classes" 
+zwall: 
+  superUser: admin
+  who: system.user.User
+  role: system.role.Role
+  dept: system.dept.Dept
+cache: 
+  enabled: 1
+mvc: 
+  http: 
+    headers: 
+      Access-Control-Allow-Origin: *
+      Access-Control-Allow-Headers: "Origin, X-Request-With, Content-Type, Accept"
+  template: 
+    path: /WEB-INF/templates/
+  interceptor: 
+    include: includes/interceptors.yml
+  exception_handler: net.zweb.core.mvc.SimpleExceptionHandler
+db: 
+  sql: 
+    includes: 
+      - includes/sql/*
+  dataSources: 
+    default: 
+      url: "jdbc:mysql://192.168.1.110:3306/public?rewriteBatchedStatements=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull"
+      user: root
+      pwd: toor

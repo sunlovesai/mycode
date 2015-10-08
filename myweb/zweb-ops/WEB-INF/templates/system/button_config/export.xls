@@ -1,0 +1,5 @@
+																																																				
+序号,所属报表,按钮名,显示文本,是否启用,功能类型,请求路径,图标,排序
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,,,,,
+${status.index+1},${item.reportConfig.title},${item.name},${item.text},${item.isEnabled},${item.typeDesc},${item.uri},${item.iconClass},${item.sort}
+</jx:forEach>,,,,,,,,

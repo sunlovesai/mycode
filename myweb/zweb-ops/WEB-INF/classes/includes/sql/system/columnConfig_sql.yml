@@ -1,0 +1,15 @@
+ColumnConfig:
+  list: > 
+    SELECT
+        *
+    FROM
+        ${app.solidbase_catalog}.sys_column_config t0
+    WHERE 1=1
+              
+        #if ($args[0].reportConfig && $args[0].reportConfig!="")
+        AND report_config_id = :reportConfig
+        #end
+          
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #end

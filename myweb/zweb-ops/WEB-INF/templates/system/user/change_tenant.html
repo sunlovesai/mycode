@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>切换机构</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+		<style type="text/css">
+			html, body {
+				font-size: 12px;
+				padding: 0;
+				margin: 0;
+				border: 0;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="mini-panel" style="width:100%;height:100%;"
+			showToolbar="true" showHeader="false" showCloseButton="false" showFooter="true"
+		>
+			<div property="footer" style="">
+				<div style="text-align:center;padding:5px 3px 8px 3px;">
+					<a class="mini-button" onclick="onOk" style="width:60px;margin-right:15px;">确定</a>
+					<a class="mini-button" onclick="onCancel" style="width:60px;">取消</a>
+				</div>
+			</div>
+			<form id="change-user-form" method="post" style="padding:15px;">
+				<table style="table-layout:fixed;">
+					<tr>
+						<td style="width:120px;">
+							<label for="tenantCode$text">切换到哪个机构：</label>
+						</td>
+						<td style="width:160px">
+							<input id="tenantCode" name="tenantCode" style="width:150px" class="mini-combobox" textField="name" valueField="code" emptyText="请选择机构..."
+								url="${base_url}/system/tenant/options?loginName=$!{loginUser.loginName}" onvaluechanged="onTenantChange" />     
+						</td>
+					</tr>
+					<tr>
+						<td style="width:120px;">切换到账号：</td>
+						<td style="width:160px;">
+							<input style="width:150px;" enabled="false" required="true" class="mini-textbox" name="to.loginName" />
+						</td>
+					</tr>
+					<tr>
+						<td style="width:120px;">该用户ID：</td>
+						<td style="width:160px;">
+							<input style="width:150px;" name="to.id" class="mini-textbox" enabled="false"/>
+						</td>
+					</tr>
+					<tr>
+						<td style="width:120px;">该用户姓名：</td>
+						<td style="width:160px;">
+							<input style="width:150px;" name="to.name" class="mini-textbox" enabled="false"/>
+						</td>
+					</tr>
+					<tr>
+						<td style="width:120px;">当前登录者密码：</td>
+						<td style="width:160px;">
+							<input style="width:150px;" class="mini-password" name="pwd" required="true" />
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
+		<script type="text/javascript">
+			mini.parse();
+
+			var form = new mini.Form("change-user-form");
+			var el = mini.getbyName("to.loginName");
+			zweb.onESC(form.el, el, function(){
+				CloseWindow("close")
+			});
+			zweb.onEnter(form.el, el, function(){
+				SaveData()
+			});
+			
+			mini.getbyName("tenantCode").select(0);
+			
+			function onTenantChange(e) {
+				var _tenantCode = "$loginUser.tenant.code";
+	            var loginName = "$loginUser.loginName";
+	            loginName = loginName.replace(_tenantCode+"_", "");
+	            var tenantCode = mini.getbyName("tenantCode").getFormValue();
+	            loginName = tenantCode + "_" + loginName;
+	            mini.getbyName("to.loginName").setValue(loginName);
+	            $.ajax({
+					url : "${base_url}/system/user/get_by_login_name?loginName="+loginName,
+					success : function(json) {
+						if (json) {
+							var user = mini.decode(json);
+							var o = form.getData();
+							o.to = user;
+							form.setData(o);
+							form.setChanged(false);
+							form.validate();
+						} else {
+							mini.alert("该用户登录名异常");
+						}
+					},
+					error : function() {
+						mini.alert("该用户登录名异常");
+					}
+				});
+	        }
+	        
+			function SaveData() {
+				var o = form.getData();
+
+				form.validate();
+				if(form.isValid() == false)
+					return;
+
+				$.ajax({
+					url : "${base_url}/system/user/change_user",
+					type : 'post',
+					data : {
+						uid : o.to.id,
+						confirm_pwd : o.pwd
+					},
+					cache : false,
+					success : function(text) {
+						mini.alert("切换用户成功!", "提示",
+				            function () {
+				            	CloseWindow("reload");
+				            }
+				        );
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						//400,403,500错误已经统一在sys.js处理
+						if(400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+							return;
+						var text = "操作失败，" + jqXHR.responseText;
+						mini.alert(text);
+					}
+				});
+			}
+
+			////////////////////
+			//标准方法接口定义
+			function SetData(data) {
+				onTenantChange();
+			}
+
+			function GetData() {
+				var o = form.getData();
+				return o;
+			}
+
+			function CloseWindow(action) {
+				if(action == "close" && form.isChanged()) {
+					if(confirm("数据被修改了，是否先保存？")) {
+						return false;
+					}
+				}
+				if(window.CloseOwnerWindow)
+					return window.CloseOwnerWindow(action);
+				else
+					window.close();
+			}
+
+			function onOk(e) {
+				SaveData();
+			}
+
+			function onCancel(e) {
+				CloseWindow("cancel");
+			}
+			
+		</script>
+	</body>
+</html>

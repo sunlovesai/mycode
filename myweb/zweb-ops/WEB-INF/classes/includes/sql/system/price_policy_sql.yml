@@ -1,0 +1,20 @@
+PricePolicy:
+  list: > 
+    SELECT
+        name,
+        unit,
+        price,
+        id
+    FROM
+        ${app.name}_solidbase_db.sys_price_policy t0
+    WHERE 1=1
+          
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #elseif ($args[0].key && $args[0].key!="")
+        AND ( 1<>1
+                      
+        )
+        #else
+          
+        #end

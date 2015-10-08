@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans>
+	<targets>
+		<!-- 目标一：抓取企业基本信息 -->
+		<target name="jibenxinxi">
+			<model>
+				<!-- 注册号 -->
+				<field name="ent_reg_no" isTrim="1">
+					<parsers>
+						<parser xpath="//span[@id='infoUC_RegInfo_SSDJYXZRGS_EntRegNO']/text()" />
+					</parsers>
+				</field>
+				<!-- 企业名 -->
+				<field name="ent_name" isTrim="1">
+					<parsers>
+						<parser xpath="//span[@id='infoUC_RegInfo_SSDJYXZRGS_EntName1']/text()" />
+					</parsers>
+				</field>
+				<!-- 企业类型 -->
+				<field name="ent_name" isTrim="1">
+					<parsers>
+						<parser xpath="//span[@id='infoUC_RegInfo_SSDJYXZRGS_EntTypeCode1']/text()" />
+					</parsers>
+				</field>
+				<!-- 法定代表人 -->
+				<field name="legal_name" isTrim="1">
+					<parsers>
+						<parser xpath="//span[@id='infoUC_RegInfo_SSDJYXZRGS_Name1']/text()" />
+					</parsers>
+				</field>
+				<!-- 注册资本 -->
+				<field name="reg_cap" isTrim="1">
+					<parsers>
+						<parser xpath="//span[@id='infoUC_RegInfo_SSDJYXZRGS_RegCap1']/text()" />
+					</parsers>
+				</field>
+				<!-- 成立日期 -->
+				<field name="est_date" isTrim="1">
+					<parsers>
+						<parser xpath="//span[@id='infoUC_RegInfo_SSDJYXZRGS_EstDate1']/text()" />
+					</parsers>
+				</field>
+				<!-- 住所 -->
+				<field name="addr" isTrim="1">
+					<parsers>
+						<parser xpath="//span[@id='infoUC_RegInfo_SSDJYXZRGS_Addr1']/text()" />
+					</parsers>
+				</field>
+				<!-- 营业期限自 -->
+				<field name="op_from_date" isTrim="1">
+					<parsers>
+						<parser xpath="//span[@id='infoUC_RegInfo_SSDJYXZRGS_OpFromDate1']/text()" />
+					</parsers>
+				</field>
+				<!-- 营业期限至 -->
+				<field name="op_to_date" isTrim="1">
+					<parsers>
+						<parser xpath="//span[@id='infoUC_RegInfo_SSDJYXZRGS_OpToDate1']/text()" />
+					</parsers>
+				</field>
+				<!-- 登记机关 -->
+				<field name="dept_name" isTrim="1">
+					<parsers>
+						<parser xpath="//span[@id='infoUC_RegInfo_SSDJYXZRGS_DeptName1']/text()" />
+					</parsers>
+				</field>
+				<!-- 核准日期 -->
+				<field name="auth_date" isTrim="1">
+					<parsers>
+						<parser xpath="//span[@id='infoUC_RegInfo_SSDJYXZRGS_AuthDate1']/text()" />
+					</parsers>
+				</field>
+				<!-- 经营状态 -->
+				<field name="ent_status" isTrim="1">
+					<parsers>
+						<parser xpath="//span[@id='infoUC_RegInfo_SSDJYXZRGS_EntStatusCode1']/text()" />
+					</parsers>
+				</field>
+			</model>
+		</target>
+		<!-- 目标二投资人信息 -->
+		<target name="touzirenxinxi">
+			<model xpath="//div[@id='jibenxinxi']//table[2]//tbody//tr" isArray="1">
+				<!-- 投资人类型 -->
+				<field name="type" isTrim="1">
+					<parsers>
+						<parser xpath="td[1]/text()" />
+					</parsers>
+				</field>
+				<!-- 投资人 -->
+				<field name="name" isTrim="1">
+					<parsers>
+						<parser xpath="td[2]/text()" />
+					</parsers>
+				</field>
+				<!-- 证照类型-->
+				<field name="cert_type" isTrim="1">
+					<parsers>
+						<parser xpath="td[3]/text()" />
+					</parsers>
+				</field>
+				<!-- 证照号码 -->
+				<field name="cert_no" isTrim="1">
+					<parsers>
+						<parser xpath="td[4]/text()" />
+					</parsers>
+				</field>
+				<!-- 详情地址 -->
+				<field name="detail_url" isTrim="1">
+					<parsers>
+						<parser xpath="td[5]//a[@href]" attribute="href" />
+						<parser exp="'http://www.szcredit.com.cn/web/GSZJGSPT/'+$this" />
+					</parsers>
+				</field>
+			</model>
+		</target>
+		<!-- 目标三 投资人信息详情 -->
+		<target name="touziren_detail" url="exp:touzirenxinxi.detail_url">
+			<model>
+				<!-- 股东 -->
+				<field name="sh_name1" isTrim="1">
+					<parsers>
+						<parser xpath="//span[@id='SHName1']/text()" />
+					</parsers>
+				</field>
+				<!-- 认缴额（万元） -->
+				<field name="cap_amt1" isTrim="1">
+					<parsers>
+						<parser xpath="//span[@id='CapAmt1']/text()" />
+					</parsers>
+				</field>
+				<!-- 认缴出资方式 -->
+				<field name="inv_model1" isTrim="1">
+					<parsers>
+						<parser xpath="//span[@id='InvMode1']/text()" />
+					</parsers>
+				</field>
+			</model>
+		</target>
+	</targets>
+</beans>

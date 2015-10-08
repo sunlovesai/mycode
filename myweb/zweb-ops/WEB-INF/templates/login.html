@@ -1,0 +1,121 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>Login</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<style type="text/css">
+			body {
+				width: 100%;
+				height: 100%;
+				margin: 0;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+
+	</head>
+	<body >
+		<div id="loginWindow" class="mini-window" title="用户登录" style="width:300px;height:180px;" showModal="true" showCloseButton="false" >
+
+			<div id="loginForm" style="padding:15px;padding-top:10px;">
+				<table >
+					#if($open_multi_tenant == 1)
+					<tr>
+						<td style="width:60px;">
+							<label for="tenantCode$text">机构：</label>
+						</td>
+						<td>
+							<input id="tenantCode" name="tenantCode" style="width:180px" class="mini-combobox" textField="name" valueField="code" emptyText="请选择机构..."
+								url="${base_url}/system/tenant/options" showNullItem="true" />     
+						</td>
+					</tr>
+					#end
+					<tr>
+						<td style="width:60px;">
+							<label for="username$text">帐号：</label>
+						</td>
+						<td>
+							<input id="username" name="username" class="mini-textbox" value="demo" required="true" style="width:180px;" onenter="onLoginClick"/>
+						</td>
+					</tr>
+					<tr>
+						<td style="width:60px;">
+							<label for="pwd$text">密码：</label>
+						</td>
+						<td>
+							<input id="pwd" name="pwd" class="mini-password" value="1" requiredErrorText="密码不能为空" required="true" style="width:180px;" onenter="onLoginClick"/>
+						</td>
+					</tr>
+					<tr>
+						<td></td>
+						<td style="padding-top:5px;">
+							<a onclick="onLoginClick" class="mini-button" style="width:60px; margin-right:10px;">登录</a>
+							<a onclick="onResetClick" class="mini-button" style="width:60px;">重置</a>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+		</div>
+
+		<script type="text/javascript">
+			mini.parse();
+
+			var loginWindow = mini.get("loginWindow");
+			loginWindow.show();
+			#if($open_multi_tenant == 1)
+			mini.get("tenantCode").select(1);
+			#end
+			function onLoginClick(e) {
+				var form = new mini.Form("#loginWindow");
+				form.validate();
+				if(form.isValid() == false)
+					return;
+				var data = form.getData();
+				form.loading("登录中...","提示");
+				var loginName = data.username;
+				if (data.tenantCode && data.tenantCode != '') {
+					loginName = data.tenantCode + "_" + loginName;
+				}
+				// 加密
+				/*
+				var exponent = "${exponent}";
+				var modulus = "${modulus}";
+				var key = RSAUtils.getKeyPair(exponent, '', modulus);
+				var ln = RSAUtils.encryptedString(key, loginName);
+				var lp = RSAUtils.encryptedString(key, data.pwd);
+				*/
+				var ln = loginName;
+				var lp = data.pwd;
+				$.ajax({
+					url : "${base_url}/system/user/login",
+					type : 'post',
+					data : {
+						loginName : ln,
+						pwd : lp,
+					},
+					cache : false,
+					success : function(text) {
+						loginWindow.hide();
+						form.unmask();
+						mini.loading("登录成功，马上转到系统...", "登录成功");
+						setTimeout(function() {
+							window.location = "${base_url}/index";
+						}, 500);
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						mini.alert(jqXHR.responseText);
+						form.unmask();
+					}
+				});
+			}
+
+			function onResetClick(e) {
+				var form = new mini.Form("#loginWindow");
+				form.clear();
+			}
+		</script>
+
+	</body>
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+#set($mainDeptFlag = $P.param('mainDeptFlag','false'))
+#if($mainDeptFlag=='true')
+   #set($mainDept='/main_dept')  
+ #else 
+  #set($mainDept='')
+#end 
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title>选择用户</title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+	</head>
+	<body>
+	<div class="mini-panel" style="width:100%;height:100%;"
+		showToolbar="true" showHeader="false" showCloseButton="false" showFooter="true"
+		>
+			<div property="footer" style="">
+				<div style="text-align:center;padding:4px 3px 4px 3px;">
+					<a class="mini-button" onclick="onOk" style="width:60px;margin-right:15px;">确定</a>
+					<a class="mini-button" onclick="onCancel" style="width:60px;">取消</a>
+				</div>
+			</div>
+			<div class="mini-splitter" style="width:100%;height:100%;">
+				<div size="215">
+					<div class="mini-toolbar" style="padding:4px 2px 4px 5px;border-top:0;border-left:0;border-right:0;">
+						<input id="deptName" style="width:118px;" emptyText="部门名称" class="mini-textbox" onenter="searchTree()" />
+						<a class="mini-button" iconCls="icon-search" onclick="searchTree()">过滤部门</a>
+					</div>
+					<div class="mini-fit">
+						<ul id="tree1" class="mini-tree" url="${base_url}/system/dept/list" style="width:100%; height:490px;"
+							showTreeIcon="true" textField="name" idField="id" parentField="pid" resultAsTree="false"
+						></ul>
+					</div>
+				</div>
+				
+				<div>
+					<div class="mini-splitter" style="width:100%;height:100%;">
+						<div size="400">
+							<div class="mini-toolbar" style="border-bottom:0;padding:0px;">
+								<table style="width:100%;">
+									<tr>
+										<td style="width:100%;">
+											<input id="key" class="mini-textbox" emptyText="登陆名/姓名" style="width:150px;" onenter="onKeyEnter"/>
+											<a class="mini-button" iconCls="icon-search" onclick="search()">查询</a>
+										</td>
+										<td style="white-space:nowrap;">
+											
+										</td>
+									</tr>
+								</table>
+							</div>
+							<div class="mini-fit">
+								<div id="datagrid1" class="mini-datagrid" style="width:100%;height:100%;" allowResize="false"
+									url="${base_url}/system/user/list${mainDept}"  idField="id" multiSelect="true" sortMode="client"
+									sizeList="[20,30,50,100,200,300,500]" pageSize="20" onrowclick="add()"
+								>
+									<div property="columns">
+										<div type="indexcolumn" field="indexcolumn" align="right" width="30"></div>
+										<div type="checkcolumn" width="25"></div>
+										<div field="name" width="100%" headerAlign="center" allowSort="true">
+											姓名
+										</div>
+										<div field="loginName" width="70" headerAlign="center" allowSort="true">
+											登录名
+										</div>
+										<div field="dept" displayField="dept.name" width="150" headerAlign="center" allowSort="true">
+											主部门
+										</div>
+										<div field="status" displayField="statusDesc" width="40" align="center" headerAlign="center" allowSort="true">
+											状态
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div>
+							<div class="mini-splitter" style="width:100%;height:100%;">
+								<div size="80">
+									<div style="padding:5px; padding-top:180px;">
+										<center>
+										<div style="padding-bottom:5px;">
+						                	<a class="mini-button" onclick="add()" style="width:40px;">&gt;</a>
+						               	</div>
+						               	<div style="padding-bottom:5px;">
+						                	<a class="mini-button" onclick="addAll()" style="width:40px;">&gt;&gt;</a>
+						                </div>
+						                <div style="padding-bottom:5px;">
+						                	<a class="mini-button" onclick="removeAll()" style="width:40px;">&lt;&lt;</a>
+						                </div>
+						                <div style="padding-bottom:5px;">
+						                	<a class="mini-button" onclick="removes()" style="width:40px;">&lt;</a>
+						                </div>
+										</center>
+									</div>
+								</div>
+								<div>
+									<div class="mini-toolbar" style="border-bottom:0;padding:0px;">
+										<table style="width:100%;">
+											<tr>
+												<td style="width:100%;">
+													<input id="client_filter_key" class="mini-textbox" emptyText="登陆名/姓名" style="width:120px;" onenter="onClientFilter"/>
+													<a class="mini-button" iconCls="icon-search" onclick="onClientFilter()">查询</a>
+												</td>
+												<td style="white-space:nowrap;">
+													
+												</td>
+											</tr>
+										</table>
+					
+									</div>
+									<div class="mini-fit">
+										<div id="datagrid2" class="mini-datagrid" style="width:100%;height:100%;" allowResize="false"
+											idField="id" multiSelect="true" sortMode="client" showPager="false" onrowdblclick="removes()"
+										>
+											<div property="columns">
+												<div type="indexcolumn" field="indexcolumn" align="right" width="30"></div>
+												<div type="checkcolumn" width="25"></div>
+												<div field="name" width="100%" headerAlign="center" allowSort="true">
+													姓名
+												</div>
+												<div field="loginName" width="70" headerAlign="center" allowSort="true">
+													登录名
+												</div>
+												<div field="status" displayField="statusDesc" width="40" align="center" headerAlign="center" allowSort="true">
+													状态
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			mini.parse();
+			
+			var tree = mini.get("tree1");
+			var grid = mini.get("datagrid1");
+			grid.on("drawcell", function(e){
+	        	if (e.field == "indexcolumn") {
+	                e.cellStyle = "background:#ecedef";
+	            }
+	        });
+	        
+			var grid2 = mini.get("datagrid2");
+			grid2.on("drawcell", function(e){
+	        	if (e.field == "indexcolumn") {
+	                e.cellStyle = "background:#ecedef";
+	            }
+	        });
+			
+			function expandTree() {
+				var root = tree.getRootNode();
+				var nodes = tree.getChildNodes(root);
+				$.each(nodes, function(i){
+					var nodes2 = tree.getChildNodes(this);
+					tree.expandNode(this);
+					$.each(nodes2, function(i2){
+						tree.loadNode(this)
+					});
+				});
+			}
+			
+			tree.on("nodeselect", function(e) {
+				var key = mini.get("key").getValue();
+				ReloadUser({
+					deptId : e.node.id,
+					key : key
+				});
+			});
+			
+			grid.load();
+			expandTree();
+			
+			function search() {
+				var key = mini.get("key").getValue();
+				try {
+					var deptId = tree.getSelectedNode().id;
+				} catch (e){
+					var deptId = 0;
+				}
+				ReloadUser({
+					key : key,
+					deptId : deptId
+				});
+			}
+			
+			function searchTree() {
+				var deptName = mini.get("deptName").getValue();
+				tree.load({
+					deptName : deptName
+				});
+				expandTree();
+			}
+
+			function onKeyEnter(e) {
+				search();
+			}
+			
+			function onClientFilter() {
+				var key = mini.get("client_filter_key").getValue();
+				grid2.filter(function (row) {
+	                var name = String(row.name).toLowerCase();
+	                if (name.indexOf(key) != -1) return true;
+	                var loginName = String(row.loginName).toLowerCase();
+	                if (loginName.indexOf(key) != -1) return true;
+	                var email = String(row.email).toLowerCase();
+	                if (email.indexOf(key) != -1) return true;
+	                return false;
+	            });
+			}
+			
+		    function GetData() {
+		        var selecteds = grid2.getData();
+		        return mini.clone(selecteds);
+		    }
+		    
+		    function SetData(data) {
+		        var items = mini.clone(data);
+	            grid2.addRows(items, 0);
+	            
+	            ReloadUser();
+		    }
+		    
+		    function ReloadUser(p) {
+		    	var params = p || {};
+		    	var items = grid2.getData();
+		    	grid.load(params, function(){
+					
+				});
+				grid.sortBy("id", "desc");
+		    }
+		    
+		    function SetDataUrl(url) {
+		    	grid2.load(url);
+		    }
+
+			//////////////////////////////////
+			function CloseWindow(action) {
+				if(window.CloseOwnerWindow)
+					return window.CloseOwnerWindow(action);
+				else
+					window.close();
+			}
+
+			function onOk() {
+				CloseWindow("ok");
+			}
+
+			function onCancel() {
+				CloseWindow("cancel");
+			}
+			
+           	///////////////
+	        function add() {
+	            var items = grid.getSelecteds();
+	            _move_items(items);
+	        }
+	        
+	        function addAll() {
+	        	var items = grid.getData();
+	            _move_items(items);
+	        }
+	        
+	        function _move_items(items) {
+	        	var _items = mini.clone(items);
+	            var data = grid2.getData();
+	            var rows = [];
+	            $.each(_items, function(i){
+	            	var row = this;
+	            	var ok = true;
+	            	$.each(data, function(i){
+						if (row.loginName == this.loginName){
+							ok = false;
+							return;
+						}
+					});
+					if (ok) {
+						rows.push(row);
+					}
+	            });
+	            grid2.addRows(rows,0);
+	          	//grid.removeRows(selecteds);
+	        }
+	        function removes() {
+	            var selecteds = grid2.getSelecteds();
+	            var items = mini.clone(selecteds);
+	            grid2.removeRows(selecteds);
+	            //grid.addRows(items,0);
+	        }
+	        function removeAll() {
+	        	var selecteds = grid2.getData();
+	            var items = mini.clone(selecteds);
+	            grid2.removeRows(selecteds);
+	            //grid.addRows(items,0);
+	        }
+		</script>
+	</body>
+</html>

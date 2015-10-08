@@ -1,0 +1,331 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>变量编辑面板</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+		<style type="text/css">
+			html, body {
+				font-size: 12px;
+				padding: 0;
+				margin: 0;
+				border: 0;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="mini-panel" style="width:100%;height:100%;"
+		showToolbar="true" showHeader="false" showCloseButton="false" showFooter="true"
+		>
+			<div property="footer" style="">
+				<div style="text-align:center;padding:5px 3px 8px 3px;">
+					<a class="mini-button" id="btn-save" onclick="onOk" style="width:60px;margin-right:15px;">确定</a>
+					<a class="mini-button" onclick="onCancel" style="width:60px;">取消</a>
+				</div>
+			</div>
+			<form id="edit-variable-form" method="post" style="padding:15px 15px 15px 5px;">
+				<input name="id" class="mini-hidden" />
+				<fieldset id="script_tips" style="display:none; border:solid 1px #aaa;padding:3px; margin-bottom:5px;">
+					<legend >
+						提示：
+					</legend>
+					<div style="padding: 2px 10px 10px 10px; color: green; font-weight:bold;">
+						<li>在脚本里可以直接使用以下对象：</li>
+						<li>${who} - 当前登录用户对象。${who.xxx}来取得用户属性</li>
+						<li>${ctx} - 上下文数据，键值对。${ctx.xxx}来取得上下文属性</li>
+					</div>
+				</fieldset>
+				<fieldset style="border:solid 1px #aaa;padding:3px; margin-bottom:5px;">
+					<legend >
+						变量信息
+					</legend>
+					<div style="padding:5px;">
+						<table style="table-layout:fixed;">
+							<tr>
+								<td style="width:80px;">类型：</td>
+								<td style="width:470px;">
+								<input style="width:450px;" id="type" onvaluechanged="onVarTypeChange" enabled="true" class="mini-combobox" data='[{"text":"固定值","value":"fixed"},{"text":"用户属性","value":"who"},{"text":"上下文属性","value":"ctx"},{"text":"数据查询","value":"query"},{"text":"二元计算式","value":"bin_calc"},{"text":"脚本","value":"script"}]' textField="text" valueField="value"  showNullItem="true" name="type" required="true" emptyText="请选择变量类型" nullItemText="请选择变量类型"/>
+								</td>
+							</tr>
+							
+							<tr>
+								<td style="width:80px;">变量名：</td>
+								<td style="width:470px;">
+								<input style="width:450px;" enabled="true" class="mini-textbox" id="name" name="name" required="true" emptyText="请输入变量名"/>
+								</td>
+							</tr>
+
+							<tr id="var_val">
+								<td style="width:80px;">变量值：</td>
+								<td style="width:470px;">
+								<input style="width:450px;" enabled="true" id="value_normal" class="mini-textbox value_el" name="value" required="true" emptyText="请输入变量值"/>
+								<input style="width:450px; display:none;" enabled="true" id="value_desc" class="mini-textbox value_el" name="valueDesc" required="true" emptyText="请输入变量值"/>
+								<input style="width:450px; height:150px; display:none;" id="value_area" class="mini-textarea value_el" required="true" emptyText="请输入变量值"/>
+								<input style="width:450px; display:none" id="value_combo" class="mini-combobox value_el" textField="text" valueField="value"  showNullItem="false" required="true" emptyText="请选择" nullItemText="请选择"/>
+								<input style="width:450px; display:none;" id="value_edit" class="mini-buttonedit value_el" onbuttonclick="onChooseValue" emptyText="请选择" />
+								</td>
+							</tr>
+						</table>
+					</div>
+				</fieldset>
+				<fieldset id="bin_calc" style="border:solid 1px #aaa;padding:3px; margin-bottom:5px; display:none;">
+					<legend >
+						二元计算式
+					</legend>
+					<div style="padding:5px;">
+						<table style="table-layout:fixed;">
+							<tr>
+								<td style="width:80px;">左变量：</td>
+								<td style="width:470px;">
+								<input style="width:450px;" enabled="false" class="mini-buttonedit bin_calc" name="left.id" textName="left.name" onbuttonclick="onChooseLeft" />
+								</td>
+							</tr>
+
+							<tr>
+								<td style="width:80px;">计算符：</td>
+								<td style="width:470px;">
+								<input style="width:450px;" enabled="false" class="mini-combobox bin_calc" data='[{"text":"加","value":"+"},{"text":"减","value":"-"},{"text":"乘","value":"*"},{"text":"除","value":"/"}]' textField="text" valueField="value"  showNullItem="true" name="op" required="true" emptyText="请选择计算符" nullItemText="请选择计算符"/>
+								</td>
+							</tr>
+
+							<tr>
+								<td style="width:80px;">右变量：</td>
+								<td style="width:470px;">
+								<input style="width:450px;" enabled="false" class="mini-buttonedit bin_calc" name="right.id" textName="right.name" onbuttonclick="onChooseRight" />
+								</td>
+							</tr>
+
+						</table>
+					</div>
+				</fieldSet>
+			</form>
+		</div>
+		<script type="text/javascript">
+			var editValueUrl = "";
+			mini.parse();
+
+			var form = new mini.Form("edit-variable-form");
+			var el = mini.getbyName("name");
+			zweb.onESC(form.el, el, function() {
+				CloseWindow("close")
+			});
+			zweb.onEnter(form.el, el, function() {
+				SaveData()
+			});
+
+			function onChooseValue(e) {
+				var btnEdit = this;
+				mini.open({
+					url : editValueUrl,
+					title : "选择变量值",
+					width : 1000,
+					height : 600,
+					ondestroy : function(action) {
+						if(action == "ok") {
+							var iframe = this.getIFrameEl();
+							var data = iframe.contentWindow.GetData();
+							data = mini.clone(data);
+							//必须
+							if(data) {
+								mini.get("name").setValue(data.name);
+								btnEdit.setValue(data.id);
+								btnEdit.setText(data.name);
+							}
+						}
+					}
+				});
+			}
+			
+			function onChooseLeft(e) {
+				var btnEdit = this;
+				mini.open({
+					url : "${base_url}/system/variable/select",
+					title : "选择左变量",
+					width : 1000,
+					height : 600,
+					ondestroy : function(action) {
+						if(action == "ok") {
+							var iframe = this.getIFrameEl();
+							var data = iframe.contentWindow.GetData();
+							data = mini.clone(data);
+							//必须
+							if(data) {
+								btnEdit.setValue(data.id);
+								btnEdit.setText(data.name);
+							}
+						}
+					}
+				});
+			}
+
+			function onChooseRight(e) {
+				var btnEdit = this;
+				mini.open({
+					url : "${base_url}/system/variable/select",
+					title : "选择右变量",
+					width : 1000,
+					height : 600,
+					ondestroy : function(action) {
+						if(action == "ok") {
+							var iframe = this.getIFrameEl();
+							var data = iframe.contentWindow.GetData();
+							data = mini.clone(data);
+							//必须
+							if(data) {
+								btnEdit.setValue(data.id);
+								btnEdit.setText(data.name);
+							}
+						}
+					}
+				});
+			}
+
+			function SaveData() {
+				var o = form.getData();
+				form.validate();
+				if(form.isValid() == false)
+					return;
+				//---控制表单数据不能重复提交
+				var btnSave = mini.get("btn-save");
+				if (!btnSave.getEnabled())
+				    return ;
+				btnSave.setEnabled(false);
+				//-----------------------
+				var json = mini.encode(o);
+				$.ajax({
+					url : "${base_url}/system/variable/save",
+					type : 'post',
+					data : {
+						data : json
+					},
+					cache : false,
+					success : function(text) {
+						CloseWindow("save");
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						btnSave.setEnabled(true);
+						if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+							return;
+						var text = "操作失败，" + jqXHR.responseText;
+						mini.alert(text);
+					}
+				});
+			}
+
+			////////////////////
+			//标准方法接口定义
+			function SetData(data) {
+				if(data.action == "new") {
+					//跨页面传递的数据对象，克隆后才可以安全使用
+					data = mini.clone(data);
+					form.setData(data);
+					form.setChanged(false);
+					onVarTypeChange();
+				} else if(data.action == "edit") {
+					//跨页面传递的数据对象，克隆后才可以安全使用
+					data = mini.clone(data);
+					$.ajax({
+						url : "${base_url}/system/variable/" + data.id,
+						cache : false,
+						success : function(text) {
+							var o = mini.decode(text);
+							if (o.type == 'query') {
+								$.ajax({
+									url : "${base_url}/system/query/" + o.value,
+									cache : false,
+									success : function(json) {
+										var obj = mini.decode(json);
+										o.valueDesc = obj.name;
+										form.setData(o);
+										form.setChanged(false);
+										form.validate();
+										onVarTypeChange();
+									}
+								});
+							} else if (o.type == 'who') {
+								$.ajax({
+									url : "${base_url}/system/user/properties?name=" + o.value,
+									cache : false,
+									success : function(json) {
+										var obj = mini.decode(json);
+										o.valueDesc = obj.text;
+										form.setData(o);
+										form.setChanged(false);
+										form.validate();
+										onVarTypeChange();
+									}
+								});
+							} else {
+								form.setData(o);
+								form.setChanged(false);
+								form.validate();
+								onVarTypeChange();
+							}
+						}
+					});
+				}
+			}
+
+			function GetData() {
+				var o = form.getData();
+				return o;
+			}
+
+			function CloseWindow(action) {
+				if(action == "close" && form.isChanged()) {
+					if(confirm("数据被修改了，是否先保存？")) {
+						return false;
+					}
+				}
+				if(window.CloseOwnerWindow)
+					return window.CloseOwnerWindow(action);
+				else
+					window.close();
+			}
+
+			function onOk(e) {
+				SaveData();
+			}
+
+			function onCancel(e) {
+				CloseWindow("cancel");
+			}
+			function onVarTypeChange(e) {
+				$("#script_tips").hide(0);
+				var type = mini.get('type').getFormValue();
+				var value = mini.get('value_normal').getFormValue();
+				var valueDesc = mini.get('value_desc').getFormValue();
+				zweb.getMiniCtrlByClass("value_el", function(v){
+					v.set({visible: false, enabled: false, name: ""});
+				});
+        				
+        		if (type == 'bin_calc') {
+        			zweb.getMiniCtrlByClass('bin_calc', function(v){
+        				v.setEnabled(true);
+        			});
+        			$("#bin_calc").show(0);
+        			$("#var_val").hide(0);
+        		} else {
+        			$("#bin_calc").hide(0);
+        			$("#var_val").show(0);
+        			
+        			if (type == 'script') {
+        				mini.get("value_area").set({visible: true, enabled: true, name: "value", value: value});
+        				$("#script_tips").show(0);
+        			} else if(type == 'query') {
+        				editValueUrl = "${base_url}/system/query/select?query_id="+value;
+        				mini.get("value_edit").set({visible: true, enabled: true, name: "value", value: value});
+        				mini.get("value_edit").setText(valueDesc);
+        			} else if(type == 'who'){
+        				var url = "${base_url}/system/user/properties";
+        				mini.get("value_combo").set({visible: true, enabled: true, name: "value", value: value, url: url});
+        			} else {
+        				mini.get("value_normal").set({visible: true, enabled: true, name: "value", value: value});
+        			}
+        		}
+			}
+		</script>
+	</body>
+</html>

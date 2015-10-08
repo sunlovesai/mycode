@@ -1,0 +1,5 @@
+																										
+序号,所属资源,操作名称,操作编码,排序
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,
+${status.index+1},${item.resource.name},${item.name},${item.code},${item.sort}
+</jx:forEach>,,,,

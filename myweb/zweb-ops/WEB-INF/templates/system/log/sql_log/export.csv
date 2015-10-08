@@ -1,0 +1,5 @@
+																																																
+序号,用户ID,用户名称,用户邮箱,sql语句,sql参数,执行时间,操作表名,执行结果
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,,,,,
+${status.index+1},${item.userId},${item.userName},${item.userEmail},${item.operateSql},${item.operateArgs},${item.timeCost},${item.tableName},${item.operateResult}
+</jx:forEach>,,,,,,,,

@@ -1,0 +1,46 @@
+TaskLog:
+  list: > 
+    SELECT
+        *
+    FROM
+        ${app.solidbase_catalog}.sys_task_log t0
+    WHERE 1=1
+              
+        #if ($args[0].task && $args[0].task!="")
+        AND task_id = :task
+        #end
+          
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #elseif ($args[0].key && $args[0].key!="")
+        AND ( 1<>1
+            OR result = :key
+            OR description like :%key%
+        )
+        #else
+                   
+        #if ($args[0].startAtStart && $args[0].startAtStart!="") 
+        AND start_at >= :startAtStart
+        #end 
+        
+        #if ($args[0].startAtEnd && $args[0].startAtEnd!="") 
+        AND start_at <= :startAtEnd
+        #end 
+                     
+        #if ($args[0].endAtStart && $args[0].endAtStart!="") 
+        AND end_at >= :endAtStart
+        #end 
+        
+        #if ($args[0].endAtEnd && $args[0].endAtEnd!="") 
+        AND end_at <= :endAtEnd
+        #end 
+                         
+        #if ($args[0].result && $args[0].result!="") 
+        AND result = :result
+        #end 
+        
+        #if ($args[0].description && $args[0].description!="") 
+        AND description like :%description%
+        #end 
+                
+        #end

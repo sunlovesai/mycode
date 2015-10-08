@@ -1,0 +1,20 @@
+plugins: 
+  - id: ioc 
+    class: zweb.plugins.SpringPlugin
+    enabled: 0 
+    config_loaction: ZbusSpringClient.xml
+  - id: velocity
+    class: zweb.plugins.velocity.VelocityPlugin
+    enabled: 1
+  - id: redis_cache
+    class: zweb.plugins.redis.RedisCacheManagerPlugin
+    enabled: 0
+  - id: druid
+    class: zweb.plugins.DruidPlugin
+    enabled: 1
+  - id: db
+    class: net.zweb.core.db.DbPlugin
+    enabled: 1
+  - id: task
+    class: zweb.plugins.QuartzPlugin
+    enabled: 1

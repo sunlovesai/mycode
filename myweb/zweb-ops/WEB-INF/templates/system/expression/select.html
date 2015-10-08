@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title>选择表达式</title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+	</head>
+	<body>
+		<div class="mini-panel" style="width:100%;height:100%;"
+			showToolbar="true" showHeader="false" showCloseButton="false" showFooter="true"
+		>
+			<div property="footer" style="">
+				<div style="text-align:center;padding:5px 3px 8px 3px;">
+					<a class="mini-button" onclick="onOk" style="width:60px;margin-right:15px;">确定</a>
+					<a class="mini-button" onclick="onCancel" style="width:60px;">取消</a>
+				</div>
+			</div>
+									
+			<div class="mini-splitter" style="width:100%;height:100%;">
+				<div size="230" showCollapseButton="true">
+					<div class="mini-toolbar" style="padding:2px;border-top:0;border-left:0;border-right:0;">
+						<span style="padding-left:5px;">所属规则：</span>
+						<input style="width:85px;" id="rule_key" class="mini-textbox" onenter="searchCategory()" />
+						<a class="mini-button" iconCls="icon-search" plain="true" onclick="searchCategory()">查找</a>
+					</div>
+					<div class="mini-fit">
+						<ul id="rule-tree" class="mini-tree" url="${base_url}/system/expression/categories" style="width:100%;"
+							showTreeIcon="true" textField="text" idField="id" parentField="pid" resultAsTree="false"
+						></ul>
+					</div>
+				</div>
+				<div>
+											
+				<div class="mini-fit">
+					<div id="expression-datagrid" class="mini-datagrid" style="width:100%;height:100%;" allowResize="false"
+						url="${base_url}/system/expression/list"  idField="id" multiSelect="true" sortMode="client"
+						sizeList="[10,20,30,50,100]" pageSize="10"
+					>
+						<div property="columns">
+							<div type="checkcolumn" ></div>
+																																			
+							<div field="rule.name"  width="120" headerAlign="center" allowSort="true">所属规则</div>
+																																										
+							<div field="sort"  width="120" headerAlign="center" allowSort="true">排序</div>
+																																										
+							<div field="logicalOp"  width="120" headerAlign="center" allowSort="true">逻辑符</div>
+																																										
+							<div field="leftBracket"  width="120" headerAlign="center" allowSort="true">左括号</div>
+																																										
+							<div field="leftVar.name"  width="120" headerAlign="center" allowSort="true">左变量</div>
+																																										
+							<div field="compareOp"  width="120" headerAlign="center" allowSort="true">比较符</div>
+																																										
+							<div field="rightVar.name"  width="120" headerAlign="center" allowSort="true">右变量</div>
+																																										
+							<div field="rightBracket"  width="120" headerAlign="center" allowSort="true">右括号</div>
+																					
+						</div>
+					</div>
+				</div>
+							
+				</div>
+			</div>
+					</div>
+		<script type="text/javascript">
+			mini.parse();
+			var grid = mini.get("expression-datagrid");
+						
+			var tree = mini.get("rule-tree");
+			tree.on("nodeselect", function(e) {
+				var key = mini.get("key").getFormValue();
+				grid.load({
+					rule : e.node.value,
+					key : key
+				});
+			});
+						
+			grid.load();
+						
+			function searchCategory() {
+				var rule = mini.get("rule").getValue();
+				tree.load({
+					rule : rule
+				});
+			}
+						
+			function searchKey() {
+				var key = mini.get("key").getFormValue();
+								
+				var rule = "";
+				if (tree.getSelected()) {
+					rule = tree.getSelected().value;
+				}
+				grid.load({
+					rule : rule,
+					key : key
+				});
+								
+			}
+			function GetSelected() {
+		        return grid.getSelected();
+		    }
+		    function GetSelecteds() {
+		        return grid.getSelecteds();
+		    }
+			function GetData() {
+		        return GetSelected();
+		    }
+			
+			grid.on("rowdblclick", function(e){
+				CloseWindow("ok");	
+			});
+			
+			function onOk() {
+				CloseWindow("ok");
+			}
+
+			function onCancel() {
+				CloseWindow("cancel");
+			}
+			
+			function CloseWindow(action) {
+				if(window.CloseOwnerWindow)
+					return window.CloseOwnerWindow(action);
+				else
+					window.close();
+			}
+		</script>
+	</body>
+</html>

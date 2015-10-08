@@ -1,0 +1,45 @@
+TransactionLog:
+  list: > 
+    SELECT
+        *
+    FROM
+        ${app.solidbase_catalog}.sys_transaction_log t0
+    WHERE 1=1
+          
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #elseif ($args[0].key && $args[0].key!="")
+        AND (
+            run_exception like :%key% 
+            OR rollback_exception like :%key% 
+            OR status like :%key% 
+            OR time_cost = :key
+            OR memo like :%key%
+        )
+        #else
+                   
+        #if ($args[0].status && $args[0].status!="") 
+        AND status = :status 
+        #end
+        
+        #if ($args[0].memo && $args[0].memo!="") 
+        AND memo = :memo 
+        #end 
+         
+        #if ($args[0].timeCostStart && $args[0].timeCostStart!="") 
+        AND time_cost >= :timeCostStart
+        #end 
+        
+        #if ($args[0].timeCostEnd && $args[0].timeCostEnd!="") 
+        AND time_cost <= :timeCostEnd
+        #end 
+                         
+        #if ($args[0].startTime && $args[0].startTime!="") 
+        AND after_begin_at >= :startTime
+        #end 
+        
+        #if ($args[0].endTime && $args[0].endTime!="") 
+        AND update_at <= :endTime
+        #end 
+                         
+        #end

@@ -1,0 +1,5 @@
+																																						
+序号,所属报表,所属字段,所属坐标轴,系列名称,图表类型
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,,
+${status.index+1},${item.reportConfig.title},${item.columnConfig.columnName},${item.axisConfig.name},${item.name},${item.typeDesc}
+</jx:forEach>,,,,,

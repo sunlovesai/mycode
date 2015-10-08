@@ -1,0 +1,5 @@
+																																																
+序号,用户ID,用户名称,用户登录名,用户邮箱,访问路径,请求头,数据包,发生时间
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,,,,,
+${status.index+1},${item.userId},${item.userName},${item.userLoginName},${item.userEmail},${item.uri},${item.headers},${item.data},${item.time}
+</jx:forEach>,,,,,,,,

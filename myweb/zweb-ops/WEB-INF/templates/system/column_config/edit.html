@@ -1,0 +1,597 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>报表字段配置编辑面板</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+		<style type="text/css">
+			html, body {
+				font-size: 12px;
+				padding: 0;
+				margin: 0;
+				border: 0;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="mini-panel" style="width:100%;height:100%;"
+		showToolbar="true" showHeader="false" showCloseButton="false" showFooter="true"
+		>
+			<div property="footer" style="">
+				<div style="text-align:center;padding:5px 3px 8px 3px;">
+					<a class="mini-button" id="btn-save" onclick="onOk" style="width:60px;margin-right:15px;">确定</a>
+					<a class="mini-button" onclick="onCancel" style="width:60px;">取消</a>
+				</div>
+			</div>
+			<form id="edit-columnConfig-form" method="post" style="padding:15px 15px 15px 5px;">
+				<input name="id" class="mini-hidden" />
+				<input name="ignoreVersionConflict" class="mini-hidden" />
+				<fieldset style="border:solid 1px #aaa;padding:3px; margin-bottom:5px;">
+					<legend >
+						报表字段配置信息
+					</legend>
+					<div style="padding:5px;">
+						<table style="table-layout:fixed;">
+
+							<tr>
+
+								<td style="width:100px;">所属报表：</td>
+								<td colspan="5" style="width:716px;">
+									<input style="width:716px;" enabled="false" class="mini-buttonedit"  name="reportConfig.id" textName="reportConfig.title" onbuttonclick="onChooseReportConfig" />
+								</td>
+							</tr>
+							<tr>
+								<td class="searchType" style="width:100px;">搜索比较符：</td>
+								<td class="searchType" style="width:170px;">
+									<input style="width:160px;" showNullItem="true" name="searchType" emptyText="请选择" nullItemText="" class="mini-combobox"  data='[{"text":"等于","value":"1"},{"text":"模糊","value":"2"},{"text":"区间","value":"3"},{"text":"大于等于","value":"4"},{"text":"小于等于","value":"5"},{"text":"多值","value":"6"}]' textField="text" valueField="value"   enabled="true"   onvaluechanged="onSearchTypeChanged"/>
+								</td>
+								
+								<!-- 日期类型搜索 -->
+								<td class="dateDefaultType" style="width:100px; display:none;">默认值：</td>
+								<td class="dateDefaultType" style="width:170px; display:none;">
+									<input style="width:160px;" id="dateDefaultType" name="defaultValue" class="mini-datepicker" nullValue="null" showTime="true" emptyText="请选择默认值"/>
+								</td>
+								
+								<td class="dateDefaultTypeStart" style="width:100px; display:none;">起始默认值：</td>
+								<td class="dateDefaultTypeStart" style="width:170px; display:none;">
+									<input style="width:160px;" id="dateDefaultTypeStart" name="defaultValueStart" class="mini-datepicker" nullValue="null" showTime="true" emptyText="请选择起始默认值"/>
+								</td>
+								
+								<td class="dateDefaultTypeEnd" style="width:100px; display:none;">结束默认值：</td>
+								<td class="dateDefaultTypeEnd" style="width:170px; display:none;">
+									<input style="width:160px;" id="dateDefaultTypeEnd" name="defaultValueEnd" class="mini-datepicker" nullValue="null" showTime="true" emptyText="请选择结束默认值"/>
+								</td>
+								
+								<!-- 其他非日期类型搜索 -->
+								<td class="otherDefaultType" style="width:100px; display:none;">默认值：</td>
+								<td class="otherDefaultType" style="width:170px; display:none;">
+									<input style="width:160px;" id="otherDefaultType" name="otherDefaultValue" enabled="true" class="mini-textbox" emptyText="请输入默认值"/>
+								</td>
+								
+								<td class="otherDefaultTypeStart" style="width:100px; display:none;">起始默认值：</td>
+								<td class="otherDefaultTypeStart" style="width:170px; display:none;">
+									<input style="width:160px;" id="otherDefaultTypeStart" name="otherDefaultValueStart" enabled="true" class="mini-textbox"emptyText="请输入起始默认值"/>
+								</td>
+								
+								<td class="otherDefaultTypeEnd" style="width:100px; display:none;">结束默认值：</td>
+								<td class="otherDefaultTypeEnd" style="width:170px; display:none;">
+									<input style="width:160px;" id="otherDefaultTypeEnd" name="otherDefaultValueEnd" enabled="true" class="mini-textbox"emptyText="请输入结束默认值"/>
+								</td>
+							</tr>
+							<tr>
+								<td style="width:100px;">字段名：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" class="mini-textbox"  name="columnName" emptyText="请输入字段名"/>
+								</td>
+
+								<td style="width:100px;">显示文本：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" enabled="true" class="mini-textbox"  name="text" emptyText="请输入显示文本"/>
+								</td>
+								<td style="width:100px;">所属分组：</td>
+								<td style="width:170px;">
+									<input id="columnGroupConfigTxt" style="width:160px;" enabled="true" class="mini-buttonedit"  name="columnGroupConfig.id" textName="columnGroupConfig.title" onbuttonclick="onChooseColumnGroupConfig" />
+								</td>
+							</tr>
+							<tr>
+								<td style="width:100px;">选项：</td>
+								<td colspan="8" style="width:716px;">
+									<input style="width:100px;" enabled="true" class="mini-checkbox"  checked="false" text="列表页显示" name="isShowInList" />
+									<input style="width:100px;" enabled="true" class="mini-checkbox"  checked="false" text="编辑页显示" name="isShowInEdit" />
+									<input style="width:100px;" enabled="true" class="mini-checkbox" onvaluechanged="onIsSearchableChanged" checked="false" text="加入搜索" name="isSearchable" />
+									<input style="width:100px;" enabled="true" class="mini-checkbox"  checked="false" text="允许编辑" name="isEditable" />
+									<input style="width:100px;" enabled="true" class="mini-checkbox"  checked="false" text="是否必填项" name="isRequired" />
+									<input style="width:100px;" enabled="true" class="mini-checkbox"  checked="false" text="字典是否多选" name="isMutiSelected" />
+									<input style="width:100px;" enabled="true" class="mini-checkbox"  checked="false" text="是否列分组" name="isColumnGroup" />
+									<input style="width:100px;" enabled="true" class="mini-checkbox"  checked="false" text="是否行分组" name="isRowGroup" />
+									<input style="width:100px;" enabled="true" class="mini-checkbox"  checked="false" text="独占一行" name="isNewRow" />
+									<input style="width:100px;" enabled="true" class="mini-checkbox"  onvaluechanged="onIsMultiRowChanged" checked="false" text="多行文本" name="isMultiRow" />
+									<input style="width:100px;" enabled="true" class="mini-checkbox" checked="true" text="默认值用于搜索" name="isDefaultValueForSearch" />
+									<input style="width:100px;" enabled="true" class="mini-checkbox" checked="false" text="默认值用于编辑" name="isDefaultValueForEdit" />
+								</td>
+							</tr>
+							<tr class="pos">
+								<td style="width:100px;">对齐方式：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" showNullItem="true" name="align" emptyText="请选择对齐方式" nullItemText="" onvaluechanged="onAlignChanged" class="mini-combobox"  data='[{"text":"左对齐","value":"left"},{"text":"居中","value":"center"},{"text":"右对齐","value":"right"}]' textField="text" valueField="value"   enabled="true"  />
+								</td>
+								<td style="width:100px;">宽度：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" enabled="true" class="mini-textbox"  name="width" emptyText="请输入宽度"/>
+								</td>
+								<td style="width:100px;">排序：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" enabled="true" class="mini-spinner" name="sort" minValue="0" maxValue="1000" format="n1" increment="0.1"/>
+								</td>
+							</tr>
+							<tr>
+								<td style="width:100px;">渲染器：</td>
+								<td colspan="5" style="width:716px;">
+									<textarea style="width:716px;height:100px" enabled="true" class="mini-textarea showCellTooltip" emptyText="请编写JS函数来处理" name="renderer"></textarea>
+								</td>
+							</tr>
+							<tr>
+								<td style="width:100px;">数据类型：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" showNullItem="true" name="dataType" emptyText="请选择数据类型" nullItemText="" onvaluechanged="onDataTypeChanged" class="mini-combobox"  data='[{"text":"日期","value":"date"},{"text":"整数","value":"int"},{"text":"小数","value":"float"},{"text":"文本","value":"text"},{"text":"字典","value":"dict"},{"text":"布尔","value":"boolean"},{"text":"外键引用","value":"fk"},{"text":"URL引用","value":"url"},{"text":"百分比","value":"percent"},{"text":"货币","value":"currency"},{"text":"自定义","value":"custom"}]' textField="text" valueField="value"   enabled="true"  />
+								</td>
+								<td class="dict" style="width:100px; display:none;">字典类型：</td>
+								<td colspan="3" class="dict" style="width:438px; display:none;">
+									<input style="width:438px;" enabled="true" class="mini-textbox" emptyText="请输入字典类型值" name="dictType" />
+								</td>
+								<td class="fk" style="width:100px; display:none;">访问路径：</td>
+								<td colspan="3" class="fk" style="width:438px; display:none;">
+									<input style="width:438px;" enabled="true" class="mini-textbox" emptyText="请输入引用的功能访问路径" name="referPath" />
+								</td>
+								<td class="date" style="width:100px; display:none;">日期格式：</td>
+								<td colspan="3" class="date" style="width:438px; display:none;">
+									<!-- <input style="width:438px;" enabled="true" class="mini-textbox" emptyText="日期格式如：yyyyMMdd HHmmss" name="dateFormat" /> -->
+									<input style="width:438px;" showNullItem="true" name="dateFormat" emptyText="请选择日期格式" nullItemText="" onvaluechanged="onDateChanged" class="mini-combobox"  data='[{"text":"yyyy-MM-dd HH:mm:ss","value":"yyyy-MM-dd HH:mm:ss"},{"text":"yyyy-MM-dd HH:mm","value":"yyyy-MM-dd HH:mm"},{"text":"yyyy-MM-dd HH","value":"yyyy-MM-dd HH"},{"text":"yyyy-MM-dd","value":"yyyy-MM-dd"},{"text":"yyyy-MM","value":"yyyy-MM"},{"text":"yyyy","value":"yyyy"}]' textField="text" valueField="value"   enabled="true"  />
+								</td>
+							</tr>
+							<tr class="multiRow">
+								<td class="multiRow" style="width:100px;display:none;">高度：</td>
+								<td class="multiRow" style="width:170px;display:none;">
+									<input style="width:160px;" enabled="true" class="mini-spinner" name="height" minValue="50" maxValue="1000" format="n1" increment="1"/>
+								</td>
+							</tr>
+							<tr class="dict">
+								<td class="dict" style="width:100px; display:none;">字典列表：</td>
+								<td colspan="5" class="dict" style="width:716px; display:none;">
+									<textarea style="width:716px;" enabled="true" class="mini-textarea" emptyText="请输入字典列表JSON" name="dictJson"></textarea>
+								</td>
+							</tr>
+							<tr class="fk">
+								<td class="fk" style="width:100px; display:none;">值字段名：</td>
+								<td class="fk" style="width:170px; display:none;">
+									<input style="width:160px;" enabled="true" class="mini-textbox" emptyText="请输入外键值字段名" name="referValueName" />
+								</td>
+								<td class="fk" style="width:100px; display:none;">显示字段名：</td>
+								<td class="fk" style="width:170px; display:none;">
+									<input style="width:160px;" enabled="true" class="mini-textbox" emptyText="请输入外键显示字段名" name="referTextName" />
+								</td>
+								<td></td><td></td>
+							</tr>
+							
+							<tr class="customType">
+								<td class="customType" style="width:100px; display:none;">html代码片断：</td>
+								<td colspan="5" class="customType" style="width:500px; display:none;">
+									<textarea style="width:440px;height: 100%" enabled="true" class="mini-textarea" emptyText="请输入HTML代码片断" name="htmlCode"></textarea>
+								</td>
+							</tr>
+							
+							<tr class="customType">
+								<td class="customType" style="width:100px; display:none;">片断说明：</td>
+								<td class="customType" style="width:170px; display:none;">
+									<input style="width:160px;" enabled="true" class="mini-textbox" emptyText="请输入字段名说明" name="htmlCodeRemark" />
+								</td>
+								<td></td><td></td><td></td><td></td>
+							</tr>
+							
+							<tr class="customType">
+								<td class="customType" style="width:100px; display:none;">where条件模板：</td>
+								<td colspan="5" class="customType" style="width:500px; display:none;">
+									<textarea style="width:440px;height: 100%" enabled="true" class="mini-textarea" emptyText="请输入当前字段的where条件模板" name="columnWhereTmpl"></textarea>
+								</td>
+							</tr>
+							
+							<tr>
+								<td style="width:100px;">字段业务说明：</td>
+								<td colspan="5" style="width:730px;">
+									<textarea style="width:720px;height:80px" enabled="true" class="mini-textarea" emptyText="请从业务角度描述当前字段的意义,注意,不能含有空格" name="columnRemark"></textarea>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</fieldSet>
+			</form>
+		</div>
+<script id="tipTpl" type="text/x-jquery-tmpl">
+<div style="color: green; width:600px; text-align:left;">
+<pre>
+function(e){
+    // 一定要有返回值,且返回值会作为单元格内容显示
+    e = {
+	    rowIndex: Number,// 行序号
+	    record: Object,// 行数据对象    
+	    column: Object,// 列对象
+	    value: String,// 数据值
+	    rowCls: "",// 行CSS class
+	    cellCls: "",// 单元格CSS class
+	    rowStyle: "",// 行CSS样式
+	    cellStyle: ""// 单元格CSS样式
+	}
+	// 返回值会直接作为单元格内容渲染显示
+	return e.value;
+}
+</pre>
+</div>
+</script>
+		<script type="text/javascript">
+			mini.parse();
+			var tip = new mini.ToolTip();
+	        tip.set({
+	            target: document,
+	            placement: "bottom",
+	            selector: '.showCellTooltip',
+	            onbeforeopen: function (e) {            
+		            e.cancel = false;
+		        },
+		        onopen: function (e) {
+                    var html = $("#tipTpl").html();
+                    tip.setContent(html);
+		        }
+	        });
+	        
+			var form = new mini.Form("edit-columnConfig-form");
+			var el = mini.getbyName("reportConfig");
+			zweb.onESC(form.el, el, function() {
+				CloseWindow("close")
+			});
+			zweb.onEnter(form.el, el, function() {
+				SaveData()
+			});
+
+			
+			function onSearchTypeChanged(e) {
+				var currDataType = mini.getbyName("dataType");
+				var dataValue = currDataType.getFormValue();
+				var currSearchType = mini.getbyName("searchType");
+				var searchType = currSearchType.getFormValue();
+				if('int' == dataValue || 'float' == dataValue || 'percent' == dataValue || 'currency' == dataValue) {
+					$(".dateDefaultType").hide(0);
+					$(".dateDefaultTypeStart").hide(0);
+					$(".dateDefaultTypeEnd").hide(0);
+					if('1' == searchType || '2' == searchType) {
+						$(".otherDefaultType").show(0);
+						$(".otherDefaultTypeStart").hide(0);
+						$(".otherDefaultTypeEnd").hide(0);
+					} else if('3' == searchType) {
+						$(".otherDefaultType").hide(0);
+						$(".otherDefaultTypeStart").show(0);
+						$(".otherDefaultTypeEnd").show(0);
+					} else if('4' == searchType) {
+						$(".otherDefaultType").hide(0);
+						$(".otherDefaultTypeStart").show(0);
+						$(".otherDefaultTypeEnd").hide(0);
+					} else if('5' == searchType) {
+						$(".otherDefaultType").hide(0);
+						$(".otherDefaultTypeStart").hide(0);
+						$(".otherDefaultTypeEnd").show(0);
+					} else {
+						$(".otherDefaultType").show(0);
+						$(".otherDefaultTypeStart").hide(0);
+						$(".otherDefaultTypeEnd").hide(0);
+					}
+				}else if('text' == dataValue || 'boolean' == dataValue) {
+					$(".dateDefaultType").hide(0);
+					$(".dateDefaultTypeStart").hide(0);
+					$(".dateDefaultTypeEnd").hide(0);
+					$(".otherDefaultType").show(0);
+					$(".otherDefaultTypeStart").hide(0);
+					$(".otherDefaultTypeEnd").hide(0);
+				} else if('date' == dataValue) {
+					var dateFormat = mini.getbyName("dateFormat");
+					var dateDefaultType = mini.get("dateDefaultType");
+					var dateDefaultTypeStart = mini.get("dateDefaultTypeStart");
+					var dateDefaultTypeEnd = mini.get("dateDefaultTypeEnd");
+					dateDefaultType.set({format:dateFormat.value});
+					dateDefaultTypeStart.set({format:dateFormat.value});
+					dateDefaultTypeEnd.set({format:dateFormat.value});
+					
+					$(".otherDefaultType").hide(0);
+					$(".otherDefaultTypeStart").hide(0);
+					$(".otherDefaultTypeEnd").hide(0);
+					
+					if('1' == searchType || '2' == searchType) {
+						$(".dateDefaultType").show(0);
+						$(".dateDefaultTypeStart").hide(0);
+						$(".dateDefaultTypeEnd").hide(0);
+					} else if('4' == searchType) {
+						$(".dateDefaultType").hide(0);
+						$(".dateDefaultTypeStart").show(0);
+						$(".dateDefaultTypeEnd").hide(0);
+					} else if('5' == searchType) {
+						$(".dateDefaultType").hide(0);
+						$(".dateDefaultTypeStart").hide(0);
+						$(".dateDefaultTypeEnd").show(0);
+					} else {
+						$(".dateDefaultType").hide(0);
+						$(".dateDefaultTypeStart").show(0);
+						$(".dateDefaultTypeEnd").show(0);
+					} 
+				} else {
+					$(".dateDefaultType").hide(0);
+					$(".dateDefaultTypeStart").hide(0);
+					$(".dateDefaultTypeEnd").hide(0);
+					$(".otherDefaultType").hide(0);
+					$(".otherDefaultTypeStart").hide(0);
+					$(".otherDefaultTypeEnd").hide(0);
+				}
+			} 
+			
+			function onChooseColumnGroupConfig(e) {
+				var btnEdit = this;
+				var data = form.getData();
+				var report_config_id = data.reportConfig.id;
+				mini.open({
+					url : "${base_url}/system/column_group_config/select?is_type=0&report_config_id="+report_config_id,
+					title : "选择分组配置",
+					width : 1000,
+					height : 600,
+					ondestroy : function(action) {
+						if(action == "ok") {
+							var iframe = this.getIFrameEl();
+							var data = iframe.contentWindow.GetData();
+							data = mini.clone(data);
+							//必须
+							if(data) {
+								btnEdit.setValue(data.id);
+								btnEdit.setText(data.title);
+							}
+						}
+					}
+				});
+			}
+			
+			function onChooseReportConfig(e) {
+				var btnEdit = this;
+				mini.open({
+					url : "${base_url}/system/report_config/select",
+					title : "选择报表配置",
+					width : 1000,
+					height : 600,
+					ondestroy : function(action) {
+						if(action == "ok") {
+							var iframe = this.getIFrameEl();
+							var data = iframe.contentWindow.GetData();
+							data = mini.clone(data);
+							//必须
+							if(data) {
+								btnEdit.setValue(data.id);
+								btnEdit.setText(data.title);
+							}
+						}
+					}
+				});
+			}
+
+			function onIsSearchableChanged(e) {
+				onSearchTypeChanged(e);
+				var curr = mini.getbyName("isSearchable");
+				var value = curr.getFormValue();
+				if (value == 'true') {
+					$(".searchType").show(0);
+				} else {
+					$(".searchType").hide(0);
+					$(".dateDefaultType").hide(0);
+					$(".dateDefaultTypeStart").hide(0);
+					$(".dateDefaultTypeEnd").hide(0);
+					$(".otherDefaultType").hide(0);
+					$(".otherDefaultTypeStart").hide(0);
+					$(".otherDefaultTypeEnd").hide(0);
+				}
+				
+			}
+			
+			function onIsMultiRowChanged(e) {
+				var curr = mini.getbyName("isMultiRow");
+				var value = curr.getFormValue();
+				if (value == 'true') {
+					$(".multiRow").show(0);
+				} else {
+					$(".multiRow").hide(0);
+				}
+			}
+
+			function onDataTypeChanged(e) {
+				var curr = mini.getbyName("dataType");
+				var value = curr.getFormValue();
+				
+				var searchType = mini.getbyName('searchType');
+				if("custom" == value){
+					$(".fk").hide(0);
+					$(".pos").hide(0);
+					$(".dict").hide(0);
+					$(".date").hide(0);
+					$(".customType").show(0);
+				}else if("dict" == value) {
+					$(".dict").show(0);
+					$(".fk").hide(0);
+					$(".date").hide(0);
+					searchType.select(6);
+				} else if("fk" == value || "url" == value) {
+					$(".fk").show(0);
+					$(".dict").hide(0);
+					$(".date").hide(0);
+					$(".customType").hide();
+					searchType.select(6);
+				} else if("date" == value) {
+					$(".date").show(0);
+					$(".dict").hide(0);
+					$(".fk").hide(0);
+					$(".customType").hide(0);
+				} else {
+					$(".fk").hide(0);
+					$(".dict").hide(0);
+					$(".date").hide(0);
+					$(".customType").hide(0);
+				}
+				onSearchTypeChanged(e);
+			}
+
+			function showErrorTexts(errorTexts) {
+				var s = errorTexts.join('<br/>');
+
+				var win = window.open('', "", 'height=200,width=400,top=200,left=400,toolbar=no,menubar=no,scrollbars=no, resizable=no,location=no, status=no, titlebar=no');
+				win.document.open('text/html', 'replace');
+				win.document.write(s);
+				win.document.close();
+			}
+
+			function SaveData() {
+				var o = form.getData(true);
+				var currDataType = mini.getbyName("dataType");
+				var dataValue = currDataType.getFormValue();
+				
+				if('date' != dataValue) {
+					o.defaultValue = o.otherDefaultValue;
+					o.defaultValueStart = o.otherDefaultValueStart;
+					o.defaultValueEnd = o.otherDefaultValueEnd;
+				}
+				
+				
+				form.validate();
+				if(form.isValid() == false) {
+					var errorTexts = form.getErrorTexts();
+					showErrorTexts(errorTexts);
+					return;
+				}
+				//---控制表单数据不能重复提交
+				var btnSave = mini.get("btn-save");
+				if (!btnSave.getEnabled())
+				    return ;
+				btnSave.setEnabled(false);
+				//----------------------
+				var json = mini.encode(o);
+				$.ajax({
+					url : "${base_url}/system/column_config/save",
+					type : 'post',
+					data : {
+						data : json
+					},
+					cache : false,
+					success : function(text) {
+						CloseWindow("save");
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						btnSave.setEnabled(true);
+						if(409 == jqXHR.status) {
+							mini.showMessageBox({
+								title : "数据版本冲突",
+								message : jqXHR.responseText + "，获取最新数据？",
+								buttons : ["是", "否"],
+								iconCls : "mini-messagebox-question",
+								allowResize : true,
+								callback : function(action) {
+									if(action == "是") {
+										var _data = mini.clone(o);
+										_data.action = "edit";
+										SetData(_data);
+									} else if(action == "否") {
+										mini.showMessageBox({
+											title : "数据版本冲突",
+											message : "保留本地数据并提交覆盖最新数据？",
+											buttons : ["是", "否"],
+											iconCls : "mini-messagebox-question",
+											callback : function(action) {
+												if(action == "是") {
+													#set($lor = $zwall.judge('local_override_remote'))
+													#if($lor.ok)
+													
+													mini.getbyName("ignoreVersionConflict").setValue("true");
+					                				SaveData();
+					                				#else
+					                				
+					                				mini.alert($lor.denyReason);
+					                				#end
+												}
+											}
+										});
+									}
+								}
+							});
+						} else {
+							//400,403,500错误已经统一在sys.js处理
+							if(400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+								return;
+							var text = "操作失败，" + jqXHR.responseText;
+							mini.alert(text);
+						}
+					}
+				});
+			}
+
+			////////////////////
+			//标准方法接口定义
+			function SetData(data) {
+				if(data.action == "new") {
+					//跨页面传递的数据对象，克隆后才可以安全使用
+					data = mini.clone(data);
+					form.setData(data);
+					form.setChanged(false);
+				} else if(data.action == "edit") {
+					//跨页面传递的数据对象，克隆后才可以安全使用
+					data = mini.clone(data);
+					$.ajax({
+						url : "${base_url}/system/column_config/" + data.id,
+						cache : false,
+						success : function(text) {
+							var o = mini.decode(text);
+							
+							if('date' != o.dataType) {
+								o.otherDefaultValue = o.defaultValue;
+								o.otherDefaultValueStart = o.defaultValueStart;
+								o.otherDefaultValueEnd = o.defaultValueEnd;
+							}
+							
+							
+							form.setData(o);
+							form.setChanged(false);
+							form.validate();
+							onDataTypeChanged({});
+							onIsSearchableChanged({});
+						}
+					});
+				}
+			}
+
+			function GetData() {
+				var o = form.getData();
+				return o;
+			}
+
+			function CloseWindow(action) {
+				if(action == "close" && form.isChanged()) {
+					if(confirm("数据被修改了，是否先保存？")) {
+						return false;
+					}
+				}
+				if(window.CloseOwnerWindow)
+					return window.CloseOwnerWindow(action);
+				else
+					window.close();
+			}
+
+			function onOk(e) {
+				SaveData();
+			}
+
+			function onCancel(e) {
+				CloseWindow("cancel");
+			}
+		</script>
+	</body>
+</html>

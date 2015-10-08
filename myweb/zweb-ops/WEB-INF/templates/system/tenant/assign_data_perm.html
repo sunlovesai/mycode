@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>租户数据共享设置面板</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+		<style type="text/css">
+			html, body {
+				font-size: 12px;
+				padding: 0;
+				margin: 0;
+				border: 0;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="mini-panel" style="width:100%;height:100%;"
+			showToolbar="true" showHeader="false" showCloseButton="false" showFooter="true"
+		>
+			<div property="footer" style="">
+				<div style="text-align:center;padding:5px 3px 8px 3px;">
+					<a class="mini-button" onclick="onOk" style="width:60px;margin-right:15px;">确定</a>
+					<a class="mini-button" onclick="onCancel" style="width:60px;">取消</a>
+				</div>
+			</div>
+			<div class="mini-fit">
+				<div id="tenant-shared-datagrid" class="mini-datagrid" style="width:100%;height:100%;" allowResize="false"
+				 	idField="id" multiSelect="true" sortMode="client"
+					showModified="true" showPager="false" onrowdblclick="onRowDblClick"
+				>
+					<div property="columns">
+						<div type="indexcolumn" field="indexcolumn" align="right" width="30"></div>
+						<div type="checkcolumn" width="25"></div>
+						<div name="name" displayField="name" field="name" width="100%" headerAlign="center" >
+							租户名称
+						</div>
+						<div name="code" displayField="code" field="code" width="120" headerAlign="center" >
+							租户编码
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			var tid;
+			var uri;
+			mini.parse();
+			var grid = mini.get("tenant-shared-datagrid");
+			grid.on("drawcell", function(e){
+	        	if (e.field == "indexcolumn") {
+	                e.cellStyle = "background:#ecedef";
+	            }
+	        });
+	        
+			function SetData(data) {
+				tid = data.tid;
+				uri = data.uri;
+				grid.loading("数据加载中...");
+				$.ajax({
+		    		url : "${base_url}/system/tenant/shared",
+					type : 'post',
+					data : {
+						uri : uri,
+						tid : tid
+					},
+					cache : false,
+					success : function(text) {
+						if (text) {
+							var tenants = mini.decode(text);
+							var o = mini.clone(tenants);
+							grid.setData(o);
+							var rows = grid.findRows(function(row){
+								if(row.checked){
+									grid.select(row, true);
+									return true;
+								}
+							});
+						} else {
+							mini.alert("无更多租户数据可共享");
+						}
+						grid.unmask();
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						grid.unmask();
+						if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+							return;
+						var text = "操作失败，" + jqXHR.responseText;
+						mini.alert(text);
+					}
+				});
+			}
+			
+			function GetData() {
+				return grid.getData();
+			}
+			
+			function GetSelected(){
+		    	return grid.getSelected();
+		    }
+		    
+		    function GetSelecteds() {
+		    	return grid.getSelecteds();
+		    }
+		    
+			function onRowDblClick(e) {
+				onOk();
+			}
+
+			//////////////////////////////////
+			function CloseWindow(action) {
+				if(window.CloseOwnerWindow)
+					return window.CloseOwnerWindow(action);
+				else
+					window.close();
+			}
+
+			function onOk() {
+				var rows = GetSelecteds();
+				var data = mini.clone(rows);
+				var shared_codes = [];
+				$.each(data, function(i) {
+					shared_codes.push(this.code);
+				});
+				shared_codes = shared_codes.join(",");
+				grid.loading("保存中...");
+				$.ajax({
+		    		url : "${base_url}/system/tenant/save_shared",
+					type : 'post',
+					data : {
+						uri : uri,
+						tid : tid,
+						shared_codes : shared_codes
+					},
+					cache : false,
+					success : function(text) {
+						grid.unmask();
+						mini.alert("保存成功", "提示", function(){
+							CloseWindow("ok");	
+						});
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						grid.unmask();
+						if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+							return;
+						var text = "操作失败，" + jqXHR.responseText;
+						mini.alert(text);
+					}
+				});
+			}
+
+			function onCancel() {
+				CloseWindow("cancel");
+			}
+			
+		</script>
+	</body>
+</html>

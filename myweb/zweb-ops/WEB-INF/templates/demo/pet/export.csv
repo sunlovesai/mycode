@@ -1,0 +1,5 @@
+																												
+序号,名字,类型,年龄,主人
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,
+${status.index+1},${item.name},${item.typeDesc},${item.age},${item.master.name}
+</jx:forEach>,,,,

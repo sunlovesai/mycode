@@ -1,0 +1,393 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>权限分配面板</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+		<style type="text/css">
+			html, body {
+				font-size: 12px;
+				padding: 0;
+				margin: 0;
+				border: 0;
+				height: 100%;
+				overflow: hidden;
+			}
+			.function-item 
+		    {
+		        margin-left:5px;
+		        margin-right:5px;
+		    }
+		    .function-item input
+		    {
+		        vertical-align:bottom;
+		    }
+		</style>
+	</head>
+	<body>
+	<div id="mypanel" class="mini-panel" style="width:100%;height:100%;"
+		showToolbar="true" showHeader="false" showCloseButton="false" showFooter="true"
+		>
+			<div property="footer">
+				<div style="text-align:center;padding:5px 3px 8px 3px;">
+					<a class="mini-button" onclick="onCancel" style="width:60px;">关闭</a>
+				</div>
+			</div>
+			<center>
+			<form id="assign-perm-form" method="post">
+				<input name="rid" class="mini-hidden" />
+				#set($rid = $P.param("rid"))
+				<div id="perm-tree-grid" class="mini-treegrid" style="width:98%;height:auto;"     
+				    url="${base_url}/system/privilege/privilege_tree_for_role?rid=$!rid"
+				    treeColumn="name" idField="id" parentField="pid" resultAsTree="false"  
+				    allowResize="false" expandOnLoad="true" showTreeIcon="true"
+				    allowSelect="false" allowCellSelect="false" enableHotTrack="false" showCheckbox="true"
+				    ondrawcell="ondrawcell"  allowCellWrap="true" showColumnsMenu="true"
+				>
+				    <div property="columns">
+				        <div type="indexcolumn"></div>
+				        
+				        <div name="name" field="name" width="200" >系统菜单</div>
+				        <div field="functions" width="450">功能权限<font color='blue'>（颜色高亮的权限可点击分配数据权限）</font></div>
+				        <div field="resources" width="170">界面元素权限</div>
+				        <div field="remark" width="200">菜单备注</div>
+				    </div>
+				</div>
+			</form>
+			</center>
+		</div>
+		<script type="text/javascript">
+			mini.parse();
+			var panel = mini.get("mypanel");
+			var form = new mini.Form("assign-perm-form");
+			
+			////////////////////
+			//标准方法接口定义
+			function SetData(data) {
+				//跨页面传递的数据对象，克隆后才可以安全使用
+				data = mini.clone(data);
+				form.setData(data);
+			}
+
+			function GetData() {
+				var o = form.getData();
+				return o;
+			}
+
+			function CloseWindow(action) {
+				if(action == "close" && form.isChanged()) {
+					if(confirm("数据被修改了，是否先保存？")) {
+						return false;
+					}
+				}
+				if(window.CloseOwnerWindow)
+					return window.CloseOwnerWindow(action);
+				else
+					window.close();
+			}
+
+			function onOk(e) {
+				SaveData();
+			}
+
+			function onCancel(e) {
+				CloseWindow("cancel");
+			}
+			
+			var tree = mini.get("perm-tree-grid");
+			tree.expandAll();
+			//隐藏掉左侧菜单非叶子节点
+			tree.on("drawnode", function(e){
+				var node = e.node;
+				var isLeaf = e.isLeaf;
+				if (!isLeaf) {
+					e.showCheckBox = false;
+				}
+			});
+			function check_menu(menu) {
+				var o = form.getData();
+				panel.loading("操作中...", "提示");
+		        setTimeout(function() {
+			        $.ajax({
+						url : "${base_url}/system/role/save_menu",
+						type : 'post',
+						data : {
+							rid: o.rid,
+							mid: menu.id,
+							checked: menu.checked
+						},
+						cache : false,
+						success : function(text) {
+							panel.unmask();
+						},
+						error : function(jqXHR, textStatus, errorThrown) {
+							panel.unmask();
+							//400,403,500错误已经统一在sys.js处理
+							if(400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+								return;
+							var text = "操作失败，" + jqXHR.responseText;
+							mini.alert(text);
+						}
+					});
+		        }, 100);
+			}
+			//处理左侧菜单叶子节点的checkbox事件
+			tree.on("nodecheck", function(e){
+				var node = e.node;
+				var isLeaf = e.isLeaf;
+				if (isLeaf) {
+					check_menu(node);
+				}
+			});
+		    function ondrawcell(e) {
+		        var tree = e.sender,
+		            record = e.record,            
+		            column = e.column,
+		            field = e.field,
+		            id = record[tree.getIdField()],
+		            funs = record.functions,
+		            resources = record.resources;
+		            
+				if (funs && field == 'functions') {
+		            e.cellHtml = createCheckboxs(funs);
+		       	} else if(resources && field == 'resources') {
+		       		var html = "";
+		       		for (var i = 0, l = resources.length; i < l; i++) {
+		       			var res = resources[i];
+		                var menu = tree.findNodes(function(node){
+						    if(node.id == res.menu.id) {
+						    	return true;
+						    }
+						});
+		       			html = html + '<label class="function-item"><a href="javascript:void(0)" title="分配操作权限" onclick="edit_op_perm(\''+id+'\',\''+res.code+'\',\''+menu[0].name+'\',\''+res.name+'\')">'+res.name+'</a></label>';
+		       		}
+		       		e.cellHtml = html;
+		       	}
+		        function createCheckboxs(funs) {
+		            if (!funs) return "";
+		            var html = "";
+		            var checkAll = true;
+		            for (var i = 0, l = funs.length; i < l; i++) {
+		                var fn = funs[i];
+		                var menu = tree.findNodes(function(node){
+						    if(node.id == fn.menu.id) {
+						    	return true;
+						    }
+						});
+		                if (!fn.checked) {
+		                	checkAll = false;
+		                }
+		                var clickFn = 'checkFunc(\'' + id + '\',\'' + fn.action + '\', this.checked)';
+		                var checked = fn.checked ? 'checked' : '';
+		                html += '<label class="function-item"><input onclick="' + clickFn + '" ' + checked + ' type="checkbox" name="'
+		                        + fn.action + '" hideFocus/>';
+		                // 是否开启多机构模式
+		                var tenant = "";
+		                if (fn.isOpenTenant) {
+		                	tenant = "(多机构模式)";
+		                }
+		                if(checked && fn.hasPolicy){
+                			html = html + '</label><a href="javascript:void(0)" title="分配数据权限" onclick="edit_data_perm(\''+id+'\',\''+fn.action+'\',\''+menu[0].name+'\',\''+fn.name+'\')">'+fn.name+'</a>'+tenant;
+		                } else {
+		                	html = html + fn.name+tenant+'</label>';
+		                }
+		            }
+		            var value = checkAll == false ? "全选" : "反选";
+		            if (checkAll){
+		            	if (record.checkAll === undefined) {
+		            		record.checkAll = false;
+		            		tree.updateRow(record);
+		            	}
+		            }
+                	var clickFn = 'checkAllFunc(\'' + id + '\', this)';
+                	html = '<input onclick="' + clickFn + '" type="button" value="' + value + '" style="border:solid 1px #aaa;"/>' + html;
+	                	
+		            return html;
+		        }
+		    }
+		
+		    function checkFunc(id, action, checked) {
+				_checkFunc(id, action, checked, true);
+			}
+		    function _checkFunc(id, action, checked, upd) {
+		        var record = tree.getRecord(id);
+		        if(!record) return;
+		        var funs = record.functions;
+		        if (!funs) return;
+		        function getAction(action) {
+		            for (var i = 0, l = funs.length; i < l; i++) {
+		                var o = funs[i];
+		                if (o.action == action) return o;
+		            }
+		        }
+		        var obj = getAction(action);
+		        if (!obj) return;
+		        obj.checked = checked;
+		        tree.findNodes(function(node){
+				    if(node.id == obj.menu.id) {
+				    	if (!node.checked && obj.checked) {
+				    		tree.checkNode(node);
+				    		check_menu(node);
+				    	}
+				    	return true;
+				    }
+				});
+		        var o = form.getData();
+		        if (upd) {
+		        	panel.loading("操作中...", "提示");
+			        setTimeout(function() {
+				        $.ajax({
+							url : "${base_url}/system/role/save_privilege",
+							type : 'post',
+							data : {
+								rid: o.rid,
+								action: action,
+								checked: checked
+							},
+							cache : false,
+							async : false,
+							success : function(text) {
+								panel.unmask();
+								if (upd) {
+									tree.updateRow(record);
+								}
+							},
+							error : function(jqXHR, textStatus, errorThrown) {
+								panel.unmask();
+								//400,403,500错误已经统一在sys.js处理
+								if(400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+									return;
+								var text = "操作失败，" + jqXHR.responseText;
+								mini.alert(text);
+							}
+						});
+			        }, 100);
+		        } else {
+		        	panel.loading("操作中...", "提示");
+					$.ajax({
+						url : "${base_url}/system/role/save_privilege",
+						type : 'post',
+						data : {
+							rid: o.rid,
+							action: action,
+							checked: checked
+						},
+						cache : false,
+						async : false,
+						success : function(text) {
+							panel.unmask();
+							if (upd) {
+								tree.updateRow(record);
+							}
+						},
+						error : function(jqXHR, textStatus, errorThrown) {
+							panel.unmask();
+							//400,403,500错误已经统一在sys.js处理
+							if(400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+								return;
+							var text = "操作失败，" + jqXHR.responseText;
+							mini.alert(text);
+						}
+					});
+				}
+		    }
+		    
+		    function checkAllFunc(id, btn) {
+		        var record = tree.getRecord(id);
+		        if (!record) return;
+		        var funs = record.functions;
+		        if (!funs) return;
+		        panel.loading("操作中...", "提示");
+		        setTimeout(function() {
+			        var checked = record.checkAll !== false;
+			        for (var i = 0, l = funs.length; i < l; i++) {
+			            var o = funs[i];
+			            o.checked = checked;
+			            _checkFunc(id, o.action, checked, false);
+			        }
+			        record.checkAll = !checked;
+			        tree.updateRow(record);
+			        panel.unmask();
+		        }, 200);
+		    }
+		    
+		    function edit_data_perm(id, action, menuName, priviName) {
+		    	var record = tree.getRecord(id);
+		        if(!record) return;
+		        var funs = record.functions;
+		        if (!funs) return;
+		        function getAction(action) {
+		            for (var i = 0, l = funs.length; i < l; i++) {
+		                var o = funs[i];
+		                if (o.action == action) return o;
+		            }
+		        }
+		        var obj = getAction(action);
+		        if (!obj) return;
+		        if (!obj.checked) return;
+		    	var o = form.getData();
+		    	
+				mini.open({
+					url : "${base_url}/system/role/assign_data_perm",
+					title : "分配["+menuName+"."+priviName+"]的数据权限",
+					width : 400,
+					height : 200,
+					showModal: true,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+						var data = {
+							uri : action,
+							rid : o.rid
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						if(action == "ok") {
+							
+						}
+					}
+				});
+					
+		    	return false;
+		    }
+		    
+		    function edit_op_perm(id, code, menuName, resourceName) {
+		    	var record = tree.getRecord(id);
+		        if(!record) return;
+		        var resources = record.resources;
+		        if (!resources) return;
+		        function getCode(code) {
+		            for (var i = 0, l = resources.length; i < l; i++) {
+		                var o = resources[i];
+		                if (o.code == code) return o;
+		            }
+		        }
+		        var obj = getCode(code);
+		        if (!obj) return;
+		    	var o = form.getData();
+		    	
+				mini.open({
+					url : "${base_url}/system/role/assign_op_perm",
+					title : "分配["+menuName+"."+resourceName+"]的操作权限",
+					width : 400,
+					height : 200,
+					showModal: true,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+						var data = {
+							code : code,
+							rid : o.rid
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						if(action == "ok") {
+						}
+					}
+				});
+					
+		    	return false;
+		    }
+		</script>
+	</body>
+</html>

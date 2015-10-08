@@ -1,0 +1,67 @@
+-- Function: test.demo_query_osc_projects(character varying, character varying, character varying, character varying, text, refcursor, refcursor, character varying, character varying, bigint, bigint)
+
+--DROP FUNCTION test.demo_query_osc_projects(character varying, character varying, character varying, text, refcursor, refcursor, character varying, character varying, bigint, bigint);
+
+select test.demo_query_osc_projects(null, null, null, null, null, 'a', 'b', null, null, null, null);
+fetch all from a;
+
+CREATE OR REPLACE FUNCTION test.demo_query_osc_projects(IN p_ids character varying, IN p_kw character varying, IN p_name character varying, IN p_mobile character varying, IN p_right text, INOUT data_set refcursor, INOUT data_count refcursor, IN p_order_col character varying DEFAULT 'id'::character varying, IN p_order_dir character varying DEFAULT 'asc'::character varying, IN p_size bigint DEFAULT 20, IN p_no bigint DEFAULT 1)
+  RETURNS record AS
+$BODY$  
+declare
+   sql_data text ; 
+   sql_count text ; 
+   sql_where text; 
+   sql_limit text ; 
+   sql_orderby text; 
+begin  
+   p_order_col = coalesce(p_order_col,'id');
+   p_order_dir = coalesce(p_order_dir,'desc') ;
+   p_size = COALESCE(p_size,20);
+   p_no =  COALESCE(p_no,1);
+    
+   -- get query sql
+   sql_where = ' where 1=1 ' ;
+   if p_ids is not null then
+     sql_where = sql_where || ' and id in ('||p_ids||') ' ;
+   end if;
+
+   if p_kw is not null then
+     sql_where = sql_where || ' and (name like ''%'||p_kw||'%'' or mobile like ''%'||p_kw ||'%'' )' ; 
+   end if ; 
+   
+   if p_name is not null then 
+     sql_where = sql_where || ' and name like ''%'||p_name ||'%'' ' ;  
+   end if ; 
+   if p_mobile is not null then 
+     sql_where = sql_where || ' and mobile like ''%'||p_mobile || '%'' ' ; 
+   end if ; 
+   
+   if p_right is not null then 
+     sql_where = sql_where || ' and ('||p_right||') ';
+   end if ; 
+
+   -- get order by sql
+    sql_orderby = ' order by '||p_order_col||' '|| p_order_dir ; 
+
+
+   --get page sql
+   if p_no > 0 and p_size > 0 then
+    sql_limit = ' limit '||p_size||' offset '|| (p_size * (p_no -1)) ;
+   end if ;
+
+   sql_data = 'select * from test.osc_projects_local ' || COALESCE(sql_where,'') || COALESCE(sql_orderby,'') || COALESCE(sql_limit,'') ; 
+   sql_count = 'select count(*) as total from test.osc_projects_local ' || COALESCE(sql_where,'') ; 
+   
+   open  data_set for execute sql_data ;
+ 
+   open data_count for execute sql_count;  
+
+  
+  
+end;  
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION test.demo_query_osc_projects(character varying, character varying, character varying, character varying, text, refcursor, refcursor, character varying, character varying, bigint, bigint)
+  OWNER TO dcuser;

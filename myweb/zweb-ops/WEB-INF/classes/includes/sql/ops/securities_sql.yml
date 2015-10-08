@@ -1,0 +1,31 @@
+Securities:
+  list: > 
+    SELECT
+      *
+    FROM
+        ${app.ops_catalog}.securities t0
+    WHERE 1=1
+    
+    #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #elseif ($args[0].key && $args[0].key!="")
+        AND (
+            security like :%key%                
+            OR description1 like :%key% 
+            OR description2 like :%key%       
+        )
+        #else
+                   
+        #if ($args[0].security && $args[0].security!="") 
+        AND security like :%security% 
+        #end 
+                         
+        #if ($args[0].description1 && $args[0].description1!="") 
+        AND description1 like :%description1%
+        #end 
+        
+        #if ($args[0].description2 && $args[0].description2!="") 
+        AND description2 like :%description2%
+        #end
+                
+        #end

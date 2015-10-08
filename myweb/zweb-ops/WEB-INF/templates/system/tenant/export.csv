@@ -1,0 +1,5 @@
+																																																														
+序号,编号,名称,国家,省份,城市,街道地址,联系电话,联系人,状态
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,,,,,,
+${status.index+1},${item.code},${item.name},${item.countryDesc},${item.provinceDesc},${item.cityDesc},${item.address},${item.telephone},${item.contactor},${item.statusDesc}
+</jx:forEach>,,,,,,,,,

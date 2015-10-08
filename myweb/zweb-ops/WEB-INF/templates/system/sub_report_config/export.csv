@@ -1,0 +1,5 @@
+																																				
+序号,名称,所属报表,关联报表,网页地址,引用字段,关联字段,排序
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,,,,
+${status.index+1},${item.text},${item.reportConfig.title},${item.relReportConfig.title},${item.url},${item.referColumn},${item.relColumn},${item.sort}
+</jx:forEach>,,,,,,,

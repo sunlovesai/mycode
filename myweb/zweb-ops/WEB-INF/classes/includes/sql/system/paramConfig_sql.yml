@@ -1,0 +1,28 @@
+ParamConfig:
+  list: > 
+    SELECT
+            
+        button_config_id,
+                  
+        name,
+                  
+        value,
+            
+        id
+    FROM
+        ${app.solidbase_catalog}.sys_param_config t0
+    WHERE 1=1
+              
+        #if ($args[0].buttonConfig && $args[0].buttonConfig!="")
+        AND button_config_id = :buttonConfig
+        #end
+          
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #elseif ($args[0].key && $args[0].key!="")
+        AND ( 1<>1
+                      
+        )
+        #else
+          
+        #end

@@ -1,0 +1,5 @@
+																				
+序号,标题,状态,链接地址
+<jx:forEach items="${data}" var="item" varStatus="status">,,,
+${status.index+1},${item.title},${item.statusDesc},${item.url}
+</jx:forEach>,,,

@@ -1,0 +1,63 @@
+ReportConfig:
+  list: > 
+    SELECT
+      *
+    FROM
+        ${app.solidbase_catalog}.sys_report_config t0
+    WHERE 1=1
+          
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #elseif ($args[0].key && $args[0].key!="")
+        AND ( 1<>1
+            OR title like :%key% 
+            OR code like :%key% 
+            OR table_name like :%key% 
+        )
+        #else
+                   
+        #if ($args[0].title && $args[0].title!="") 
+        AND title like :%title% 
+        #end 
+                         
+        #if ($args[0].code && $args[0].code!="") 
+        AND code like :%code% 
+        #end 
+                         
+        #if ($args[0].tableName && $args[0].tableName!="") 
+        AND table_name like :%tableName% 
+        #end 
+                
+        #end
+                
+  app_list: > 
+    SELECT
+      *
+    FROM
+        ${app.solidbase_catalog}.sys_report_config t0
+    WHERE 1=1
+        and is_show_app = '1' 
+        and status='release'
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #elseif ($args[0].key && $args[0].key!="")
+        AND ( 1<>1
+            OR title like :%key% 
+            OR code like :%key% 
+            OR table_name like :%key% 
+        )
+        #else
+                   
+        #if ($args[0].title && $args[0].title!="") 
+        AND title like :%title% 
+        #end 
+                         
+        #if ($args[0].code && $args[0].code!="") 
+        AND code like :%code% 
+        #end 
+                         
+        #if ($args[0].tableName && $args[0].tableName!="") 
+        AND table_name like :%tableName% 
+        #end 
+                
+        #end

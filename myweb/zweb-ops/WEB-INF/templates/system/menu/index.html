@@ -1,0 +1,275 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>菜单管理</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+		<style>
+	    html, body{
+	        margin:0;padding:0;border:0;width:100%;height:100%;overflow:hidden;
+	    }    
+	    </style>
+	</head>
+	<body>
+	    <div class="mini-toolbar" style="border-bottom:0;padding:0px;">
+			<table style="width:100%;">
+				<tr>
+					<td style="width:100%;">
+						<input id="key" class="mini-textbox" emptyText="菜单名称" style="width:150px;" onenter="onKeyEnter"/>
+						<a class="mini-button" iconCls="icon-search" onclick="search()">查询</a>
+						<span class="separator"></span>
+						<a class="mini-button" iconCls="icon-add" onclick="add()">增加</a>
+						<a class="mini-button" iconCls="icon-edit" onclick="edit()">编辑</a>
+						<a class="mini-button" iconCls="icon-remove" onclick="remove()">删除</a>
+						<a class="mini-button" iconCls="icon-restore" onclick="repair_pid_path()">修复父路径</a>
+					    <a class="mini-button" iconCls="icon-import" onclick="upload()">导入</a>
+					    <a class="mini-button" iconCls="icon-export" onclick="download()">导出</a>
+					</td>
+					<td style="white-space:nowrap;">
+						
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div class="mini-fit">
+			<div id="menu-tree" class="mini-treegrid" style="width:100%;height:100%;" resultAsTree="false"
+				showTreeIcon="true" showArrow="true" expandOnLoad="true" treeColumn="name" idField="id" parentField="pid" 
+				url="${base_url}/system/menu/list" multiSelect="true" allowResize="false" 
+				showColumnsMenu="true"
+			>
+				<div property="columns">
+					<div type="indexcolumn" field="indexcolumn" align="right" width="30"></div>
+					<div type="checkcolumn" width="25"></div>
+					<div name="name" field="name" hideable="true" width="100%" headerAlign="center" >
+						菜单名称
+					</div>
+					<div field="link" width="200" headerAlign="center" >
+						菜单链接
+					</div>
+					<div field="iconCls" width="120" headerAlign="center" >
+						图标代码
+					</div>
+					<div field="pidPath" width="200" headerAlign="center" >
+						父节点路径
+					</div>
+					<div field="sort" width="50" align="right" headerAlign="center" >
+						排序
+					</div>
+					<div field="tenant" displayField="tenant.code" width="80" align="left" headerAlign="center" >
+						所属机构
+					</div>
+					<div field="remark" width="100" headerAlign="center" >
+						备注
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			mini.parse();
+
+			var grid = mini.get("menu-tree");
+			grid.expandAll();
+			grid.on("drawcell", function(e){
+	        	if (e.field == "indexcolumn") {
+	                e.cellStyle = "background:#ecedef";
+	            }
+	        });
+	        
+			function add() {
+				var node = grid.getSelectedNode();
+				if (node) {
+					var pid = node.id;
+					var pname = node.name;
+				}
+				mini.open({
+					url : "${base_url}/system/menu/edit?action=add",
+					title : "新增菜单",
+					showModal : false,
+					width : 380,
+					height : 310,
+					showModal: false,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+						var data = {
+							action : "add",
+							parent : {
+								id : pid,
+								name : pname
+							}
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						grid.reload();
+						grid.expandAll();
+					}
+				});
+			}
+
+			function edit() {
+				var row = grid.getSelected();
+				if(row) {
+					mini.open({
+						url : "${base_url}/system/menu/edit?action=edit",
+						title : "菜单",
+						showModal : false,
+						width : 380,
+						height : 310,
+						showModal: false,
+						onload : function() {
+							var iframe = this.getIFrameEl();
+							var data = {
+								action : "edit",
+								id : row.id
+							};
+							iframe.contentWindow.SetData(data);
+						},
+						ondestroy : function(action) {
+							grid.reload();
+							grid.expandAll();
+						}
+					});
+				} else {
+					alert("请选中一条记录");
+				}
+			}
+
+			function remove() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定删除选中记录？", "确定？",
+			            function (action) {
+			                if (action == "ok") {
+								var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								grid.loading("操作中，请稍后......");
+								$.ajax({
+									url : "${base_url}/system/menu/delete?id=" + id,
+									type : 'post',
+									success : function(text) {
+										grid.reload();
+										grid.expandAll();
+									},
+									error : function(jqXHR, textStatus, errorThrown) {
+										grid.unmask();
+										//400,403,500错误已经统一在sys.js处理
+										if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+											return;
+										var text = "操作失败，" + jqXHR.responseText;
+										mini.alert(text);
+									}
+								});
+							}
+						});
+				} else {
+					alert("请选中一条记录");
+				}
+			}
+			
+			
+			//导出
+			function download(){
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定导出选中记录？", "确定？",
+			            function (action) {
+			                if (action == "ok") {
+								var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								location.href = "${base_url}/system/menu/export?ids=" + id;
+							}
+						});
+				} else mini.alert("没有数据可以导出");
+				
+			}
+			
+			function repair_pid_path() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					if(confirm("确定修复选中记录的PIDPath？")) {
+						var ids = [];
+						for(var i = 0, l = rows.length; i < l; i++) {
+							var r = rows[i];
+							ids.push(r.id);
+						}
+						var id = ids.join(',');
+						grid.loading("操作中，请稍后......");
+						$.ajax({
+							url : "${base_url}/system/menu/repair_pid_path?id=" + id,
+							type : 'post',
+							success : function(text) {
+								grid.reload();
+								grid.expandAll();
+							},
+							error : function(jqXHR, textStatus, errorThrown) {
+								if (403 != jqXHR.status)
+									mini.alert(jqXHR.responseText);
+								grid.reload();
+								grid.expandAll();
+							}
+						});
+					}
+				} else {
+					if(confirm("修复所有记录的PIDPath？")) {
+						$.ajax({
+							url : "${base_url}/system/menu/repair_pid_path?all=true",
+							type : 'post',
+							success : function(text) {
+								grid.reload();
+								grid.expandAll();
+							},
+							error : function(jqXHR, textStatus, errorThrown) {
+								if (403 != jqXHR.status)
+									mini.alert(jqXHR.responseText);
+								grid.reload();
+								grid.expandAll();
+							}
+						});
+					}
+				}
+			}
+			function upload() {
+				mini.open({
+					url : "${base_url}/system/menu/import",
+					title : "导入菜单数据",
+					width : 400,
+					height : 300,
+					showModal: false,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+						var data = {
+							action : "import",
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						if ("success" == action){
+							grid.reload();						
+							mini.alert("导入数据成功");	
+						}
+					}
+				});
+			}
+			function search() {
+				var key = mini.get("key").getValue();
+				grid.load({
+					name : key
+				});
+				grid.expandAll();
+			}
+
+			function onKeyEnter(e) {
+				search();
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,5 @@
+																																								
+序号,所属租户,价格策略,起始日期,结束日期,剩余次数,订阅日期
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,,,
+${status.index+1},${item.tenant.name},${item.pricePolicy.name},${item.startDate},${item.endDate},${item.remainder},${item.subscribeDate}
+</jx:forEach>,,,,,,

@@ -1,0 +1,295 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>${model.text}编辑面板</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+		<style type="text/css">
+			html, body {
+				font-size: 12px;
+				padding: 0;
+				margin: 0;
+				border: 0;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="mini-panel" style="width:100%;height:100%;"
+			showToolbar="true" showHeader="false" showCloseButton="false" showFooter="true"
+		>
+			<div property="footer" style="">
+				<div style="text-align:center;padding:5px 3px 8px 3px;">
+					<a class="mini-button" id="btn-save" onclick="onOk" style="width:60px;margin-right:15px;">确定</a>
+					<a class="mini-button" onclick="onCancel" style="width:60px;">取消</a>
+				</div>
+			</div>
+			<form id="edit-${model.ext.name}-form" method="post" style="padding:15px 15px 15px 5px;">
+				<input name="id" class="mini-hidden" />
+				<input name="ignoreVersionConflict" class="mini-hidden" />
+				<fieldset style="border:solid 1px #aaa;padding:3px; margin-bottom:5px;">
+					<legend >
+						${model.text}信息
+					</legend>
+					<div style="padding:5px;">
+						<table style="table-layout:fixed;">
+							#set($index = 0)
+							#foreach($field in $model.getUpdatableFields())
+							#if($field.ext.skip || !$field.text || $field.text.trim().length() == 0)
+							#else
+							#set($index = $index+1)
+							#if($index==4)
+							  #set($index = 1)
+							#end
+							#if($index==1)
+							
+							<tr>
+							#end
+							
+								<td style="width:100px;">#if(!$field.isBoolean)$field.text：#end</td>
+								<td style="width:170px;">
+									#set($upFieldName = $CommonUtil.toUpCaseFirst($field.fieldName))
+									#if($field.isDict())
+										#set($data = "")
+										#if($field.getDicts() && $field.getDicts().size()>0)
+										#set($data = $JSON.toJSONString($field.getDicts()))
+										#end
+										
+									<input style="width:160px;" showNullItem="true" name="$field.fieldName" emptyText="请选择$field.text" nullItemText="" onvaluechanged="on${upFieldName}Changed" class="mini-combobox" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end #if($data && $data.length()>0)data='$data' textField="text" valueField="value" #else url="${base_url}/system/dict/options/${field.ext.dict_type}" textField="dictCode" valueField="dictValue" #end #if($field.cascadeBy && $field.cascadeBy != '') enabled="false" #else enabled="$field.getEditable()" #end />
+									#elseif($field.isFk())
+									#set($textField = ${field.fieldName}+"."+${field.reference.model.getNameField().fieldName})
+									#set($valueField = ${field.fieldName}+"."+${field.reference.fieldName})
+									#if($field.ext.textField) #set($textField = $field.ext.textField) #end
+									#if($field.ext.valueField) #set($valueField = $field.ext.valueField) #end
+									
+									
+									<input style="width:160px;" enabled="$field.getEditable()" class="mini-buttonedit" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end name="$valueField" textName="$textField" onbuttonclick="onChoose${upFieldName}" />
+									#elseif($field.isInt())
+									
+									<input style="width:160px;" enabled="$field.getEditable()" class="mini-spinner" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end minValue="0" maxValue="9999999999999" allowLimitValue="true"  name="$field.fieldName" emptyText="请输入$field.text"/>
+									#elseif($field.isFloat())
+									
+									<input style="width:160px;" enabled="$field.getEditable()" class="mini-spinner" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end minValue="0" maxValue="9999999999999" decimalPlaces="2" name="$field.fieldName" emptyText="请输入$field.text"/>
+									#elseif($field.isBoolean())
+									
+									<input style="width:160px;" enabled="$field.getEditable()" class="mini-checkbox" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end checked="false" text="$field.text" name="$field.fieldName" emptyText="请选择$field.text"/>
+									#elseif($field.isDate())
+									
+									<input style="width:160px;" enabled="$field.getEditable()" class="mini-datepicker" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end nullValue="null" name="$field.fieldName" format="yyyy-MM-dd HH:mm:ss" showTime="false" showOkButton="false" showClearButton="false" emptyText="请选择$field.text"/>
+									#else
+									
+									<input style="width:160px;" enabled="$field.getEditable()" class="mini-textbox" #if($field.isRequired)required="true" requiredErrorText="$field.text不能为空"#end name="$field.fieldName" emptyText="请输入$field.text"/>
+									#end
+									
+								</td>
+								#if($index==3)
+								
+							</tr>
+							   #end
+							#end
+							#end
+							#if($index==1)
+							
+							    <td></td><td></td><td></td><td></td>
+							</tr>
+							#elseif($index==2)
+							
+							    <td></td><td></td>
+							</tr>
+							#end
+							
+						</table>
+					</div>
+				</fieldSet>
+			</form>
+		</div>
+		<script type="text/javascript">
+			mini.parse();
+
+			var form = new mini.Form("edit-${model.ext.name}-form");
+			var el = mini.getbyName("${model.getUpdatableFields()[0].fieldName}");
+			zweb.onESC(form.el, el, function(){
+				CloseWindow("close")
+			});
+			zweb.onEnter(form.el, el, function(){
+				SaveData()
+			});
+			#foreach($field in $model.getUpdatableFields())
+			#if($field.ext.skip || !$field.text || $field.text.trim().length() == 0)
+			#else
+			#set($upFieldName = $CommonUtil.toUpCaseFirst($field.fieldName))
+			#if($field.isFk())
+			
+			function onChoose${upFieldName}(e) {
+	            var btnEdit = this;
+	            mini.open({
+	                url: "${base_url}${field.reference.model.ext.path}/select",
+	                title: "选择${field.reference.model.text}",
+	                width: 1000,
+	                height: 600,
+	                ondestroy: function (action) {
+	                    if (action == "ok") {
+	                        var iframe = this.getIFrameEl();
+	                        var data = iframe.contentWindow.GetData();
+	                        data = mini.clone(data);    //必须
+	                        if (data) {
+	                            btnEdit.setValue(data.${field.reference.fieldName});
+	                            btnEdit.setText(data.${field.reference.model.getNameField().fieldName});
+	                        }
+	                    }
+	                }
+	            });            
+	        }
+	        #elseif($field.isDict() && $field.cascadeBy && $field.cascadeBy != '')
+	        
+	        function on${CommonUtil.toUpCaseFirst($field.cascadeBy)}Changed(e) {
+	            var parent = mini.getbyName("${field.cascadeBy}");
+	            var pid = parent.getValue();
+				var curr = mini.getbyName("${field.fieldName}");
+	            curr.setValue("");
+	            curr.setEnabled(true);
+	            
+	            var url = "${base_url}/system/dict/options/${field.ext.dict_type}?cascadeBy=" + pid
+	            curr.setUrl(url);
+	            curr.select(0);
+	        }
+	        #end
+	        #end
+	        #end
+	        
+	        function showErrorTexts(errorTexts) {
+	            var s = errorTexts.join('<br/>');
+	
+	            var win = window.open('', "", 'height=200,width=400,top=200,left=400,toolbar=no,menubar=no,scrollbars=no, resizable=no,location=no, status=no, titlebar=no');
+	            win.document.open('text/html', 'replace');
+	            win.document.write(s);
+	            win.document.close();
+	        }
+	        
+			function SaveData() {
+				var o = form.getData();
+				form.validate();
+				if(form.isValid() == false) {
+					var errorTexts = form.getErrorTexts();
+                	showErrorTexts(errorTexts);
+					return;
+				}
+				//---控制表单数据不能重复提交
+				var btnSave = mini.get("btn-save");
+				if (!btnSave.getEnabled())
+				    return ;
+				btnSave.setEnabled(false);
+				//----------------------
+
+				var json = mini.encode(o);
+				$.ajax({
+					url : "${base_url}${model.ext.path}/save",
+					type : 'post',
+					data : {
+						data : json
+					},
+					cache : false,
+					success : function(text) {
+						CloseWindow("save");
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						btnSave.setEnabled(true);
+						if (409 == jqXHR.status){
+							mini.showMessageBox({
+								title : "数据版本冲突",
+								message : jqXHR.responseText+"，获取最新数据？",
+								buttons : ["是", "否"],
+								iconCls : "mini-messagebox-question",
+								allowResize : true,
+					            callback: function (action) {            
+					                if (action == "是") {
+					                	var _data = mini.clone(o);
+					                	_data.action = "edit";
+					                	SetData(_data);
+					                } else if (action == "否"){
+					                	mini.showMessageBox({
+											title : "数据版本冲突",
+											message : "保留本地数据并提交覆盖最新数据？",
+											buttons : ["是", "否"],
+											iconCls : "mini-messagebox-question",
+											callback: function (action) {
+												if (action == "是") {
+													\#set($lor = $zwall.judge('local_override_remote'))
+													\#if($lor.ok)
+													
+													mini.getbyName("ignoreVersionConflict").setValue("true");
+					                				SaveData();
+					                				\#else
+					                				
+					                				mini.alert($lor.denyReason);
+					                				\#end
+					                				
+												}
+											}
+										});
+				                	}
+					            }
+					        });						
+						} else {
+							//400,403,500错误已经统一在sys.js处理
+							if (400 != jqXHR.status && 403 != jqXHR.status && 500 != jqXHR.status) {
+								var text = "操作失败，" + jqXHR.responseText;
+								mini.alert(text);
+							}
+						}
+					}
+				});
+			}
+
+			////////////////////
+			//标准方法接口定义
+			function SetData(data) {
+				if (data.action == "new") {
+					//跨页面传递的数据对象，克隆后才可以安全使用
+					data = mini.clone(data);
+					form.setData(data);
+					form.setChanged(false);
+				} else if (data.action == "edit") {
+					//跨页面传递的数据对象，克隆后才可以安全使用
+					data = mini.clone(data);
+					$.ajax({
+						url : "${base_url}${model.ext.path}/" + data.id,
+						cache : false,
+						success : function(text) {
+							var o = mini.decode(text);
+							form.setData(o);
+							form.setChanged(false);
+							form.validate();
+						}
+					});
+				}
+			}
+
+			function GetData() {
+				var o = form.getData();
+				return o;
+			}
+
+			function CloseWindow(action) {
+				if(action == "close" && form.isChanged()) {
+					if(confirm("数据被修改了，是否先保存？")) {
+						return false;
+					}
+				}
+				if(window.CloseOwnerWindow)
+					return window.CloseOwnerWindow(action);
+				else
+					window.close();
+			}
+
+			function onOk(e) {
+				SaveData();
+			}
+
+			function onCancel(e) {
+				CloseWindow("cancel");
+			}
+		</script>
+	</body>
+</html>

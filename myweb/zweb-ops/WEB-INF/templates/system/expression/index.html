@@ -1,0 +1,289 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title>表达式维护</title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+	</head>
+	<body>
+
+		<div class="mini-splitter" style="width:100%;height:100%;">
+			<div size="230" showCollapseButton="true">
+				<div class="mini-toolbar" style="padding:2px;border-top:0;border-left:0;border-right:0;">
+					<span style="padding-left:5px;">所属规则：</span>
+					<input style="width:85px;" id="rule_key" class="mini-textbox" onenter="searchCategory()" />
+					<a class="mini-button" iconCls="icon-search" plain="true" onclick="searchCategory()">查找</a>
+				</div>
+				<div class="mini-fit">
+					<ul id="rule-tree" class="mini-tree" url="${base_url}/system/expression/categories" style="width:100%;"
+					showTreeIcon="true" textField="text" idField="id" parentField="pid" resultAsTree="false"
+					></ul>
+				</div>
+			</div>
+			<div>
+
+				<div class="mini-toolbar" style="border-bottom:0;padding:0px;">
+					<table style="width:100%;">
+						<tr>
+							<td style="width:100%;">
+								<a class="mini-button" iconCls="icon-add" onclick="add()">增加</a>
+								<a class="mini-button" iconCls="icon-edit" onclick="edit()">编辑</a>
+								<a class="mini-button" iconCls="icon-remove" onclick="remove()">删除</a>
+							</td>
+
+						</tr>
+					</table>
+				</div>
+				<div class="mini-fit">
+					<div id="expression-datagrid" class="mini-datagrid" style="width:100%;height:100%;" allowResize="false"
+					url="${base_url}/system/expression/list"  idField="id" multiSelect="true" sortMode="client"
+					sizeList="[20,30,50,100]" pageSize="20"
+					>
+						<div property="columns">
+							<div type="checkcolumn" ></div>
+
+							<div field="rule.name"  width="150" headerAlign="center" allowSort="true">
+								所属规则
+							</div>
+
+							<div field="logicalOpDesc" align="center" width="80" headerAlign="center" allowSort="true">
+								逻辑符
+							</div>
+
+							<div field="leftBracket"  align="center" width="40" headerAlign="center" allowSort="true">
+								左括号
+							</div>
+
+							<div field="leftVar.name"  width="200" headerAlign="center" allowSort="true">
+								左变量
+							</div>
+
+							<div field="compareOpDesc" align="center"  width="80" headerAlign="center" allowSort="true">
+								比较符
+							</div>
+
+							<div field="rightVar.name"  width="200" headerAlign="center" allowSort="true">
+								右变量
+							</div>
+
+							<div field="rightBracket"  align="center" width="40" headerAlign="center" allowSort="true">
+								右括号
+							</div>
+							
+							<div field="sort"  width="80" headerAlign="center" allowSort="true">
+								排序
+							</div>
+
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<script type="text/javascript">
+			mini.parse();
+			var grid = mini.get("expression-datagrid");
+
+			var tree = mini.get("rule-tree");
+			tree.on("nodeselect", function(e) {
+				var key = mini.get("rule_key").getFormValue();
+				grid.load({
+					rule : e.node.value,
+					key : key
+				});
+			});
+
+			grid.load();
+
+			function onChooseRule(e) {
+				var btnEdit = this;
+				mini.open({
+					url : "${base_url}/system/rule/select",
+					title : "选择所属规则",
+					width : 650,
+					height : 380,
+					ondestroy : function(action) {
+						if(action == "ok") {
+							var iframe = this.getIFrameEl();
+							var data = iframe.contentWindow.GetData();
+							data = mini.clone(data);
+							//必须
+							if(data) {
+								btnEdit.setValue(data.id);
+								btnEdit.setText(data.name);
+							}
+						}
+					}
+				});
+			}
+
+			function onChooseLeftVar(e) {
+				var btnEdit = this;
+				mini.open({
+					url : "${base_url}/system/variable/select",
+					title : "选择左变量",
+					width : 650,
+					height : 380,
+					ondestroy : function(action) {
+						if(action == "ok") {
+							var iframe = this.getIFrameEl();
+							var data = iframe.contentWindow.GetData();
+							data = mini.clone(data);
+							//必须
+							if(data) {
+								btnEdit.setValue(data.id);
+								btnEdit.setText(data.name);
+							}
+						}
+					}
+				});
+			}
+
+			function onChooseRightVar(e) {
+				var btnEdit = this;
+				mini.open({
+					url : "${base_url}/system/variable/select",
+					title : "选择右变量",
+					width : 650,
+					height : 380,
+					ondestroy : function(action) {
+						if(action == "ok") {
+							var iframe = this.getIFrameEl();
+							var data = iframe.contentWindow.GetData();
+							data = mini.clone(data);
+							//必须
+							if(data) {
+								btnEdit.setValue(data.id);
+								btnEdit.setText(data.name);
+							}
+						}
+					}
+				});
+			}
+
+			function add() {
+				var rule = {};
+				if(tree.getSelected()) {
+					var node = tree.getSelected();
+					rule.id = node.value;
+					rule.name = node.text;
+				}
+				mini.open({
+					url : "${base_url}/system/expression/edit",
+					title : "新增表达式",
+					width : 530,
+					height : 379,
+					showModal : false,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+						var data = {
+							action : "new",
+							rule : rule
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						grid.reload();
+					}
+				});
+			}
+
+			function edit() {
+
+				var row = grid.getSelected();
+				if(row) {
+					mini.open({
+						url : "${base_url}/system/expression/edit",
+						title : "编辑表达式",
+						width : 530,
+						height : 379,
+						showModal : false,
+						onload : function() {
+							var iframe = this.getIFrameEl();
+							var data = {
+								action : "edit",
+								id : row.id
+							};
+							iframe.contentWindow.SetData(data);
+						},
+						ondestroy : function(action) {
+							grid.reload();
+						}
+					});
+
+				} else {
+					alert("请选中一条记录");
+				}
+			}
+
+			function remove() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定删除选中记录？", "确定？",
+			            function (action) {
+			                if (action == "ok") {
+								var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								grid.loading("操作中，请稍后......");
+								$.ajax({
+									url : "${base_url}/system/expression/delete?id=" + id,
+									type : 'post',
+									success : function(text) {
+										grid.reload();
+									},
+									error : function(jqXHR, textStatus, errorThrown) {
+										grid.unmask();
+										//400,403,500错误已经统一在sys.js处理
+										if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+											return;
+										var text = "操作失败，" + jqXHR.responseText;
+										mini.alert(text);
+									}
+								});
+							}
+						});
+				} else {
+					alert("请选中一条记录");
+				}
+			}
+
+			function searchCategory() {
+				var rule = mini.get("rule_key").getValue();
+				tree.load({
+					rule : rule
+				});
+			}
+
+			function searchKey() {
+				var key = mini.get("key").getFormValue();
+
+				var rule = "";
+				if(tree.getSelected()) {
+					rule = tree.getSelected().value;
+				}
+				grid.load({
+					rule : rule,
+					key : key
+				});
+
+			}
+
+		</script>
+	</body>
+</html>

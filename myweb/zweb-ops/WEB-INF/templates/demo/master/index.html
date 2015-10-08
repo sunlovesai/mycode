@@ -1,0 +1,437 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title>主人维护</title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+	</head>
+	<body>
+						
+		<div class="mini-splitter" style="width:100%;height:100%;">
+			<div size="225" showCollapseButton="true">
+				<div class="mini-toolbar" style="padding:3px 2px 3px 2px;">
+					<span style="padding-left:3px;"></span>
+					<input id="position_key" class="mini-textbox" style="width:120px;" emptyText="职业" onenter="searchCategory()" />
+					<a class="mini-button" iconCls="icon-search" onclick="searchCategory()">过滤职业</a>
+				</div>
+				<div class="mini-fit">
+					<ul id="position-tree" class="mini-tree" url="${base_url}/demo/master/categories" style="width:100%; height:100%"
+						showTreeIcon="true" textField="text" idField="id" parentField="pid" resultAsTree="false"
+					></ul>
+				</div>
+			</div>
+			<div>
+										
+				<div class="mini-splitter" id="search-splitter" style="width:100%;height:100%;">
+					<div size="225" showCollapseButton="true" expanded="false">
+						<div class="mini-panel" showToolbar="true" showHeader="false" style="width:100%;height:100%;">
+						    <div property="toolbar" style="padding:5px 5px 5px 10px;">
+						    	<form id="search-form" onsubmit="return false;">
+									<table>
+																													
+										<tr>
+											<td>姓名：</td>
+											<td>
+												<input style="width:125px;" id="name" onenter="search()" class="mini-textbox" emptyText="请输入姓名"/>
+											</td>
+										</tr>
+																																							
+										<tr>
+											<td>是否启用:</td>
+											<td>
+												<input style="width:125px;" id="enableStatus" onenter="search()" class="mini-checkbox" checked="false" text="允许" emptyText="请选择是否启用"/>
+											</td>
+										</tr>
+																																																		
+										<tr>
+											<td>性别：</td>
+											<td>
+												<input style="width:125px;" id="gender" onvaluechanged="onGenderChanged" showNullItem="true" emptyText="请选择性别" nullItemText="请选择性别" onenter="search()" class="mini-combobox"  url="${base_url}/system/dict/options/gender" textField="dictCode" valueField="dictValue"  />
+											</td>
+										</tr>
+																																							
+										<tr>
+											<td>生日(起始)：</td>
+											<td>
+												<input style="width:125px;" id="birthdayStart" onenter="search()" class="mini-datepicker" nullValue="null" format="yyyy-MM-dd" showTime="false" showOkButton="false" showClearButton="false" emptyText="请选择起始日期"/>
+											</td>
+										</tr>
+										<tr>
+											<td>生日(截止)：</td>
+											<td>
+												<input style="width:125px;" id="birthdayEnd" onenter="search()" class="mini-datepicker" nullValue="null" format="yyyy-MM-dd" showTime="false" showOkButton="false" showClearButton="false" emptyText="请选择截止日期"/>
+											</td>
+										</tr>
+																												
+									</table>
+									<div style="text-align: center; padding: 10px;">
+										<a class="mini-button" onclick="search()" iconCls="icon-search" style="width: 60px; margin-right: 20px;">查询</a>
+		                               <a class="mini-button" onclick="reset()" iconCls="icon-cancel"	style="width: 60px; margin-right: 20px;">清空</a>							
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+					<div>
+														
+					<div class="mini-splitter" style="width:100%;height:100%;" vertical="true">
+			    		<div size="50%">
+			    				    	
+						<div class="mini-toolbar" style="border-bottom:0;padding:0px;">
+							<table style="width:100%;">
+								<tr>
+									<td style="width:100%;">
+																			
+										<input id="key" class="mini-textbox" emptyText="{请补充字段名称}" style="width:150px;" onenter="searchKey()"/>
+										<a class="mini-button" iconCls="icon-search" onclick="searchKey()">查询</a>
+										<span class="separator"></span>
+																				
+										<a class="mini-button" iconCls="icon-add" onclick="add()">增加</a>
+										<a class="mini-button" iconCls="icon-edit" onclick="edit()">编辑</a>
+										<a class="mini-button" iconCls="icon-remove" onclick="remove()">删除</a>
+										<a class="mini-button" iconCls="icon-export" onclick="exportExcel()">导出</a>
+																			
+										<a class="mini-button" iconCls="icon-search" onclick="highSearch()">高级查询</a>
+																				
+									</td>
+									<td style="white-space:nowrap;">
+									</td>
+								</tr>
+							</table>
+						</div>
+						<div class="mini-fit">
+							<div id="master-datagrid" class="mini-datagrid" style="width:100%;height:100%;" allowResize="false"
+								url="${base_url}/demo/master/list#if(${parent_id} != '0')?#end"  idField="id" multiSelect="true"
+								sizeList="[20,50,100,300,500]" pageSize="20" contextMenu="#contextMenu" showColumnsMenu="true" onselect="onRowSelect" 							>
+								<div property="columns">
+									<div type="indexcolumn" field="indexcolumn" align="right" width="30"></div>
+									<div type="checkcolumn" width="25"></div>
+																																				
+									<div field="name"  displayField="name"   width="300" hideable="true"  headerAlign="center" allowSort="true">姓名</div>
+																																													
+									<div field="enableStatus"  displayField="enableStatus"   width="120"  headerAlign="center" allowSort="true">是否启用</div>
+																																													
+									<div field="position"  displayField="positionDesc"   width="120"  headerAlign="center" allowSort="true">职业</div>
+																																													
+									<div field="gender"  displayField="genderDesc"   width="120"  headerAlign="center" allowSort="true">性别</div>
+																																													
+									<div field="birthday"  dateFormat="yyyy-MM-dd HH:mm:ss"  width="120"  headerAlign="center" allowSort="true">生日</div>
+																																													
+									<div field="version"  displayField="version"   align="right" width="120"  headerAlign="center" allowSort="true">版本</div>
+																											
+								</div>
+							</div>
+							<ul id="contextMenu" class="mini-contextmenu">
+								<li name="fix" iconCls="icon-unlock" onclick="onFix" >锁定列</li>
+								<li name="unfix" iconCls="icon-lock" onclick="onUnfix" >取消锁定列</li>
+						    </ul>
+						</div>
+										
+						</div>
+						<div showCollapseButton="true">
+							<div id="detail-tabs" class="mini-tabs" activeIndex="0" onactivechanged="onTabChange" contextMenu="#refreshTabMenu" style="width:100%;height:100%;" >
+			    							    				
+			    				<div name="${base_url}/demo/pet" title="宠物">请选择上面的主人</div>
+			    							    				
+			    			</div>
+			    			<ul id="refreshTabMenu" class="mini-contextmenu" onbeforeopen="onBeforeOpen">
+								<li iconCls="icon-reload" onclick="reloadTab">
+									刷新标签页
+								</li>
+							</ul>
+						</div>
+					</div>
+													
+					</div>
+				</div>
+									
+			</div>
+		</div>
+				
+		<script type="text/javascript">
+			mini.parse();
+			var grid = mini.get("master-datagrid");
+			function onUnfix() {
+				grid.unFrozenColumns();
+			}
+			function onFix() {
+				mini.prompt("请输入要锁定的列数,比如：2", "请输入",
+		            function (action, value) {
+		                if (action == "ok" && value) {
+		                	try {
+			                	var end = parseInt(value);
+			                	if (end < 0) end = 0;
+			                    grid.frozenColumns(0, end);
+		                  	} catch(e) {
+		                  	}
+		                }
+		            }
+		        );
+			}
+			grid.on("drawcell", function(e){
+	        	if ( false     || e.field == "enableStatus"           ) {
+	        		var c= "";
+	        		if (e.value == true)
+	        			c = "checked=checked";
+	        		e.cellHtml = "<center><input disabled=disabled type='checkbox' "+c+"/></center>";
+	        	}
+	        	if (e.field == "indexcolumn") {
+	                e.cellStyle = "background:#ecedef";
+	            }
+	        });
+						
+			var tree = mini.get("position-tree");
+			tree.on("nodeselect", function(e) {
+				var key = mini.get("position_key").getFormValue();
+				grid.load({
+					position : e.node.value,
+					key : key
+				});
+			});
+						
+			grid.load();
+			
+										        	        							        	        							        	        							        	        							        	        							        	        	        
+			function add() {
+								
+				mini.open({
+					url : "${base_url}/demo/master/edit",
+					title : "新增主人",
+					width : 810,
+					height : 323,
+					showModal : false,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+												
+						var position = "";
+						if (tree.getSelected()) {
+							position = tree.getSelected();
+						}
+													
+						var data = {
+							action : "new",
+																					
+							position : position.value,
+																												
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						grid.reload();
+					}
+				});
+			}
+
+			function edit() {
+								
+				var row = grid.getSelected();
+				if(row) {
+					mini.open({
+						url : "${base_url}/demo/master/edit",
+						title : "编辑主人",
+						width : 810,
+						height : 323,
+						showModal : false,
+						onload : function() {
+							var iframe = this.getIFrameEl();
+							var data = {
+								action : "edit",
+								id : row.id
+							};
+							iframe.contentWindow.SetData(data);
+						},
+						ondestroy : function(action) {
+							grid.reload();
+						}
+					});
+
+				} else {
+					mini.alert("请选中一条记录","提示");
+				}
+			}
+			
+			function remove() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定删除选中记录？", "确定？",
+			            function (action) {
+			                if (action == "ok") {
+			                    var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								grid.loading("操作中，请稍后......");
+								$.ajax({
+									url : "${base_url}/demo/master/delete?id=" + id,
+									type : 'post',
+									success : function(text) {
+										mini.alert("删除选中记录，操作成功","提示");
+										grid.reload();
+									},
+									error : function(jqXHR, textStatus, errorThrown) {
+										grid.unmask();
+										//400,403,500错误已经统一在sys.js处理
+										if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+											return;
+										var text = "操作失败，" + jqXHR.responseText;
+										mini.alert(text,"提示");
+									}
+								});
+			                }
+			            }
+			        );
+				} else {
+					mini.alert("请选中一条记录","提示");
+				}
+			}
+						
+			function searchCategory() {
+				var position = mini.get("position_key").getValue();
+				tree.load({
+					position : position
+				});
+			}
+									
+			function searchKey() {
+				var key = mini.get("key").getFormValue();
+				
+								
+				var position = "";
+				if (tree.getSelected()) {
+					position = tree.getSelected().value;
+				}
+				grid.load({
+					position : position,
+					key : key
+				});
+								
+			}
+			
+			function highSearch(){
+				var index = 1;
+				var splitter = mini.get("search-splitter");
+				var pane = splitter.getPane(index);
+				if (pane.expanded) {
+					splitter.collapsePane(index);
+				} else {
+					splitter.expandPane(index);
+				}
+			}
+			
+			function search() {
+				var json = _getSearchJSON();
+				grid.load(json);
+				return false;
+			}
+			function reset(){
+				var form = new mini.Form("search-form");
+				form.reset();
+			}
+			function _getSearchJSON() {
+																
+				var name = mini.get("name").getFormValue();
+																								
+				var enableStatus = mini.get("enableStatus").getFormValue();
+																								
+				var gender = mini.get("gender").getFormValue();
+																								
+				var birthdayStart = mini.get("birthdayStart").getFormValue();
+												
+				var birthdayEnd = mini.get("birthdayEnd").getFormValue();
+																								
+				var position = "";
+				if (tree.getSelected()) {
+					position = tree.getSelected().value;
+				}
+				return {
+					position: position,
+					name:name,enableStatus:enableStatus,gender:gender,birthdayStart:birthdayStart,birthdayEnd:birthdayEnd
+				};
+								
+			}
+									
+			var tabs = mini.get("detail-tabs");
+			var currentTab;
+			function onBeforeOpen(e) {
+				currentTab = tabs.getTabByEvent(e.htmlEvent);
+				if(!currentTab) {
+					e.cancel = true;
+				}
+			}
+			
+			function reloadTab() {
+				tabs.reloadTab(currentTab);
+			}
+			var onRowSelect = function(sender){
+				var row = grid.getSelected();
+				if(!row){
+					return false;
+				}
+				var activeTab = tabs.getActiveTab();
+				if (typeof activeTab === 'undefined' || !activeTab) {
+					activeTab = tabs.getTab(0);
+					tabs.activeTab(activeTab);
+				}
+				var url = activeTab.name + "?parent_id=" + row.id + "&parent_name=" + row.name;
+				tabs.loadTab(url, activeTab);
+			}
+			var onTabChange = function(sender){
+				var row = grid.getSelected();
+				if(!row){
+					return false;
+				}
+				var tab = tabs.getTab(sender.index);
+				var url = tab.name + "?parent_id=" + row.id + "&parent_name=" + row.name;
+				tabs.loadTab(url, tab);
+				currentTab = tab;
+			}
+						
+			//导出
+			function exportExcel(){
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定导出选中记录？", "确定？",
+			            function (action) {
+			                if (action == "ok") {
+								var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								location.href="${base_url}/demo/master/export?ids=" + id;
+							}
+						});
+				} else {
+					if(grid.totalCount>0){
+						mini.confirm("确定导出记录？", "确定？",
+				            function (action) {
+				                if (action == "ok") {
+									var json = _getSearchJSON();
+									var queryString = $.param(json) ;
+									var url = "${base_url}/demo/master/export?"+queryString;
+									location.href=url;
+								}
+							});
+					} else {
+						mini.alert("没有数据可以导出","提示");
+					}
+				}
+			}
+			
+		</script>
+	</body>
+</html>

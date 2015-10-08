@@ -1,0 +1,5 @@
+																		
+序号,报表标题,报表编码,表名
+<jx:forEach items="${data}" var="item" varStatus="status">,,,
+${status.index+1},${item.title},${item.code},${item.tableName}
+</jx:forEach>,,,

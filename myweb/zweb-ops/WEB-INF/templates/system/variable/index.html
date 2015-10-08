@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title>变量维护</title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+	</head>
+	<body>
+						
+		<div class="mini-splitter" style="width:100%;height:100%;">
+			<div size="220">
+				<div class="mini-toolbar" style="padding:3px 2px 3px 3px;">
+					<input id="type_key" class="mini-textbox" emptyText="变量类型名" onenter="searchCategory()" />
+					<a class="mini-button" iconCls="icon-search" onclick="searchCategory()">过滤类型</a>
+				</div>
+				<div class="mini-fit">
+					<ul id="type-tree" class="mini-tree" url="${base_url}/system/variable/categories" style="width:100%;"
+						showTreeIcon="true" textField="text" idField="id" parentField="pid" resultAsTree="false"
+					></ul>
+				</div>
+			</div>
+			<div>
+				<div class="mini-toolbar" style="border-bottom:0;padding:0px;">
+					<table style="width:100%;">
+						<tr>
+							<td style="width:100%;">
+								<input id="key" class="mini-textbox" emptyText="变量名" style="width:150px;" onenter="searchKey()"/>
+								<a class="mini-button" iconCls="icon-search" onclick="searchKey()">查询</a>
+								<span class="separator"></span>
+								<a class="mini-button" iconCls="icon-add" onclick="add()">增加</a>
+								<a class="mini-button" iconCls="icon-edit" onclick="edit()">编辑</a>
+								<a class="mini-button" iconCls="icon-remove" onclick="remove()">删除</a>
+							</td>
+							<td style="white-space:nowrap;">
+								
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="mini-fit">
+					<div id="variable-datagrid" class="mini-datagrid" style="width:100%;height:100%;" allowResize="false"
+						url="${base_url}/system/variable/list"  idField="id" multiSelect="true" sortMode="client"
+						sizeList="[20,50,100,300,500]" pageSize="20"  showColumnsMenu="true"
+					>
+						<div property="columns">
+							<div type="indexcolumn" field="indexcolumn" align="right" width="30"></div>
+							<div type="checkcolumn" width="25"></div>
+							<div field="typeDesc" width="80" headerAlign="center" allowSort="true">变量类型</div>
+							<div field="name" hideable="true" width="100%" headerAlign="center" allowSort="true">变量名</div>
+							<div field="value"  width="200" headerAlign="center" allowSort="true">变量值</div>
+							<div field="left.name"  width="120" headerAlign="center" allowSort="true">左变量</div>
+							<div field="opDesc"  width="50" align="center" headerAlign="center" allowSort="true">计算符</div>
+							<div field="right.name"  width="120" headerAlign="center" allowSort="true">右变量</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+				
+		<script type="text/javascript">
+			mini.parse();
+			var grid = mini.get("variable-datagrid");
+			grid.on("drawcell", function(e){
+	        	if (e.field == "indexcolumn") {
+	                e.cellStyle = "background:#ecedef";
+	            }
+	        });
+			
+			var tree = mini.get("type-tree");
+			tree.on("nodeselect", function(e) {
+				var key = mini.get("type_key").getFormValue();
+				grid.load({
+					type : e.node.value,
+					key : key
+				});
+			});
+						
+			grid.load();
+			
+			function onChooseLeft(e) {
+	            var btnEdit = this;
+	            mini.open({
+	                url: "${base_url}/system/variable/select",
+	                title: "选择左变量",
+	                width: 650,
+	                height: 380,
+	                ondestroy: function (action) {
+	                    if (action == "ok") {
+	                        var iframe = this.getIFrameEl();
+	                        var data = iframe.contentWindow.GetData();
+	                        data = mini.clone(data);    //必须
+	                        if (data) {
+	                            btnEdit.setValue(data.id);
+	                            btnEdit.setText(data.name);
+	                        }
+	                    }
+	                }
+	            });            
+	        }
+				        	        	        							        	        									
+			function onChooseRight(e) {
+	            var btnEdit = this;
+	            mini.open({
+	                url: "${base_url}/system/variable/select",
+	                title: "选择右变量",
+	                width: 650,
+	                height: 380,
+	                ondestroy: function (action) {
+	                    if (action == "ok") {
+	                        var iframe = this.getIFrameEl();
+	                        var data = iframe.contentWindow.GetData();
+	                        data = mini.clone(data);    //必须
+	                        if (data) {
+	                            btnEdit.setValue(data.id);
+	                            btnEdit.setText(data.name);
+	                        }
+	                    }
+	                }
+	            });            
+	        }
+				        	        	        	        
+			function add() {
+				var type = "";
+				var node = tree.getSelectedNode();
+				if (node) {
+					type = node.value;
+				}
+				mini.open({
+					url : "${base_url}/system/variable/edit",
+					title : "新增变量",
+					width : 630,
+					height : 480,
+					showModal : false,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+						var data = {
+							action : "new",
+							type : type
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						grid.reload();
+					}
+				});
+			}
+
+			function edit() {
+				var row = grid.getSelected();
+				if(row) {
+					mini.open({
+						url : "${base_url}/system/variable/edit",
+						title : "编辑变量",
+						width : 630,
+						height : 480,
+						showModal : false,
+						onload : function() {
+							var iframe = this.getIFrameEl();
+							var data = {
+								action : "edit",
+								id : row.id
+							};
+							iframe.contentWindow.SetData(data);
+						},
+						ondestroy : function(action) {
+							grid.reload();
+						}
+					});
+				} else {
+					alert("请选中一条记录");
+				}
+			}
+			
+			function remove() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定删除选中记录？", "确定？", function(action) {
+						if(action == "ok") {
+							var ids = [];
+							for(var i = 0, l = rows.length; i < l; i++) {
+								var r = rows[i];
+								ids.push(r.id);
+							}
+							var id = ids.join(',');
+							grid.loading("操作中，请稍后......");
+							$.ajax({
+								url : "${base_url}/system/variable/delete?id=" + id,
+								type : 'post',
+								success : function(text) {
+									grid.reload();
+								},
+								error : function(jqXHR, textStatus, errorThrown) {
+									grid.unmask();
+									//400,403,500错误已经统一在sys.js处理
+									if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+										return;
+									var text = "操作失败，" + jqXHR.responseText;
+									mini.alert(text);
+								}
+							});
+						}
+					});
+				} else {
+					alert("请选中一条记录");
+				}
+			}
+						
+			function searchCategory() {
+				var type = mini.get("type_key").getValue();
+				tree.load({
+					type : type
+				});
+			}
+						
+			function searchKey() {
+				var key = mini.get("key").getFormValue();
+				var type = "";
+				if (tree.getSelected()) {
+					type = tree.getSelected().value;
+				}
+				grid.load({
+					type : type,
+					key : key
+				});
+			}
+						
+			function search() {
+				var nameAndOr = mini.get("nameAndOr").getFormValue();
+				var name = mini.get("name").getFormValue();
+				var valueAndOr = mini.get("valueAndOr").getFormValue();
+				var value = mini.get("value").getFormValue();
+				var type = "";
+				if (tree.getSelected()) {
+					type = tree.getSelected().value;
+				}
+				grid.load({
+					type: type,
+					nameAndOr:nameAndOr,name:name,valueAndOr:valueAndOr,value:value
+				});
+			}
+						
+		</script>
+	</body>
+</html>

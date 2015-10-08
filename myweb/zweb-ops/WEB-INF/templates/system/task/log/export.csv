@@ -1,0 +1,5 @@
+																																
+序号,所属任务,起始时间,结束时间,执行结果,失败原因
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,,
+${status.index+1},${item.task.name},${item.startAt},${item.endAt},${item.result},${item.reason}
+</jx:forEach>,,,,,

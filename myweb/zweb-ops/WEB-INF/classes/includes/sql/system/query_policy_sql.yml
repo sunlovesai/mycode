@@ -1,0 +1,38 @@
+QueryPolicy:
+  list: > 
+    SELECT
+        privilege_id,
+        name,
+        who_rule_id,
+        query_id,
+        sort,
+        id
+    FROM
+        ${app.solidbase_catalog}.sys_query_policy t0
+    WHERE 1=1 
+              
+        #if ($args[0].privilege && $args[0].privilege!="")
+        AND privilege_id = :privilege
+        #end
+          
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #elseif ($args[0].key && $args[0].key!="")
+        AND ( 1<>1
+                           
+            OR name like :%key% 
+                                          
+            OR who_rule_id = :key
+                                
+        )
+        #else
+        
+        #if ($args[0].name && $args[0].name!="") 
+        AND name like :%name% 
+        #end 
+                         
+        #if ($args[0].who && $args[0].who!="") 
+        AND who_rule_id = :who
+        #end 
+                
+        #end

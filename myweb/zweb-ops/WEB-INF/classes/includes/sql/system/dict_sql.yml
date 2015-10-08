@@ -1,0 +1,36 @@
+Dict: 
+  list: >
+    SELECT
+      *
+    FROM
+      ${app.solidbase_catalog}.sys_dict t0
+    WHERE 1=1
+    #if ($args[0].ids && $args[0].ids != '') 
+      AND id in ( $args[0].ids )
+    #elseif ($args[0].pid && $args[0].pid != '')
+      AND pid = :pid
+      #if ($args[0].isNotType == true)
+      AND is_type <> 1
+      #end
+      #if ($args[0].key && $args[0].key != '')
+      AND ( dict_code like :%key% OR dict_value like :%key% )
+      #end
+    #else
+      #if ($args[0].key && $args[0].key != '')
+      AND is_type <> 1 AND ( dict_code like :%key% OR dict_value like :%key% )
+      #else
+      AND is_type = 1 AND pid is null
+      #end
+    #end
+  categories: >
+    SELECT
+      *
+    FROM
+      ${app.solidbase_catalog}.sys_dict t0
+    WHERE 1=1
+    #if ($args[0].key && $args[0].key != '')
+      AND is_type = 1 AND ( dict_code like :%key% OR dict_value like :%key% )
+    #else
+      AND is_type = 1
+    #end
+    

@@ -1,0 +1,35 @@
+TimedTask:
+  list: > 
+    SELECT
+        *
+    FROM
+        ${app.solidbase_catalog}.sys_timed_task t0
+    WHERE 1=1
+          
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #elseif ($args[0].key && $args[0].key!="")
+        AND ( 1<>1
+                           
+            OR name like :%key% 
+                                     
+            OR description like :%key% 
+                                          
+            OR schedule_type = :key
+                                
+        )
+        #else
+                   
+        #if ($args[0].name && $args[0].name!="") 
+        AND name like :%name% 
+        #end 
+                         
+        #if ($args[0].description && $args[0].description!="") 
+        AND description like :%description% 
+        #end 
+                         
+        #if ($args[0].scheduleType && $args[0].scheduleType!="") 
+        AND schedule_type = :scheduleType
+        #end 
+                
+        #end

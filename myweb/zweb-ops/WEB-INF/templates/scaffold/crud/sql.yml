@@ -1,0 +1,62 @@
+${model.ext.Name}:
+  list: > 
+    SELECT
+      #foreach($field in $model.getUpdatableFields())
+      #if($field.ext.skip || !$field.text || $field.text.trim().length() == 0)
+      #else
+
+        ${field.columnName},
+      #end
+      #end
+
+        $model.getIdField().columnName
+    FROM
+        ${app.solidbase_catalog}.${model.getTable()} t0
+    WHERE 1=1
+      #if($model.getParentField())
+        
+        \#if ($args[0].${model.getParentField().fieldName} && $args[0].${model.getParentField().fieldName}!="")
+        AND ${model.getParentField().columnName} = :${model.getParentField().fieldName}
+        \#end
+      #end
+    
+        \#if ($args[0].ids && $args[0].ids!="")
+        AND $model.getIdField().columnName in ($args[0].ids)
+        \#elseif ($args[0].key && $args[0].key!="")
+        AND ( 1<>1
+          #foreach($field in $model.searchableFields)
+          #if($field.isBoolean() || $field.isFk() || $field.isDict() || $field.isDate() || $field.isNumber())
+            
+            OR ${field.columnName} = :key
+          #else
+       
+            OR ${field.columnName} like :%key% 
+          #end
+          #end
+            
+        )
+        \#else
+      #foreach($field in $model.searchableFields)
+      #if($field.isBoolean() || $field.isFk() || $field.isDict())
+       
+        \#if ($args[0].${field.fieldName} && $args[0].${field.fieldName}!="") 
+        AND ${field.columnName} = :${field.fieldName}
+        \#end 
+      #elseif($field.isDate() || $field.isNumber())
+   
+        \#if ($args[0].${field.fieldName}Start && $args[0].${field.fieldName}Start!="") 
+        AND ${field.columnName} >= :${field.fieldName}Start
+        \#end 
+        
+        \#if ($args[0].${field.fieldName}End && $args[0].${field.fieldName}End!="") 
+        AND ${field.columnName} <= :${field.fieldName}End
+        \#end 
+      #else
+       
+        \#if ($args[0].${field.fieldName} && $args[0].${field.fieldName}!="") 
+        AND ${field.columnName} like :%${field.fieldName}% 
+        \#end 
+      #end
+      #end
+    
+        \#end

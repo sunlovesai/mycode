@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+#set($uid = $P.param('uid', ''))
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>菜单列表</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+		<style>
+	    html, body{
+	        margin:0;padding:0;border:0;width:100%;height:100%;overflow:hidden;
+	    }    
+	    </style>
+	</head>
+	<body>
+	    <div class="mini-toolbar" style="border-bottom:0;padding:0px;">
+			<table style="width:100%;">
+				<tr>
+					<td style="width:100%;">
+						<input id="key" class="mini-textbox" emptyText="菜单名称" style="width:150px;" onenter="onKeyEnter"/>
+						<a class="mini-button" iconCls="icon-search" onclick="search()">查询</a>
+					</td>
+					<td style="white-space:nowrap;">
+						
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div class="mini-fit">
+			<div id="menu-datagrid" class="mini-datagrid" style="width:100%;height:100%;" allowResize="false"
+						url="${base_url}/system/menu/list_for_user?uid=${uid}"  idField="id" multiSelect="true"
+						sizeList="[20,50,100,300,500]" pageSize="20" showColumnsMenu="true">
+			>
+				<div property="columns">
+					<div type="indexcolumn" field="indexcolumn" align="right" width="30"></div>
+					<div type="checkcolumn" width="25"></div>
+					<div name="name" field="name" hideable="true" width="200" headerAlign="center" >
+						菜单名称
+					</div>
+					<div field="link" width="200" headerAlign="center" >
+						菜单链接
+					</div>
+					<div field="sort" width="50" align="right" headerAlign="center" >
+						排序
+					</div>
+					<div field="tenant" displayField="tenant.code" width="80" align="left" headerAlign="center" >
+						所属机构
+					</div>
+					<div field="remark" width="100" headerAlign="center" >
+						备注
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			mini.parse();
+
+			var grid = mini.get("menu-datagrid");
+	        
+			grid.load();
+			
+			function search() {
+				var key = mini.get("key").getValue();
+				grid.load({
+					name : key
+				});
+			}
+
+			function onKeyEnter(e) {
+				search();
+			}
+		</script>
+	</body>
+</html>

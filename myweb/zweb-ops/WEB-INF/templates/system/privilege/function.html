@@ -1,0 +1,412 @@
+#set($parent_id = $P.param('parent_id','0'))
+#set($parent_name = $P.param('parent_name',''))
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title>功能权限配置</title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+	</head>
+	<body>
+		<div class="mini-splitter" style="width:100%;height:100%;" vertical="true">
+    		<div size="60%">
+				<div class="mini-toolbar" style="border-bottom:0;padding:0px;">
+					<table style="width:100%;">
+						<tr>
+							<td style="width:100%;">
+								<input id="key" class="mini-textbox" emptyText="权限名称/权限标识" style="width:150px;" onenter="onKeyEnter"/>
+								<a class="mini-button" iconCls="icon-search" onclick="search()">查询</a>
+								<span class="separator"></span>
+								<a class="mini-button" iconCls="icon-add" onclick="add()">增加</a>
+								<a class="mini-button" iconCls="icon-edit" onclick="edit()">编辑</a>
+								<a class="mini-button" iconCls="icon-remove" onclick="remove()">删除</a>
+								<a class="mini-button" iconCls="icon-ok" onclick="enable()">启用</a>
+								<a class="mini-button" iconCls="icon-no" onclick="disable()">禁用</a>
+								<a class="mini-button" iconCls="icon-synchronize" onclick="synchronize()">同步数据</a>
+								<a class="mini-button" iconCls="icon-import" onclick="upload()">导入策略</a>
+								<a class="mini-button" iconCls="icon-export" onclick="download()">导出策略</a>
+							</td>
+							<td style="white-space:nowrap;">
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="mini-fit">
+					<div id="privilege-grid" class="mini-datagrid" style="width:100%;height:100%;" allowResize="false"
+						url="${base_url}/system/privilege/list?menuId=${parent_id}"  idField="id" multiSelect="true" sortMode="client"
+						onrowclick="onPrivilegeClick"
+						sizeList="[20,50,100,300,500]" pageSize="20"  showColumnsMenu="true"
+					>
+						<div property="columns">
+							<div type="indexcolumn" field="indexcolumn" align="right" width="30"></div>
+							<div type="checkcolumn" width="25"></div>
+							<div field="uri" width="200" allowSort="true" headerAlign="center" >
+								系统功能路径
+							</div>
+							<div field="name" hideable="true" width="120" allowSort="true" headerAlign="center" >
+								系统功能简称
+							</div>
+							<div field="menu" displayField="menu.name" allowSort="true" width="70" headerAlign="center" align="center" >
+								所属菜单
+							</div>
+							<div field="developer" displayField="developer" allowSort="true" width="100" headerAlign="center" align="left" >
+								开发负责人
+							</div>
+							<div field="type" displayField="typeDesc" allowSort="true" align="center" width="50" headerAlign="center" >
+								类型
+							</div>
+							<div field="isAvailable" align="center" allowSort="true" width="50" headerAlign="center" >
+								状态
+							</div>
+							<div field="isDisplayOnPannel" displayField="isDisplayOnPannel" width="60"  headerAlign="center" allowSort="true">
+								授权面板
+							</div>
+							<div field="isSharedDataQuery" displayField="isSharedDataQuery" width="60"  headerAlign="center" allowSort="true">
+								共享查询
+							</div>
+							<div field="isSharedDataOp" displayField="isSharedDataOp" width="60"  headerAlign="center" allowSort="true">
+								共享操作
+							</div>
+							<div field="isOpenTenant" width="70"  headerAlign="center" allowSort="true">
+								多机构模式
+							</div>
+							<div field="needLog" width="60"  headerAlign="center" allowSort="true">
+								记录日志
+							</div>
+							<div field="sort" align="right" width="40" allowSort="true" headerAlign="center" >
+								排序
+							</div>
+							<div field="tenant" displayField="tenant.name" width="120" headerAlign="center" allowSort="true">
+								所属机构
+							</div>
+						</div>
+					</div>
+					<ul id="contextMenu" class="mini-contextmenu">
+						<li name="fix" iconCls="icon-unlock" onclick="onFix" >锁定列</li>
+						<li name="unfix" iconCls="icon-lock" onclick="onUnfix" >取消锁定列</li>
+				    </ul>
+				</div>
+				
+			</div>
+			<div showCollapseButton="true">
+				<div id="detail-tabs" class="mini-tabs" activeIndex="0"  style="width:100%;height:100%;" >
+    				<div name="${base_url}/system/privilege/query_policy" title="查询策略"></div>
+    				<div name="${base_url}/system/privilege/decision_policy" title="决策策略"></div>
+    			</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			mini.parse();
+			
+			var grid = mini.get("privilege-grid");
+			grid.on("drawcell", function(e){
+	        	if (e.field == "indexcolumn") {
+	                e.cellStyle = "background:#ecedef";
+	            }
+	            if (e.field == "isAvailable") {
+	            	if (e.value) {
+	            		e.cellHtml = "<font color='green'>已启用</font>";
+	            	} else {
+	            		e.cellHtml = "<font color='gray'>未启用</font>";
+	            	}
+	            }
+	            if (e.field == "isDisplayOnPannel" || e.field == "isSharedDataOp" 
+	            	|| e.field == "isSharedDataQuery" || e.field == "isOpenTenant" || e.field == "needLog") {
+					var c= "";
+	        		if (e.value == true)
+	        			c = "checked=checked";
+	        		e.cellHtml = "<center><input disabled=disabled type='checkbox' "+c+"/></center>";
+				}
+	        });
+	        
+			grid.load();
+			
+			function add() {
+				mini.open({
+					url : "${base_url}/system/privilege/edit",
+					title : "新增功能权限信息",
+					width : 400,
+					height : 400,
+					showModal : false,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+						var data = {
+							action : "new",
+							menu : {
+								id : "${parent_id}",
+								name : "${parent_name}"
+							}
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						grid.reload();
+					}
+				});
+			}
+			
+			function edit() {
+				var row = grid.getSelected();
+				if(row) {
+					mini.open({
+						url : "${base_url}/system/privilege/edit",
+						title : "修改权限定义信息",
+						width : 400,
+						height : 400,
+						showModal : false,
+						onload : function() {
+							var iframe = this.getIFrameEl();
+							var data = {
+								action : "edit",
+								id : row.id
+							};
+							iframe.contentWindow.SetData(data);
+
+						},
+						ondestroy : function(action) {
+							grid.reload();
+						}
+					});
+
+				} else {
+					alert("请选中一条记录");
+				}
+			}
+			
+			function remove() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定删除选定记录？", "确定？",
+			            function (action) {
+			                if (action == "ok") {
+								var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								grid.loading("操作中，请稍后......");
+								$.ajax({
+									url : "${base_url}/system/privilege/delete?id=" + id,
+									type : 'post',
+									success : function(text) {
+										grid.reload();
+									},
+									error : function(jqXHR, textStatus, errorThrown) {
+										grid.unmask();
+										//400,403,500错误已经统一在sys.js处理
+										if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+											return;
+										var text = "操作失败，" + jqXHR.responseText;
+										mini.alert(text);
+									}
+								});
+							}
+						});
+				} else {
+					alert("请选中一条记录");
+				}
+			}
+			
+			function enable() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("启用后系统将会拦截该路径检查访问权限，确定吗？", "确定？",
+			            function (action) {
+			                if (action == "ok") {
+								var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								grid.loading("操作中，请稍后......");
+								$.ajax({
+									url : "${base_url}/system/privilege/enable?id=" + id,
+									type : 'post',
+									success : function(text) {
+										grid.reload();
+									},
+									error : function(jqXHR, textStatus, errorThrown) {
+										grid.unmask();
+										//400,403,500错误已经统一在sys.js处理
+										if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+											return;
+										var text = "操作失败，" + jqXHR.responseText;
+										mini.alert(text);
+									}
+								});
+							}
+						});
+				} else {
+					alert("请选中一条记录");
+				}
+			}
+			
+			function disable() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("禁用后系统将不会拦截该路径检查访问权限，确定吗？", "确定？",
+			            function (action) {
+			                if (action == "ok") {
+								var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								grid.loading("操作中，请稍后......");
+								$.ajax({
+									url : "${base_url}/system/privilege/disable?id=" + id,
+									type : 'post',
+									success : function(text) {
+										grid.reload();
+									},
+									error : function(jqXHR, textStatus, errorThrown) {
+										grid.unmask();
+										//400,403,500错误已经统一在sys.js处理
+										if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+											return;
+										var text = "操作失败，" + jqXHR.responseText;
+										mini.alert(text);
+									}
+								});
+							}
+						});
+				} else {
+					alert("请选中一条记录");
+				}
+			}
+			
+			function synchronize() {
+				mini.confirm("确定同步数据？", "确定？", function(action) {
+					if(action == "ok") {
+						grid.loading("操作中，请稍后......");
+						$.ajax({
+							url : "${base_url}/system/privilege/synchronize",
+							type : 'post',
+							success : function(text) {
+								grid.reload();
+								mini.alert("同步数据成功");
+							},
+							error : function(jqXHR, textStatus, errorThrown) {
+								grid.unmask();
+								//400,403,500错误已经统一在sys.js处理
+								if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+									return;
+								var text = "操作失败，" + jqXHR.responseText;
+								mini.alert(text);
+							}
+						});
+					}
+				});
+			}
+			
+			function search() {
+				var key = mini.get("key").getValue();
+				grid.load({
+					key : key,
+					menuId : "${parent_id}"
+				});
+			}
+			
+			function onKeyEnter(e) {
+				search();
+			}
+			
+			var tabs = mini.get("detail-tabs");
+			var onPrivilegeClick = function(sender){
+				var privi = grid.getSelected();
+				if(!privi){
+					return false;
+				}
+				var activeTab = tabs.getActiveTab();
+				var type = privi.type;
+				if ("query" == type) {
+					activeTab = tabs.getTab(0);
+					tabs.updateTab(tabs.getTab(1), {visible:false});
+					tabs.updateTab(activeTab, {visible:true});
+					tabs.activeTab(activeTab);
+				} else if ("decision" == type) {
+					activeTab = tabs.getTab(1);
+					tabs.updateTab(tabs.getTab(0), {visible:false});
+					tabs.updateTab(activeTab, {visible:true});
+					tabs.activeTab(activeTab);
+				} else if (!activeTab) {
+					activeTab = tabs.getTab(0);
+				}
+				
+				var url = activeTab.name + "?parent_id=" + privi.id + "&parent_name=" + privi.name;
+				tabs.loadTab(url, activeTab);
+			}
+			
+			//导入
+			function upload() {
+				mini.open({
+					url : "${base_url}/system/privilege/import",
+					title : "导入数据",
+					width : 400,
+					height : 300,
+					showModal: false,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+						var data = {
+							action : "import",
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						if ("success" == action) {
+							grid.reload();
+							mini.alert("导入数据成功");
+						}
+					}
+				});
+			}
+			
+			//导出
+			function download(){
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定导出选中记录？", "确定？",
+			            function (action) {
+			                if (action == "ok") {
+								var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								location.href = "${base_url}/system/privilege/export?ids=" + id;
+							}
+						});
+				} else {
+					if(grid.totalCount>0){
+						mini.confirm("确定导出记录？", "确定？",
+				            function (action) {
+				                if (action == "ok") {
+									var key = mini.get("key").getFormValue();
+									var queryString = "menuId=${parent_id}&key="+key;
+									var url = "${base_url}/system/privilege/export?"+queryString;
+									location.href = url;
+								}
+							});
+					} else {
+						mini.alert("没有数据可以导出");
+					}
+				}
+			}
+		</script>
+	</body>
+</html>

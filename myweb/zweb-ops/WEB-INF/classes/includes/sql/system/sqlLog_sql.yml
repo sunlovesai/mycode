@@ -1,0 +1,57 @@
+SqlLog:
+  list: > 
+    SELECT
+        *
+    FROM
+        ${app.solidbase_catalog}.sys_sql_log t0
+    WHERE 1=1
+          
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #elseif ($args[0].key && $args[0].key!="")
+        AND ( 1<>1
+                           
+            OR user_name like :%key% 
+                                     
+            OR user_email like :%key% 
+                                          
+            OR table_name like :%key% 
+                                          
+            OR action_log_id = :key
+                                
+        )
+        #else
+                   
+        #if ($args[0].userName && $args[0].userName!="") 
+        AND user_name like :%userName% 
+        #end 
+                         
+        #if ($args[0].userEmail && $args[0].userEmail!="") 
+        AND user_email like :%userEmail% 
+        #end 
+                     
+        #if ($args[0].timeCostStart && $args[0].timeCostStart!="") 
+        AND time_cost >= :timeCostStart
+        #end 
+        
+        #if ($args[0].timeCostEnd && $args[0].timeCostEnd!="") 
+        AND time_cost <= :timeCostEnd
+        #end 
+                         
+        #if ($args[0].tableName && $args[0].tableName!="") 
+        AND table_name like :%tableName% 
+        #end 
+                     
+        #if ($args[0].createTimeStart && $args[0].createTimeStart!="") 
+        AND create_time >= :createTimeStart
+        #end 
+        
+        #if ($args[0].createTimeEnd && $args[0].createTimeEnd!="") 
+        AND create_time <= :createTimeEnd
+        #end 
+                         
+        #if ($args[0].actionLog && $args[0].actionLog!="") 
+        AND action_log_id = :actionLog
+        #end 
+                
+        #end

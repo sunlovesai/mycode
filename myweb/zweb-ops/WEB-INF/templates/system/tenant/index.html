@@ -1,0 +1,451 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title>租户维护</title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+	</head>
+	<body>
+												
+		<div class="mini-splitter" id="search-splitter" style="width:100%;height:100%;">
+			<div size="225" showCollapseButton="true" expanded="false">
+				<div class="mini-panel" showToolbar="true" showHeader="false" style="width:100%;height:100%;">
+				    <div property="toolbar" style="padding:5px 5px 5px 10px;">
+				    	<form id="search-form">
+							<table>
+																											
+								<tr>
+									<td>编号：</td>
+									<td>
+										<input style="width:125px;" id="code" onenter="search()" class="mini-textbox" emptyText="请输入编号"/>
+									</td>
+								</tr>
+																																					
+								<tr>
+									<td>名称：</td>
+									<td>
+										<input style="width:125px;" id="name" onenter="search()" class="mini-textbox" emptyText="请输入名称"/>
+									</td>
+								</tr>
+																																																											
+								<tr>
+									<td>状态：</td>
+									<td>
+										<input style="width:125px;" id="status" onvaluechanged="onStatusChanged" showNullItem="true" emptyText="请选择状态" nullItemText="请选择状态" onenter="search()" class="mini-combobox" data='[{"text":"启用","value":"1"},{"text":"禁用","value":"2"}]' textField="text" valueField="value"  />
+									</td>
+								</tr>
+							</table>
+							<div style="text-align: center; padding: 10px;">
+								<a class="mini-button" onclick="search()" iconCls="icon-search" style="width: 60px; margin-right: 20px;">查询</a>
+                               <a class="mini-button" onclick="reset()" iconCls="icon-cancel"	style="width: 60px; margin-right: 20px;">清空</a>							
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div>
+												
+			<div class="mini-splitter" style="width:100%;height:100%;" vertical="true">
+	    		<div size="50%">
+	    				    	
+				<div class="mini-toolbar" style="border-bottom:0;padding:0px;">
+					<table style="width:100%;">
+						<tr>
+							<td style="width:100%;">
+																	
+								<input id="key" class="mini-textbox" emptyText="关键词" style="width:150px;" onenter="searchKey()"/>
+								<a class="mini-button" iconCls="icon-search" onclick="searchKey()">查询</a>
+								<span class="separator"></span>
+																		
+								<a class="mini-button" iconCls="icon-add" onclick="add()">增加</a>
+								<a class="mini-button" iconCls="icon-edit" onclick="edit()">编辑</a>
+								<a class="mini-button" iconCls="icon-remove" onclick="remove()">删除</a>
+								<a class="mini-button" iconCls="icon-export" onclick="exportExcel()">导出</a>
+								<a class="mini-button" iconCls="icon-install" onclick="initData()">初始化数据</a>
+								<a class="mini-button" iconCls="icon-user-security" onclick="assign_perm()">分配权限</a>
+																	
+								<a class="mini-button" iconCls="icon-search" onclick="highSearch()">高级查询</a>
+																		
+							</td>
+							<td style="white-space:nowrap;">
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="mini-fit">
+					<div id="tenant-datagrid" class="mini-datagrid" style="width:100%;height:100%;" allowResize="false"
+						url="${base_url}/system/tenant/list#if(${parent_id} != '0')?#end"  idField="id" multiSelect="true"
+						sizeList="[20,50,100,300,500]" pageSize="20" contextMenu="#contextMenu" showColumnsMenu="true" onselect="onRowSelect" 							>
+						<div property="columns">
+							<div type="indexcolumn" field="indexcolumn" align="right" width="30"></div>
+							<div type="checkcolumn" width="25"></div>
+							<div field="code"  displayField="code"   width="80"  headerAlign="center" allowSort="true">编号</div>
+							<div field="name"  displayField="name"   width="100%" hideable="true"  headerAlign="center" allowSort="true">名称</div>
+							<div field="country"  displayField="countryDesc"   width="50"  headerAlign="center" allowSort="true">国家</div>
+							<div field="province"  displayField="provinceDesc"   width="50"  headerAlign="center" allowSort="true">省份</div>
+							<div field="city"  displayField="cityDesc"   width="50"  headerAlign="center" allowSort="true">城市</div>
+							<div field="address"  displayField="address"   width="250"  headerAlign="center" allowSort="true">街道地址</div>
+							<div field="telephone"  displayField="telephone"   width="120"  headerAlign="center" allowSort="true">联系电话</div>
+							<div field="contactor"  displayField="contactor"   width="60"  headerAlign="center" allowSort="true">联系人</div>
+							<div field="status"  displayField="statusDesc"   width="60"  headerAlign="center" allowSort="true">状态</div>
+							##<div field="isolateData" displayField="isolateData" width="80"  headerAlign="center" allowSort="true">是否隔离数据</div>
+							<div field="sort" width="50" align="right" headerAlign="center" >排序</div>													
+						</div>
+					</div>
+					<ul id="contextMenu" class="mini-contextmenu">
+						<li name="fix" iconCls="icon-unlock" onclick="onFix" >锁定列</li>
+						<li name="unfix" iconCls="icon-lock" onclick="onUnfix" >取消锁定列</li>
+				    </ul>
+				</div>
+								
+				</div>
+				<div showCollapseButton="true" expanded="false">
+					<div id="detail-tabs" class="mini-tabs" activeIndex="0" onactivechanged="onTabChange" contextMenu="#refreshTabMenu" style="width:100%;height:100%;" >
+	    				<div name="${base_url}/system/subscriber" title="订购">请选择上面的租户</div>
+	    				<div name="${base_url}/tenant/journal" title="流水">请选择上面的租户</div>
+	    			</div>
+	    			<ul id="refreshTabMenu" class="mini-contextmenu" onbeforeopen="onBeforeOpen">
+						<li iconCls="icon-reload" onclick="reloadTab">
+							刷新标签页
+						</li>
+					</ul>
+				</div>
+			</div>
+											
+			</div>
+		</div>
+								
+		<script type="text/javascript">
+			mini.parse();
+			var grid = mini.get("tenant-datagrid");
+			function onUnfix() {
+				grid.unFrozenColumns();
+			}
+			function onFix() {
+				mini.prompt("请输入要锁定的列数,比如：2", "请输入",
+		            function (action, value) {
+		                if (action == "ok" && value) {
+		                	try {
+			                	var end = parseInt(value);
+			                	if (end < 0) end = 0;
+			                    grid.frozenColumns(0, end);
+		                  	} catch(e) {
+		                  	}
+		                }
+		            }
+		        );
+			}
+			grid.on("drawcell", function(e){
+	        	if (e.field == "isolateData") {
+	        		var c= "";
+	        		if (e.value == true)
+	        			c = "checked=checked";
+	        		e.cellHtml = "<center><input disabled=disabled type='checkbox' "+c+"/></center>";
+	        	}
+	        	if (e.field == "indexcolumn") {
+	                e.cellStyle = "background:#ecedef";
+	            }
+	        });
+						
+			grid.load();
+										        	        							        	        							        	        							        
+	        function onCountryChanged(e) {
+	            var parent = mini.getbyName("country");
+	            var pid = parent.getValue();
+				var curr = mini.getbyName("province");
+	            curr.setValue("");
+	            curr.setEnabled(true);
+	            
+	            var url = "${base_url}/system/dict/options/province?cascadeBy=" + pid
+	            curr.setUrl(url);
+	            curr.select(0);
+	        }
+	        	        	        							        
+	        function onProvinceChanged(e) {
+	            var parent = mini.getbyName("province");
+	            var pid = parent.getValue();
+				var curr = mini.getbyName("city");
+	            curr.setValue("");
+	            curr.setEnabled(true);
+	            
+	            var url = "${base_url}/system/dict/options/city?cascadeBy=" + pid
+	            curr.setUrl(url);
+	            curr.select(0);
+	        }
+	        	        	        							        	        							        	        							        	        							        	        	        
+			function add() {
+								
+				mini.open({
+					url : "${base_url}/system/tenant/edit",
+					title : "新增租户",
+					width : 810,
+					height : 407,
+					showModal : false,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+													
+						var data = {
+							action : "new",
+																					
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						grid.reload();
+					}
+				});
+			}
+
+			function edit() {
+								
+				var row = grid.getSelected();
+				if(row) {
+					mini.open({
+						url : "${base_url}/system/tenant/edit",
+						title : "编辑租户",
+						width : 810,
+						height : 407,
+						showModal : false,
+						onload : function() {
+							var iframe = this.getIFrameEl();
+							var data = {
+								action : "edit",
+								id : row.id
+							};
+							iframe.contentWindow.SetData(data);
+						},
+						ondestroy : function(action) {
+							grid.reload();
+						}
+					});
+
+				} else {
+					alert("请选中一条记录");
+				}
+			}
+			
+			function remove() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定删除选中记录？", "确定？",
+			            function (action) {
+			                if (action == "ok") {
+			                    var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								grid.loading("操作中，请稍后......");
+								$.ajax({
+									url : "${base_url}/system/tenant/delete?id=" + id,
+									type : 'post',
+									success : function(text) {
+										mini.alert("删除选中记录，操作成功");
+										grid.reload();
+									},
+									error : function(jqXHR, textStatus, errorThrown) {
+										grid.unmask();
+										//400,403,500错误已经统一在sys.js处理
+										if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+											return;
+										var text = "操作失败，" + jqXHR.responseText;
+										mini.alert(text);
+									}
+								});
+			                }
+			            }
+			        );
+				} else {
+					alert("请选中一条记录");
+				}
+			}
+			
+			function initData() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定初始化选中租户的数据？", "确定？",
+			            function (action) {
+			                if (action == "ok") {
+			                    var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								grid.loading("操作中，请稍后......");
+								$.ajax({
+									url : "${base_url}/system/tenant/init_data?id=" + id,
+									type : 'post',
+									success : function(text) {
+										mini.alert("初始化租户数据，操作成功");
+										grid.reload();
+									},
+									error : function(jqXHR, textStatus, errorThrown) {
+										grid.unmask();
+										//400,403,500错误已经统一在sys.js处理
+										if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+											return;
+										var text = "操作失败，" + jqXHR.responseText;
+										mini.alert(text);
+									}
+								});
+			                }
+			            }
+			        );
+				} else {
+					alert("请选中一条记录");
+				}
+			}
+			
+			function assign_perm() {
+				var row = grid.getSelected();
+				if(row) {
+					mini.open({
+						url : "${base_url}/system/tenant/assign_perm?tid=" + row.id,
+						title : "分配权限到租户["+row.name+"]",
+						width : 1000,
+						height : 600,
+						showModal : false,
+						showMaxButton : true,
+						onload : function() {
+							var iframe = this.getIFrameEl();
+							var data = {
+								action : "assign_perm",
+								tid : row.id
+							};
+							iframe.contentWindow.SetData(data);
+						},
+						ondestroy : function(action) {
+							grid.reload();
+						}
+					});
+				} else {
+					mini.alert("请选中一条记录");
+				}
+			}
+			
+			function searchKey() {
+				var key = mini.get("key").getFormValue();
+								
+				grid.load({
+					key : key
+				});
+								
+			}
+			
+			function highSearch(){
+				var index = 1;
+				var splitter = mini.get("search-splitter");
+				var pane = splitter.getPane(index);
+				if (pane.expanded) {
+					splitter.collapsePane(index);
+				} else {
+					splitter.expandPane(index);
+				}
+			}
+			
+			function search() {
+				var json = _getSearchJSON();
+				grid.load(json);
+			}
+			 function reset(){
+				 var form = new mini.Form("search-form");
+					form.reset();
+			 }
+			function _getSearchJSON() {
+																
+				var code = mini.get("code").getFormValue();
+																								
+				var name = mini.get("name").getFormValue();
+																								
+				var status = mini.get("status").getFormValue();
+																								
+				return {
+					code:code,name:name,status:status
+				};
+			}
+									
+			var tabs = mini.get("detail-tabs");
+			var currentTab;
+			function onBeforeOpen(e) {
+				currentTab = tabs.getTabByEvent(e.htmlEvent);
+				if(!currentTab) {
+					e.cancel = true;
+				}
+			}
+			
+			function reloadTab() {
+				tabs.reloadTab(currentTab);
+			}
+			var onRowSelect = function(sender){
+				var row = grid.getSelected();
+				if(!row){
+					return false;
+				}
+				var activeTab = tabs.getActiveTab();
+				if (typeof activeTab === 'undefined' || !activeTab) {
+					activeTab = tabs.getTab(0);
+					tabs.activeTab(activeTab);
+				}
+				var url = activeTab.name + "?parent_id=" + row.id + "&parent_name=" + row.name;
+				tabs.loadTab(url, activeTab);
+			}
+			var onTabChange = function(sender){
+				var row = grid.getSelected();
+				if(!row){
+					return false;
+				}
+				var tab = tabs.getTab(sender.index);
+				var url = tab.name + "?parent_id=" + row.id + "&parent_name=" + row.name;
+				tabs.loadTab(url, tab);
+				currentTab = tab;
+			}
+						
+			//导出
+			function exportExcel(){
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定导出选中记录？", "确定？",
+			            function (action) {
+			                if (action == "ok") {
+								var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.id);
+								}
+								var id = ids.join(',');
+								location.href="${base_url}/system/tenant/export?ids=" + id;
+							}
+						});
+				} else {
+					if(grid.totalCount>0){
+						mini.confirm("确定导出记录？", "确定？",
+				            function (action) {
+				                if (action == "ok") {
+									var json = _getSearchJSON();
+									var queryString = $.param(json) ;
+									var url = "${base_url}/system/tenant/export?"+queryString;
+									location.href=url;
+								}
+							});
+					} else {
+						mini.alert("没有数据可以导出");
+					}
+				}
+			}
+			
+		</script>
+	</body>
+</html>

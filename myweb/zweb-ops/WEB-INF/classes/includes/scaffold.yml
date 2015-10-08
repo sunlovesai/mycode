@@ -1,0 +1,11 @@
+#代码生成脚手架
+scaffold: 
+  #预定义模板的目录,相对mvc.template,输出目录与控制器类上的@Path上面一致
+  tpl_dir: scaffold/crud
+  models:
+    - class: system.task.models.TimedTask
+      path: /system/task
+    - class: system.task.models.TaskParam
+      path: /system/task/param
+    - class: system.task.models.TaskLog
+      path: /system/task/log

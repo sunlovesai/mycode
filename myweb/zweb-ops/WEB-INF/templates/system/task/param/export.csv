@@ -1,0 +1,5 @@
+																				
+序号,参数名,参数值,所属任务
+<jx:forEach items="${data}" var="item" varStatus="status">,,,
+${status.index+1},${item.key},${item.value},${item.task.name}
+</jx:forEach>,,,

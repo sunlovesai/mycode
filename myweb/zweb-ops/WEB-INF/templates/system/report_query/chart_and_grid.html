@@ -1,0 +1,1138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title></title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+		<script>
+		var g_base_url = "${base_url}";
+		var g_invite_code = "${inviteCode}";
+		var g_report_code = "${reportConfig.code}";
+		</script>
+		<!-- ECharts单文件引入 -->
+    	<script src="${base_url}/js/echarts.js"></script>
+	</head>
+	<body>
+		#if($reportConfig.searchColumns)
+
+		<div class="mini-splitter" id="search-splitter" style="width:100%;height:100%;">
+			<div size="${reportConfig.searchWidth}" showCollapseButton="true" #if($reportConfig.isHighSearchExpand)expanded="true"#else expanded="false" #end>
+				<div class="mini-panel" showToolbar="true" showHeader="false" style="width:100%;height:100%;">
+				    	<form id="search-form" onsubmit="return false;" class="mini-toolbar">
+							<table>
+								#foreach($col in $reportConfig.searchColumns)
+								#set($upName = $CommonUtil.toUpCaseFirst($col.columnName))
+
+								#if("$!searchText"!="")
+								#set($searchText = $searchText+"/"+$col.text)
+								#else
+								#set($searchText = $col.text)
+								#end
+
+								#if($col.dataType == 'dict')
+									#set($data = $col.dictJson)
+									<tr>
+										<td>$col.text：</td>
+										<td>
+											<input style="width:125px;"  multiSelect="$col.isMutiSelected" id="$col.columnName" name="$col.columnName" required="$col.isSearchRequired" showNullItem="!$col.isMutiSelected" emptyText="请选择$col.text" nullItemText="请选择$col.text" onenter="search()" class="mini-combobox" #if($data && $data.length()>0)data='$data' textField="text" valueField="value" #elseif($col.cascadeBy && $col.cascadeBy != '') textField="dictCode" valueField="dictValue" enabled="false" #else url="${base_url}/system/dict/options/${col.dictType}" textField="dictCode" valueField="dictValue" #end />
+										</td>
+									</tr>
+								#elseif($col.dataType == 'fk')
+
+									<tr>
+										<td>$col.text：</td>
+										<td>
+											<input style="width:125px;" id="${col.columnName}" name="$col.columnName" required="$col.isSearchRequired" onenter="search()" class="mini-buttonedit" textName="$col.referTextName" onbuttonclick="onChoose${upName}" />
+									    </td>
+									</tr>
+								#elseif($col.dataType == 'url')
+
+									<tr>
+										<td>$col.text：</td>
+										<td>
+											<input style="width:125px;" id="${col.columnName}" name="$col.columnName" required="$col.isSearchRequired" onenter="search()" class="mini-combobox" multiSelect="true" url="${base_url}${col.referPath}" textField="${col.referTextName}" valueField="${col.referValueName}" />
+									    </td>
+									</tr>
+								#elseif($col.dataType == 'int' || $col.dataType == 'float' ||$col.dataType == 'percent')
+								#if($col.searchType == '3')
+									<tr>
+										<td>${col.text}(最小)：</td>
+										<td>
+											<input style="width:125px;" id="${col.columnName}Start" value="$!col.defaultValueStart" name="${col.columnName}Start" required="$col.isSearchRequired" onenter="search()" class="mini-textbox" emptyText="请输入最小$col.text"/>
+										</td>
+									</tr>
+									<tr>
+										<td>${col.text}(最大)：</td>
+										<td>
+											<input style="width:125px;" id="${col.columnName}End" value="$!col.defaultValueEnd" name="${col.columnName}End" required="$col.isSearchRequired" onenter="search()" class="mini-textbox" emptyText="请输入最大$col.text"/>
+										</td>
+									</tr>
+								#elseif($col.searchType == '4')
+									<tr>
+										<td>${col.text}(最小)：</td>
+										<td>
+											<input style="width:125px;" id="${col.columnName}Start" value="$!col.defaultValueStart" name="${col.columnName}Start" required="$col.isSearchRequired" onenter="search()" class="mini-textbox" emptyText="请输入最小$col.text"/>
+										</td>
+									</tr>
+								#elseif($col.searchType == '5')
+									<tr>
+										<td>${col.text}(最大)：</td>
+										<td>
+											<input style="width:125px;" id="${col.columnName}End" value="$!col.defaultValueEnd" name="${col.columnName}End" required="$col.isSearchRequired" onenter="search()" class="mini-textbox" emptyText="请输入最大$col.text"/>
+										</td>
+									</tr>
+								#else
+									<tr>
+										<td>$col.text：</td>
+										<td>
+											<input style="width:125px;" id="$col.columnName" value="$!col.defaultValue" name="$col.columnName" required="$col.isSearchRequired" onenter="search()" class="mini-textbox" emptyText="请输入$col.text"/>
+										</td>
+									</tr>
+								#end
+								#elseif($col.dataType == 'boolean')
+
+									<tr>
+										<td>${col.text}:</td>
+										<td>
+											<input style="width:125px;" id="$col.columnName" name="$col.columnName" required="$col.isSearchRequired" onenter="search()" class="mini-checkbox" checked="false" text="允许" emptyText="请选择$col.text"/>
+										</td>
+									</tr>
+								#elseif($col.dataType == 'date')
+								#if($col.searchType == '1' || $col.searchType == '2')
+									<tr>
+										<td>${col.text}：</td>
+										<td>
+											<input style="width:125px;" id="${col.columnName}" value="$!col.defaultValue" name="${col.columnName}" required="$col.isSearchRequired" onenter="search()" class="mini-datepicker" nullValue="null" format="$col.dateFormat" showTime="true" showOkButton="false" showClearButton="false" emptyText="请选择$col.text"/>
+										</td>
+									</tr>
+								#elseif($col.searchType == '4')
+									<tr>
+										<td>${col.text}(起始)：</td>
+										<td>
+											<input style="width:125px;" id="${col.columnName}Start" value="$!col.defaultValueStart" name="${col.columnName}Start" required="$col.isSearchRequired" onenter="search()" class="mini-datepicker" nullValue="null" format="$col.dateFormat" showTime="true" showOkButton="false" showClearButton="false" emptyText="请选择起始日期"/>
+										</td>
+									</tr>
+								#elseif($col.searchType == '5')
+									<tr>
+										<td>${col.text}(截止)：</td>
+										<td>
+											<input style="width:125px;" id="${col.columnName}End" value="$!col.defaultValueEnd" name="${col.columnName}End" required="$col.isSearchRequired" onenter="search()" class="mini-datepicker" nullValue="null" format="$col.dateFormat" showTime="true" showOkButton="false" showClearButton="false" emptyText="请选择截止日期"/>
+										</td>
+									</tr>
+								#else
+									<tr>
+										<td>${col.text}(起始)：</td>
+										<td>
+											<input style="width:125px;" id="${col.columnName}Start" value="$!col.defaultValueStart" name="${col.columnName}Start" required="$col.isSearchRequired" onenter="search()" class="mini-datepicker" nullValue="null" format="$col.dateFormat" showTime="true" showOkButton="false" showClearButton="false" emptyText="请选择起始日期"/>
+										</td>
+									</tr>
+									<tr>
+										<td>${col.text}(截止)：</td>
+										<td>
+											<input style="width:125px;" id="${col.columnName}End" value="$!col.defaultValueEnd" name="${col.columnName}End" required="$col.isSearchRequired" onenter="search()" class="mini-datepicker" nullValue="null" format="$col.dateFormat" showTime="true" showOkButton="false" showClearButton="false" emptyText="请选择截止日期"/>
+										</td>
+									</tr>
+								#end
+								#elseif($col.dataType == 'custom')
+									${col.htmlCode}
+								#else
+
+									<tr>
+										<td>$col.text：</td>
+										<td>
+											<input style="width:125px;" id="$col.columnName" value="$!col.defaultValue" name="$col.columnName" required="$col.isSearchRequired" onenter="search()" class="mini-textbox" emptyText="请输入$col.text"/>
+										</td>
+									</tr>
+								#end
+								#end
+
+							</table>
+
+							<div style="text-align: center; padding: 10px;">
+								<a class="mini-button" onclick="search()" iconCls="icon-search" style="width: 60px; margin-right: 20px;">查询</a>
+                               	<a class="mini-button" onclick="reset()" iconCls="icon-cancel"	style="width: 60px; margin-right: 20px;">清空</a>
+							</div>
+						</form>
+					</div>
+			</div>
+			<div>
+			#end
+			<div id="chart-splitter" class="mini-splitter" style="width:100%;height:100%;" vertical="true">
+	    		<div size="25%" showCollapseButton="true">
+					<div class="mini-toolbar" style="border-bottom:0;padding:0px;">
+						<table style="width:100%;">
+							<tr>
+								<td style="width:100%;">
+									#if($reportConfig.searchColumns && $reportConfig.isUseKeySearch)
+									
+									<input id="key" class="mini-textbox" required="${reportConfig.isKeyRequired}" emptyText="关键词" style="width:${reportConfig.keySearchWidth}px;" onenter="searchKey()"/>
+									<a class="mini-button" iconCls="icon-search" onclick="searchKey()">查询</a>
+									<span class="separator"></span>
+									#end
+									
+									#foreach($btn in $reportConfig.buttons)
+									
+										<a id="${btn.name}" class="mini-button" enabled="${btn.cando.editable}"  visible="${btn.cando.visible}" iconCls="${btn.iconClass}" onclick="${btn.name.trim()}Clicked()">${btn.text}</a>
+									#end
+
+								<!-- <a id="exportExcel" class="mini-button" iconCls="icon-export" onclick="exportExcel()">导出</a> -->
+									#if($reportConfig.searchColumns)
+	
+									<a id="highSearch" class="mini-button" iconCls="icon-search" onclick="highSearch()">高级查询</a>
+									#end
+									
+									<a id="chartBtn" class="mini-button" iconCls="icon-chart" onclick="onChartClick()">图形报表</a>
+								</td>
+								<td style="white-space:nowrap;">
+								</td>
+							</tr>
+						</table>
+					</div>
+					#if($!reportConfig.headHtml!="")
+						$!reportConfig.headHtml
+					#end
+					<div class="mini-fit">
+						<div id="reportConfig-datagrid" class="mini-datagrid" style="width:100%;height:100%;" allowResize="true"
+							url="${base_url}/system/report/list/${reportConfig.code}?invite_code=${inviteCode}"  idField="id" multiSelect="true"
+							showPager="$reportConfig.showPager" sizeList="[2,20,50,100,300,500]" pageSize="$reportConfig.pageSize" contextMenu="#contextMenu" showColumnsMenu="true" onrowclick="onRowClick"
+							#if($reportConfig.isRowdblclicked)
+								#foreach($btn in $reportConfig.buttons)
+									#if($btn.name == 'edit' && $btn.isEnabled)
+										
+							onrowdblclick="${btn.name}Clicked()"
+									#end
+								#end
+							#end
+								
+							>
+						</div>
+						<ul id="contextMenu" class="mini-contextmenu">
+							<li name="fix" iconCls="icon-unlock" onclick="onFix" >锁定列</li>
+							<li name="unfix" iconCls="icon-lock" onclick="onUnfix" >取消锁定列</li>
+					    </ul>
+					</div>
+				</div>
+				<div showCollapseButton="true" #if(${reportConfig.isShowChart})expanded="true"#else expanded="false" #end>
+					<div class="mini-tabs" activeIndex="0" style="width:100%;height:100%;" >
+	    				<div title="${reportConfig.title}">
+	    					#set($width = 800)
+	    					#set($height = 600)
+	    					#if($reportConfig.width>0)
+	    					#set($width = ${reportConfig.width}*1.6)
+	    					#end
+	    					#if($reportConfig.height>0)
+	    					#set($height = ${reportConfig.height})
+	    					#end
+							<div id="main" style="width:${width}px; height:${height}px; ">
+							</div>
+	    				</div>
+	    			</div>
+				</div>
+			</div>
+		#if($reportConfig.searchColumns)
+
+			</div>
+		</div>
+		#end
+
+		<script type="text/javascript">
+
+			mini.parse();
+			var tip = new mini.ToolTip();
+		    tip.set({
+		        target: document,
+		        selector: '.showTooltip,.mini-grid-headerCell',
+		        placement:'bottom',
+		        onbeforeopen: function (e) {            
+		            var el = e.element;
+		            if (el.classList.contains('mini-grid-headerCell')) {
+	                    var cls = el.classList.item(1);
+	                    if (cls.indexOf('tip-') == -1) {
+	                        e.cancel = true;
+	                        return;
+	                    }
+		            } else {
+			            var dataType = el.getAttribute('data-type');
+			            if (typeof dataType == 'undefined' || !dataType || dataType == '') {
+			                e.cancel = true;
+			                return;
+			            }
+			            var placement = el.getAttribute('placement') || 'bottom';
+			            this.set({placement:placement});
+		            }
+		            e.cancel = false;
+		        },
+		        onopen: function (e) {
+		            var el = e.element;
+		            if (el.classList.contains('mini-grid-headerCell')) {
+	                    var cls = el.classList.item(1);
+	                    if (cls.indexOf('tip-') != -1) {
+	                    	var text = cls.replace('tip-', '');
+	                    	tip.setContent(text);
+	                    }
+	                    return;
+		            } 
+		            
+		            var dataType = el.getAttribute('data-type');
+		            if (dataType == "text") {
+		                var text = el.getAttribute('data-text');
+		                tip.setContent(text);
+		            } else if (dataType == "image") {
+		                 tip.setContent("<div style='max-width:800px;'><img src='"+el.src+"' /></div>");
+		            } else if(dataType == 'ajax') {
+		                this.showLoading(); 
+		                var url = el.getAttribute('data-url');
+		                var param = JSON.parse(el.getAttribute('data-param'));
+		                var tplid = "#"+el.getAttribute('data-tpl-id');
+		                $.ajax({
+		                    url: url,
+		                    data: param,
+		                    async: true,
+		                    success: function (resp) {
+		                         var data = mini.decode(resp);
+		                         var html = $(tplid).tmpl(data)[0];
+		                         console.log(html);
+		                         tip.setContent(html);
+		                    }
+		                });
+		            }
+		        }
+		    });
+		    
+			var grid = mini.get("reportConfig-datagrid");
+			var base_url = "${base_url}";
+			var teamEmpIds = "${teamEmpIds}";
+			var teamIds = "${teamIds}";
+			var content = {};
+			var isFirst = true;
+
+			grid.set({columns:$gridColumns}); 
+			#if("$!reportConfig.freezeNum" != "" && $reportConfig.freezeNum > 0)
+				
+			grid.frozenColumns(0, ${reportConfig.freezeNum}-1);
+			#end
+			
+			grid.on("load", function () {
+			
+			#if($reportConfig.isUseRowGroup)
+				 var list = [];
+				 var i = 0;
+				 #foreach($col in $reportConfig.gridColumns)
+					#if($col.isRowGroup)
+						list[i++] = '$col.columnName';
+					#end
+				 #end
+
+				 grid.mergeColumns(list);
+			#end
+			
+				pageIndex = grid.pageIndex;
+				pageSize = grid.pageSize;
+		    });
+
+			#if($reportConfig.isLasyLoadTotal)
+				
+			var pageIndex = grid.pageIndex;
+			var pageSize = grid.pageSize;
+			grid.on("beforeload", function(){
+				grid.setShowPager(false);
+			});	
+			
+			grid.on("update", function() {
+				if(!isFirst) {
+					getTotal(content);
+				}
+				isFirst = false;
+			});
+				
+			#end
+			
+			#if($reportConfig.searchColumns)
+
+			var form = new mini.Form("search-form");
+			#end
+
+			function onUnfix() {
+				grid.unFrozenColumns();
+			}
+			function onFix() {
+				mini.prompt("请输入要锁定的列数,比如：2", "请输入",
+		            function (action, value) {
+		                if (action == "ok" && value) {
+		                	try {
+			                	var end = parseInt(value);
+			                	if (end < 0) end = 0;
+			                    grid.frozenColumns(0, end);
+		                  	} catch(e) {
+		                  	}
+		                }
+		            }
+		        );
+			}
+			
+			#if($reportConfig.showGridData)
+				#if("$!reportConfig.sortColumn" != "")
+					#if("$!reportConfig.sortOrder" != "")
+						
+						## grid.load({sortField:"$reportConfig.sortColumn",sortOrder:"$!reportConfig.sortOrder"}, onSuccess, onFail);
+						search();
+					#else
+						
+						## grid.load({sortField:"$reportConfig.sortColumn",sortOrder:"asc"}, onSuccess, onFail);
+						search();
+					#end
+				#else
+				
+				search();
+				#end
+			#else 
+				
+				grid.set({columns:$gridColumns});
+			#end
+
+			#foreach($col in $reportConfig.searchColumns)
+			#set($upName = $CommonUtil.toUpCaseFirst($col.columnName))
+			#if($col.dataType == 'fk')
+
+			function onChoose${upName}(e) {
+	            var btnEdit = this;
+	            mini.open({
+	                url: "${base_url}${col.referPath}",
+	                title: "选择${col.text}",
+	                width: 1000,
+	                height: 600,
+	                ondestroy: function (action) {
+	                    if (action == "ok") {
+	                        var iframe = this.getIFrameEl();
+	                        var data = iframe.contentWindow.GetData();
+	                        data = mini.clone(data);    //必须
+	                        if (data) {
+	                            btnEdit.setValue(data.${col.referValueName});
+	                            btnEdit.setText(data.${col.referTextName});
+	                        }
+	                    }
+	                }
+	            });
+	        }
+			#end
+			#end
+			#foreach($btn in $reportConfig.buttons)
+			#if($btn.type == 'window')
+				
+			function ${btn.name}Clicked() {
+				#set($height = 300)
+				#if ($reportConfig.editColumns && $reportConfig.editColumns.size() > 0)
+				#set($height = (${reportConfig.editColumns.size()}) * 28 + 155)
+				#end
+
+				var row = {};
+				#if ($btn.isRowNeedSelected)
+
+				var _row = grid.getSelected();
+				if(_row) {
+					row = _row;
+				#end
+
+				#if("$!{btn.beforeScript}" != "")
+
+				var ctx = {row:row,grid:grid,btn:this,loginUser:${loginUser},action:"",text:""};
+				if(!beforeScript_${btn.name}(ctx,row,grid)) return;
+				#end
+
+					#set($uri = ${btn.uri})
+					#if($uri.contains("?"))
+					#set($uri = $uri+"&")
+					#else
+					#set($uri = $uri+"?")
+					#end
+					#set($uri = $uri+"button_id=$!{btn.id}&code=$!{reportConfig.code}&invite_code=$!{inviteCode}")
+					
+					var uri = "$uri.replaceAll("\{","'+").replaceAll("\}","+'")".replace(/\'/g,"\"")
+					mini.open({
+						url : "${base_url}"+uri,
+						title : "${btn.text}${reportConfig.title}",
+						width : ${btn.windowWidth},
+						height : ${btn.windowHeight},
+						showModal : false,
+						showMaxButton : true,
+						onload : function() {
+							var iframe = this.getIFrameEl();
+							if(typeof iframe.contentWindow.SetData == 'function'){
+								var data = {
+									action : "${btn.name}",
+									isRowSelected : ${btn.isRowNeedSelected},
+									row : row
+									#foreach($param in $btn.params)
+
+									,$param.paramName : "${param.paramValue}"
+									#end
+									
+								};
+								iframe.contentWindow.SetData(data);
+							}
+						},
+						ondestroy : function(action) {
+							#if("$!{btn.afterScript}" != "")
+
+							var ctx = {row:row,grid:grid,btn:this,loginUser:${loginUser},action:action,text:""};
+							if(!afterScript_${btn.name}(ctx,row,grid,action,this,'')) return;
+							#end
+							
+							grid.reload();
+						}
+					});
+				#if($btn.isRowNeedSelected)
+
+				} else {
+					mini.alert("请选中一条记录","提示");
+				}
+				#end
+
+			}
+			#elseif($btn.type =='action' && $btn.isRowNeedSelected && $btn.name != 'export')
+
+			function ${btn.name}Clicked() {
+
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					#if("$!{btn.beforeScript}" != "")
+
+					var ctx = {row:rows,grid:grid,btn:this,loginUser:${loginUser},action:"",text:""};
+					if(!beforeScript_${btn.name}(ctx,rows,grid)) return;
+					#end
+					
+					mini.confirm("确定${btn.text}选中记录？", "确定？",
+			            function (action) {
+			                if (action == "ok") {
+			                    var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.${reportConfig.idName});
+								}
+								var id = ids.join(',');
+								grid.loading("操作中，请稍后......");
+								#set($uri = ${btn.uri})
+								#if($uri.contains("?"))
+								#set($uri = $uri+"&")
+								#else
+								#set($uri = $uri+"?")
+								#end
+								#set($uri = $uri+"button_id=${btn.id}&code=${reportConfig.code}&invite_code=${inviteCode}")
+
+								$.ajax({
+									url : "${base_url}${uri}&id=" + id,
+									type : 'post',
+									success : function(text) {
+										mini.alert("${btn.text}选中记录，操作成功","提示");
+										#if("$!{btn.afterScript}" != "")
+
+										var ctx = {row:rows,grid:grid,btn:this,loginUser:${loginUser},action:action,text:text};
+										if(!afterScript_${btn.name}(ctx,rows,grid,action,this,text)) return;
+										#end
+										
+										grid.reload();
+									},
+									error : function(jqXHR, textStatus, errorThrown) {
+										grid.unmask();
+										//400,403,500错误已经统一在sys.js处理
+										if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+											return;
+										var text = "操作失败，" + jqXHR.responseText;
+										mini.alert(text,"提示");
+									}
+								});
+			                }
+			            }
+			        );
+				} else {
+					mini.alert("请选中一条记录","提示");
+				}
+			}
+			#end
+
+			#if("$!{btn.beforeScript}" != "")
+
+			function beforeScript_${btn.name}(ctx,row,grid){
+				$!{btn.beforeScript}
+				return true;
+			}
+			#end
+
+			#if("$!{btn.afterScript}" != "")
+
+			function afterScript_${btn.name}(ctx,row,grid,action,This,text){
+				$!{btn.afterScript}
+				return true;
+			}
+			#end
+
+			#end
+
+			#if($reportConfig.searchColumns)
+			#if($reportConfig.isUseKeySearch)
+				
+			function searchKey() {
+				var key = mini.get("key").getFormValue();
+				#if (${reportConfig.isKeyRequired})
+
+				if(!key || $.trim(key) == '') {
+					mini.alert("请输入关键词查询");
+					return ;
+				}
+				#end
+				content = {
+					key : key,
+					#if("$!reportConfig.sortColumn" != "")
+						#if("$!reportConfig.sortOrder" != "")
+
+						sortField:"$reportConfig.sortColumn",
+						sortOrder:"$!reportConfig.sortOrder",
+						#else
+
+						sortField:"$reportConfig.sortColumn",
+						sortOrder:"asc",
+						#end
+					#end	
+					
+				};
+				
+				grid.load(content, onSuccess, onFail);
+				
+			}
+			#end
+
+			function highSearch(){
+				var index = 1;
+				var splitter = mini.get("search-splitter");
+				var pane = splitter.getPane(index);
+				if (pane.expanded) {
+					splitter.collapsePane(index);
+				} else {
+					splitter.expandPane(index);
+				}
+			}
+
+			function search() {
+				form.validate();
+				if(!form.isValid()) return;
+
+				content = _getSearchJSON();
+				grid.load(content, onSuccess, onFail);
+				
+				return false;
+			}
+			function reset(){
+				form.reset();
+			}
+			function _getSearchJSON() {
+				#if(${reportConfig.isUseKeySearch})
+					
+				var key = mini.get("key").getFormValue();
+				#if (${reportConfig.isKeyRequired})
+
+				if(!key || $.trim(key) == '') {
+					mini.alert("请输入关键词查询");
+					return ;
+				}
+				#end
+				#end
+
+				#foreach($col in $reportConfig.searchColumns)
+				#if($col.dataType == 'date' || $col.dataType == 'int' || $col.dataType == 'float' || $col.dataType == 'percent')
+					#if($col.searchType == '3' || ((!$col.searchType || $col.searchType == '') && $col.dataType == 'date'))
+						
+						var ${col.columnName}Start = mini.get("${col.columnName}Start").getFormValue();
+						var ${col.columnName}End = mini.get("${col.columnName}End").getFormValue();
+					#elseif($col.searchType == '4')
+					
+						var ${col.columnName}Start = mini.get("${col.columnName}Start").getFormValue();
+					#elseif($col.searchType == '5')
+					
+						var ${col.columnName}End = mini.get("${col.columnName}End").getFormValue();
+					#else
+						
+						var $col.columnName = mini.get("$col.columnName").getFormValue();
+					#end
+				#else
+
+				var $col.columnName = mini.get("$col.columnName").getFormValue();
+				#end
+				#end
+
+				var sf = grid.sortField;
+				var so = grid.sortOrder;
+				
+				return {
+					#if("$!reportConfig.sortColumn" != "")
+						#if("$!reportConfig.sortOrder" != "")
+
+						sortField:"$reportConfig.sortColumn",
+						sortOrder:"$!reportConfig.sortOrder",
+						#else
+
+						sortField:"$reportConfig.sortColumn",
+						sortOrder:"asc",
+						#end
+					#end	
+					#if(${reportConfig.isUseKeySearch})
+						
+					key : key,
+					#end
+					#foreach($col in $reportConfig.searchColumns)
+					#if($col.dataType == 'date' || $col.dataType == 'int' || $col.dataType == 'float'|| $col.dataType == 'percent')
+
+						#if($col.searchType == '3' || ((!$col.searchType || $col.searchType == '') && $col.dataType == 'date'))
+							
+							${col.columnName}Start: ${col.columnName}Start,
+							${col.columnName}End: ${col.columnName}End,
+						#elseif($col.searchType == '4')
+						
+							${col.columnName}Start: ${col.columnName}Start,
+						#elseif($col.searchType == '5')
+						
+							${col.columnName}End: ${col.columnName}End,
+						#else
+							
+							$col.columnName: $col.columnName,
+						#end
+
+					#else
+					
+					$col.columnName: $col.columnName,
+					#end
+					#end
+
+				};
+			}
+			#end
+			
+			function onChartClick(){
+				var index = 2;
+				var splitter = mini.get("chart-splitter");
+				var pane = splitter.getPane(index);
+				if (pane.expanded) {
+					splitter.collapsePane(index);
+				} else {
+					splitter.expandPane(index);
+				}
+			}
+			
+			//导出
+			function exportClicked(){
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定导出选中记录？", "确定？",
+			            function (action) {
+			                if (action == "ok") {
+								var ids = [];
+								for(var i = 0, l = rows.length; i < l; i++) {
+									var r = rows[i];
+									ids.push(r.${reportConfig.idName});
+								}
+								var id = ids.join(',');
+								location.href="${base_url}/system/report/export/${reportConfig.code}?invite_code=${inviteCode}&code=${reportConfig.code}&ids=" + id;
+							}
+						});
+				} else {
+					if(grid.totalCount>0){
+						mini.confirm("确定导出记录？", "确定？",
+				            function (action) {
+				                if (action == "ok") {
+				                	var queryString = "";
+				                	#if($reportConfig.searchColumns)
+
+									var json = _getSearchJSON();
+									queryString = $.param(json) ;
+									#end
+
+									var url = "${base_url}/system/report/export/${reportConfig.code}?invite_code=${inviteCode}&code=${reportConfig.code}&"+queryString;
+									location.href=url;
+								}
+							});
+					} else {
+						mini.alert("没有数据可以导出","提示");
+					}
+				}
+			}
+
+			function onRowClick(e){
+				var row = grid.getSelected();
+				#if("$!{reportConfig.rowClickScript}" != "")
+					$!{reportConfig.rowClickScript}
+				#end
+			}
+
+			#if("$!{reportConfig.methodScript}" != "")
+				$!{reportConfig.methodScript}
+			#end
+			
+			function onSuccess(result) {
+				// nothing
+			}
+			
+			function onFail() {
+				mini.alert("数据加载失败");
+			}
+			
+			//------------图形报表相关脚本---------------
+			// 路径配置
+	        require.config({
+	            paths: {
+	                echarts: '${base_url}/js'
+	            }
+	        });
+            
+            // 监听数据加载事件，当数据有变化，重新渲染图表
+			grid.on("load", function(e) {
+				renderChart(e.result);
+			});
+			
+            /**
+             * 渲染图形 
+             */
+	        function renderChart(result) {
+	        	if ((typeof result) == undefined || !result)
+	        		return;
+	        		
+	        	// 加载回来的数据
+	        	var resp = result;
+	        	var data = resp.data;
+				if ((typeof data) == undefined || !data || data.length == 0)
+					return;
+					
+	        	// 使用
+			    require(
+		            [ 'echarts', 'echarts/chart/bar', 'echarts/chart/line', 'echarts/chart/pie', ],
+			        function (ec) {
+		        		// 基于准备好的dom，初始化echarts图表
+	            		var myChart = ec.init(document.getElementById('main'));
+	            	
+						//debugger;
+						// 坐标轴
+						var _axis = [
+							#set($xindex = -1)
+							#set($yindex = -1)
+							#foreach($o in $reportConfig.axisConfigs)
+							#if($o.direction == 'x')
+							#set($xindex = $xindex+1)
+							#end
+							#if($o.direction == 'y')
+							#set($yindex = $yindex+1)
+							#end
+							
+							{
+								id : ${o.id},
+								#if($o.direction == 'x')
+								
+								index : $xindex,
+								#end
+								#if($o.direction == 'y')
+								
+								index : $yindex,
+								#end
+								
+								columnName : "$!{o.columnConfig.columnName}",
+						    	type : "$o.type",
+						    	name : "$o.name",
+						    	direction : "$o.direction",
+						    	position : "$o.position",
+						    	show : ${o.show},
+						    	splitLine : {
+						    		show : ${o.showSplitLine}
+						    	},
+						    	#if(${o.columnConfig})
+						    	
+						    	data : [],
+						    	#else
+						    	
+						    	data : [
+						    		#set($splitNumber = 1)
+						    		#if($o.splitNumber > 0)
+						    		#set($splitNumber = $o.splitNumber)
+						    		#end
+						    		#foreach($foo in [1..${splitNumber}])
+						    		
+						    		'',
+						    		#end
+						    		
+						    	],
+						    	#end
+						    	#if($o.type == 'category')
+						    	
+						    	boundaryGap : true,
+						    	#else
+						    	  #if(${o.gap_min} > 0 && ${o.gap_max} > 0)
+						    	
+						    	boundaryGap : [${o.gap_min}, ${o.gap_max}],
+						    	  #else
+						    	
+						    	  boundaryGap : [0, 0.2],
+						    	  #end
+						    	#end
+						    	#if(${o.min} != '' && ${o.max} != '')
+						    	
+						    	min : "${o.min}",
+						    	max : "${o.max}",
+						    	#end
+						    	#if(${o.splitNumber} > 0)
+						    	
+						    	splitNumber : ${o.splitNumber},
+						    	#end
+						            
+					            axisLabel : {
+					            	#if(${o.labelRotate} > 0)
+					            	
+					            	rotate : ${o.labelRotate},
+					            	#end
+					            	#if(${o.labelFormatter} && ${o.labelFormatter} != '')
+					            	
+					            	formatter : ${o.labelFormatter},
+					            	#end
+					            	
+					            	interval : 0,
+					            	margin : 20,
+					            }
+							},
+							#end
+							
+						];
+						
+						// 定义一个用于查找给定ID值的坐标轴函数
+						var findAxis = function(id) {
+							for (var i = 0; i < _axis.length; i++) {
+								if (_axis[i].id == id) {
+									return _axis[i];
+								}
+							}
+						}
+						
+						// 系列
+						var _all_series = [
+	                		#foreach($s in $reportConfig.seriesConfigs)
+	                		
+		                	{
+		                		#if(${s.filter} && ${s.filter} != '')
+		                		
+		                		filter : ${s.filter},
+		                		#end
+		                		
+		                		valueColumnName : "${s.valueColumn.columnName}",
+		                		#if($s.categoryColumn)
+		                		
+		                		categoryColumnName : "${s.categoryColumn.columnName}",
+		                		#end
+		                		
+			                	name : "${s.name}",
+					            type : "${s.type}",
+					            data : [],
+					            itemStyle: {
+					                normal: {
+					                	#if(${s.labelShow})
+					                	
+					                    label : {
+					                        show: ${s.labelShow}, 
+					                        position: "${s.labelPosition}",
+					                        textStyle: {
+					                        	color: "${s.labelColor}",
+					                        },
+					                    },
+					                    #end
+					                    #if(${s.areaStyle})
+					                    
+					                    areaStyle: {
+					                    	type: 'default'
+					                    }
+					                    #end
+					                    
+					                }
+					            },
+					            xAxis : {
+					            	id : ${s.xAxis.id}
+						        },
+						        yAxis : {
+						        	id : ${s.yAxis.id}
+						        },
+						        validator : null
+				            },
+		                	#end
+	                	
+	                	];
+	                	
+						// 遍历,根据配置找出有用信息
+						debugger;
+						var _validSeries = [];
+						for (var i = 0; i < _all_series.length; i++) {
+					    	var _series = _all_series[i];
+					    	var _x = findAxis(_series.xAxis.id);
+					    	_series.xAxisIndex = _x.index;
+					    	var _y = findAxis(_series.yAxis.id);
+					    	_series.yAxisIndex = _y.index;
+					    	
+					    	var _found = false;
+					    	for (var j = 0; j < data.length; j++) {
+								var _row = data[j];
+								// 数据过滤条件
+						    	var _filter = _series.filter;
+						    	if ((typeof _filter != 'undefined') && _filter != '') {
+						    		var _row = data[j];
+						    		var _args = {row: _row, index: j, data: data, resp: resp, series: _series};
+						    		var ok = _filter(_args);
+						    		if (!ok) {
+										continue;
+									} else if(!_found){
+										_found = true;
+										_validSeries.push(_series);
+									}
+						    	} else if(!_found){
+									_found = true;
+									_validSeries.push(_series);
+								}
+						    	
+								for(var _key in _row) {
+							    	var _value = _row[_key];
+									if (_key == _x.columnName) {
+										if (typeof _x.axisLabel.formatter != 'undefined') {
+								    		_value = _x.axisLabel.formatter(_value);
+								    	}
+								    	// 不能重复
+								    	if (!_x.data.contains(_value)) {
+								    		_x.data.push(_value);
+										}
+									}
+									if (_key == _y.columnName) {
+										if (typeof _y.axisLabel.formatter != 'undefined') {
+								    		_value = _y.axisLabel.formatter(_value);
+								    	}
+								    	// 不能重复
+								    	if (!_y.data.contains(_value)) {
+								    		_y.data.push(_value);
+										}
+									}
+									// TODO 将坐标轴的Category下标考虑进去
+							    	if (_key == _series.valueColumnName) {
+							    		_series.data.push(_value);
+							    	}
+							    }
+							}
+					    }
+						
+						// 筛选X、Y轴
+						var _xAxis = [];
+						var _yAxis = [];
+						for (var i = 0; i < _axis.length; i++) {
+							if (_axis[i].direction == 'x') {
+								_xAxis.push(_axis[i]);
+							} else if (_axis[i].direction == 'y') {
+								_yAxis.push(_axis[i]);
+							}
+						}
+						
+						// 图例
+	                	var _legend = {
+	                		data: []
+	                	};
+	                	for (var i = 0; i < _validSeries.length; i++) {
+	                		debugger;
+	                		if (_validSeries[i].data.length > 0) {
+	                			_legend.data.push(_validSeries[i].name);
+	                		}
+	                	}
+	                	
+	                	var _grid = {
+				    		x: ${reportConfig.x},
+				    		y: ${reportConfig.y},
+				    		x2: '200',
+				    		y2: 80,
+				    	};
+	                	// 当图例的个数超过四个，排版改为竖向列表
+	                	if (_legend.data.length > 4) {
+	                		_legend.orient = 'vertical';
+	                		_legend.x = ${reportConfig.width}+40;
+	                		_legend.y = $reportConfig.y + 15;
+	                		_grid.x2 = '38%';
+	                	}
+						
+						// 构建配置信息
+						
+					    option = {
+					    	grid: _grid,
+					    	tooltip: {
+		                        show: true,
+		                        //trigger: 'axis'
+		                    },
+						    title : {
+						        #set($title = ${reportConfig.title})
+						    	#if(${reportConfig.chartTitle} && ${reportConfig.chartTitle.trim()} != "")
+						    	#set($title = ${reportConfig.chartTitle})
+						    	#end
+						        
+						        text: "$title",
+						    },
+						    legend: _legend,
+						    toolbox: {
+						        show : true,
+						        orient : 'vertical',
+						        x : 10,
+						        y : 120,
+						        feature : {
+						            magicType : {
+						            	show: true, 
+						            	type: ['line', 'bar'],
+						            },
+						            restore : {show: true},
+						            saveAsImage : {show: true}
+						        }
+						    },
+						    animation : true,
+						    calculable : true,
+						    xAxis : _xAxis,
+						    yAxis : _yAxis,
+						    series : _validSeries
+						};
+						
+						if (_validSeries.length == 0) {
+							option.grid = undefined;
+							option.xAxis = undefined;
+							option.yAxis = undefined;
+						}
+						debugger;
+		                // 为echarts对象加载数据 
+		                myChart.setOption(option); 
+	                }
+	            );
+	       }
+	     // 获取记录总数
+			function getTotal(json) {
+				$.ajax({
+					url : "${base_url}/system/report/get_total/${reportConfig.code}?invite_code=${inviteCode}",
+					type : 'post',
+					data : json,
+					success : function(text) {
+						grid.setTotalCount(text.total);
+						grid.setPageIndex(pageIndex);
+						grid.setPageSize(pageSize);
+						grid.setShowPager(true);
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						//400,403,500错误已经统一在sys.js处理
+						if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+							return;
+						var text = "操作失败，" + jqXHR.responseText;
+						mini.alert(text,"提示");
+					}
+				});
+			}
+		</script>
+	</body>
+</html>

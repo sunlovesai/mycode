@@ -1,0 +1,478 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>功能按钮配置编辑面板</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+		<style type="text/css">
+			html, body {
+				font-size: 12px;
+				padding: 0;
+				margin: 0;
+				border: 0;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="mini-panel" style="width:100%;height:100%;"
+			showToolbar="true" showHeader="false" showCloseButton="false" showFooter="true"
+		>
+			<div property="footer" style="">
+				<div style="text-align:center;padding:5px 3px 8px 3px;">
+					<a class="mini-button" id="btn-save" onclick="onOk" style="width:60px;margin-right:15px;">确定</a>
+					<a class="mini-button" onclick="onCancel" style="width:60px;">取消</a>
+				</div>
+			</div>
+			<form id="edit-buttonConfig-form" method="post" style="padding:15px 15px 15px 5px;">
+				<input name="id" class="mini-hidden" />
+				<input name="ignoreVersionConflict" class="mini-hidden" />
+				<fieldset style="border:solid 1px #aaa;padding:3px; margin-bottom:5px;">
+					<legend >
+						功能按钮配置信息
+					</legend>
+					<div style="padding:5px;">
+						<table style="table-layout:fixed;">
+																																										
+							<tr>
+														
+								<td style="width:100px;">所属报表：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" enabled="false" class="mini-buttonedit"  name="reportConfig.id" textName="reportConfig.title" onbuttonclick="onChooseReportConfig" />
+								</td>
+																																																		
+								<td style="width:100px;">按钮名：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" enabled="true" class="mini-textbox"  name="name" emptyText="请输入按钮名"/>
+								</td>
+																																																		
+								<td style="width:100px;">显示文本：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" enabled="true" class="mini-textbox"  name="text" emptyText="请输入显示文本"/>
+								</td>
+																
+							</tr>
+							<tr>
+								<td style="width:100px;">资源编码：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" enabled="true" class="mini-textbox"  name="resourceCode" emptyText="请输入资源编码"/>
+								</td>
+								<td></td><td></td>
+								<td></td><td></td>
+							</tr>
+							<tr>
+								<td style="width:100px;">选项：</td>
+								<td colspan="5" style="width:470px;">
+									<input style="width:100px;" enabled="true" class="mini-checkbox"  checked="false" text="是否启用" name="isEnabled" />
+									<input style="width:100px;" enabled="true" class="mini-checkbox"  checked="false" text="需要选中行" name="isRowNeedSelected" />
+								</td>
+							</tr>
+							<tr class="paramAttr">
+								<td style="width:100px;">参数列表：</td>
+								<td colspan="5">
+									<div class="mini-toolbar" style="width:500px;border-bottom:0;padding:0px;" id="productButton">
+	                                	<table>
+	                                    	<tr>
+		                                        <td> 
+		                                            <a class="mini-button" iconCls="icon-add" onclick="addParam()" 
+		                                                plain="true">添加</a>
+		                                            <a class="mini-button" iconCls="icon-edit" onclick="editParam()" 
+		                                                plain="true">编辑</a>
+		                                            <a class="mini-button" iconCls="icon-remove" onclick="delParam()" 
+		                                                plain="true">删除</a>
+		                                        </td>
+	                                    	</tr>
+		                                </table>
+		                            </div>
+									<div id="param-grid" class="mini-datagrid" style="width:502px;height:auto;border-bottom:0;padding:0px;"  allowResize="false"
+								        url="${base_url}/system/param_config/list"  idField="id" 
+								    >
+								        <div property="columns">
+								        	<div type="checkcolumn" width="20"></div>
+								            <div name="paramName" field="paramName" displayField="paramName" width="100" headerAlign="center" allowSort="true">参数名
+								                <input property="editor" class="mini-buttonedit" onbuttonclick="onSelectColumn" style="width:100%;"/>                
+								            </div>
+								            <div name="paramValue" field="paramValue" width="120" headerAlign="center" allowSort="true">参数取值
+								                <input property="editor" class="mini-textbox" style="width:100%;"/>
+								            </div>                          
+								        </div>
+								    </div>
+								</td>
+							</tr>
+							<tr>
+								<td style="width:100px;">功能类型：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" showNullItem="true" name="type" emptyText="请选择功能类型" nullItemText="" onvaluechanged="onTypeChanged" class="mini-combobox"  data='[{"text":"打开窗口","value":"window"},{"text":"执行动作","value":"action"}]' textField="text" valueField="value"   enabled="true"  />
+								</td>
+								<td style="width:100px;">请求路径：</td>
+								<td colspan="3" style="width:370px;">
+									<input style="width:360px;" enabled="true" class="mini-textbox"  name="uri" emptyText="请输入请求路径"/>
+								</td>
+							</tr>
+							<tr>
+								<td style="width:100px;">保存路径：</td>
+								<td colspan="5" style="width:470px;">
+									<input style="width:460px;" enabled="true" class="mini-textbox"  name="saveUrl" emptyText="请输入用于保存数据的请求路径"/>
+								</td>
+							</tr>
+							<tr class="windowAttr" style="display:none;">
+								<td style="width:100px;">窗口宽度：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" required="true" enabled="true" class="mini-spinner"  name="windowWidth" minValue="0" maxValue="9999" value="800" emptyText="请输入窗口宽度"/>
+								</td>
+								<td style="width:100px;">窗口高度：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" required="true" enabled="true" class="mini-spinner"  name="windowHeight" minValue="0" maxValue="9999" value="500" emptyText="请输入窗口高度"/>
+								</td>
+							    <td></td><td></td>
+							</tr>
+							<tr>
+								<td style="width:100px;">图标：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" enabled="true" class="mini-textbox"  name="iconClass" emptyText="请输入图标"/>
+								</td>
+								<td style="width:100px;">排序：</td>
+								<td style="width:170px;">
+									<input style="width:160px;" required="true" enabled="true" class="mini-spinner" value="0" minValue="0" maxValue="9999999999999" allowLimitValue="true"  name="sort" emptyText="请输入排序"/>
+								</td>
+							    <td></td><td></td>
+							</tr>
+							<tr>
+								<td style="width:100px;">前置脚本：</td>
+								<td colspan="5">
+									<div style="color:blue;font-weight:bold">脚本提示：内置<label data-tooltip="ctx：上下文对象，通过此对象获取参数，不建议直接使用row,grid等参数对象" data-placement="right">ctx</label>对象，包含属性
+									<label data-tooltip="row：当前选择的行对象，选一行为json对象，选多行为json数组对象" data-placement="bottom">row</label>，
+									<label data-tooltip="grid：DataGrid对象" data-placement="bottom">grid</label>，
+									<label data-tooltip="btn：当前点击的按键对象" data-placement="bottom">btn</label>，
+									<label data-tooltip="loginUser：当前登录用户对象，常用属性id,name,loginName；详细属性请查看User类" data-placement="bottom">loginUser</label>,
+									<label data-tooltip="action：确认操作名称，确定:ok,取消:cancel" data-placement="bottom">action</label>,
+									<label data-tooltip="text：请求后台返回的数据" data-placement="bottom">text</label>（鼠标移动到属性查看具体说明）</div>
+									<input name="beforeScript" style="width:502px;height:100px" class="mini-textarea" /></td>
+							</tr>
+							<tr>
+								<td style="width:100px;">后置脚本：</td>
+								<td colspan="5">
+									<input name="afterScript" style="width:502px;height:100px" class="mini-textarea" /></td>
+							</tr>							
+						</table>
+					</div>
+				</fieldSet>
+			</form>
+		</div>
+		<script type="text/javascript">
+			mini.parse();
+
+			var form = new mini.Form("edit-buttonConfig-form");
+			var grid = mini.get("param-grid");
+			var el = mini.getbyName("reportConfig");
+			var report_config_id = ''; 
+			var tip = new mini.ToolTip();
+			tip.set({
+			    target: document,
+			    selector: '[data-tooltip], [title]'
+			});
+			zweb.onESC(form.el, el, function(){
+				CloseWindow("close")
+			});
+			zweb.onEnter(form.el, el, function(){
+				SaveData()
+			});
+												
+			function onChooseReportConfig(e) {
+	            var btnEdit = this;
+	            mini.open({
+	                url: "${base_url}/report/reportConfig/select",
+	                title: "选择报表配置",
+	                width: 1000,
+	                height: 600,
+	                ondestroy: function (action) {
+	                    if (action == "ok") {
+	                        var iframe = this.getIFrameEl();
+	                        var data = iframe.contentWindow.GetData();
+	                        data = mini.clone(data);    //必须
+	                        if (data) {
+	                            btnEdit.setValue(data.id);
+	                            btnEdit.setText(data.title);
+	                        }
+	                    }
+	                }
+	            });            
+	        }
+	        	        	        							        	        							        	        							        	        							        	        							        	        							        	        							        	        	        
+	        function showErrorTexts(errorTexts) {
+	            var s = errorTexts.join('<br/>');
+	
+	            var win = window.open('', "", 'height=200,width=400,top=200,left=400,toolbar=no,menubar=no,scrollbars=no, resizable=no,location=no, status=no, titlebar=no');
+	            win.document.open('text/html', 'replace');
+	            win.document.write(s);
+	            win.document.close();
+	        }
+	        
+			function SaveData() {
+				var o = form.getData();
+				o.params = getParam();
+				form.validate();
+				if(form.isValid() == false) {
+					var errorTexts = form.getErrorTexts();
+                	showErrorTexts(errorTexts);
+					return;
+				}
+				
+				//---控制表单数据不能重复提交
+				var btnSave = mini.get("btn-save");
+				if (!btnSave.getEnabled())
+				    return ;
+				btnSave.setEnabled(false);
+				//----------------------
+				
+				var json = mini.encode(o);
+				$.ajax({
+					url : "${base_url}/system/button_config/save",
+					type : 'post',
+					data : {
+						data : json
+					},
+					cache : false,
+					success : function(text) {
+						CloseWindow("save");
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						btnSave.setEnabled(true);
+						if (409 == jqXHR.status){
+							mini.showMessageBox({
+								title : "数据版本冲突",
+								message : jqXHR.responseText+"，获取最新数据？",
+								buttons : ["是", "否"],
+								iconCls : "mini-messagebox-question",
+								allowResize : true,
+					            callback: function (action) {            
+					                if (action == "是") {
+					                	var _data = mini.clone(o);
+					                	_data.action = "edit";
+					                	SetData(_data);
+					                } else if (action == "否"){
+					                	mini.showMessageBox({
+											title : "数据版本冲突",
+											message : "保留本地数据并提交覆盖最新数据？",
+											buttons : ["是", "否"],
+											iconCls : "mini-messagebox-question",
+											callback: function (action) {
+												if (action == "是") {
+													#set($lor = $zwall.judge('local_override_remote'))
+													#if($lor.ok)
+													
+													mini.getbyName("ignoreVersionConflict").setValue("true");
+					                				SaveData();
+					                				#else
+					                				
+					                				mini.alert($lor.denyReason);
+					                				#end
+												}
+											}
+										});
+				                	}
+					            }
+					        });						
+						} else {
+							//400,403,500错误已经统一在sys.js处理
+							if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+								return;
+							var text = "操作失败，" + jqXHR.responseText;
+							mini.alert(text);
+						}
+					}
+				});
+			}
+
+			function onTypeChanged(e){
+				var curr = mini.getbyName("type");
+				var value = curr.getFormValue();
+				if ("window" == value)
+					$(".windowAttr").show(0);
+				else
+					$(".windowAttr").hide(0);
+			}
+			
+			function onRowNeedChanged(e){
+				
+				var curr = mini.getbyName("isRowNeedSelected");
+				if(curr.getFormValue() == 'true')
+					$(".paramAttr").show(0);
+				else 
+					$(".paramAttr").hide(0);
+			}
+			
+			
+			///
+			function addParam() {
+				grid.commitEdit();
+                var row = {};
+                grid.addRow(row, grid.getData().length);
+                grid.cancelEdit();
+                grid.beginEditRow(row);
+            }
+              
+           function editParam(){
+                var row = grid.getSelected();
+                if(row) {
+                    if (grid.isEditingRow(row)){
+                        mini.alert("当前已处于编辑状态，可直接编辑本记录");
+                        return;
+                    }
+                    grid.beginEditRow(row);
+                }
+           } 
+           function delParam(){
+               var row = grid.getSelected();
+               if(row) {
+                 	grid.removeRow(row, true);
+                }else{
+                    mini.alert("请选中一条记录","提示");
+                }
+            }
+           function onParamChanged(e) {
+               var combo = e.sender;
+               var row = grid.getEditorOwnerRow(combo);
+               var editor = grid.getCellEditor("paramValue", row);
+               editor.setValue(e.columnName);
+           }
+           function getParam() {
+               grid.commitEdit();
+               return grid.getData();
+           }
+			///
+			/* function newRow() {            
+	            var row = {};
+	            grid.addRow(row, row.length);
+
+	            grid.cancelEdit();
+	            grid.beginEditRow(row);
+	        }
+	        function editRow(row_uid) {
+	            var row = grid.getRowByUID(row_uid);
+	            if (row) {
+	                grid.cancelEdit();
+	                grid.beginEditRow(row);
+	            }
+	        }
+	        function cancelRow(row_uid) {            
+	            grid.reload();
+	        }
+	        function delRow(row_uid) {
+	            var row = grid.getRowByUID(row_uid);
+	            if (row) {
+	                if (confirm("确定删除此记录？")) {
+	                    grid.loading("删除中，请稍后......");
+	                    $.ajax({
+	                        url: "../data/AjaxService.aspx?method=RemoveEmployees&id=" + row.id,
+	                        success: function (text) {
+	                            grid.reload();
+	                        },
+	                        error: function () {
+	                        }
+	                    });
+	                }
+	            }
+	        }
+
+	        function updateRow(row_uid) {
+	            var row = grid.getRowByUID(row_uid);
+	            
+	            grid.commitEdit();
+	            var rowData = grid.getChanges();
+	            
+	            grid.loading("保存中，请稍后......");
+	            var json = mini.encode(rowData);
+	            
+	            $.ajax({
+	                url: "../data/AjaxService.aspx?method=SaveEmployees",
+	                data: { data: json },
+	                success: function (text) {
+	                    grid.reload();
+	                },
+	                error: function (jqXHR, textStatus, errorThrown) {
+	                    alert(jqXHR.responseText);
+	                }
+	            });
+
+	        } */
+	        
+	        function onSelectColumn(e){
+	        	var btnEdit = this;
+	            mini.open({
+	                url: "${base_url}/system/column_config/select?report_config_id="+report_config_id,
+	                title: "选择报表字段",
+	                width: 1000,
+	                height: 600,
+	                ondestroy: function (action) {
+	                    if (action == "ok") {
+	                        var iframe = this.getIFrameEl();
+	                        var data = iframe.contentWindow.GetData();
+	                        data = mini.clone(data);    //必须
+	                        if (data) {
+	                            btnEdit.setValue(data.columnName);
+	                            btnEdit.setText(data.columnName);
+	                            e.columnName = "row."+data.columnName;
+	                            onParamChanged(e);
+	                        }
+	                    }
+	                }
+	            }); 
+	        }
+			////////////////////
+			//标准方法接口定义
+			function SetData(data) {
+				if (data.action == "new") {
+					//跨页面传递的数据对象，克隆后才可以安全使用
+					data = mini.clone(data);
+					report_config_id = data.reportConfig.id;
+					form.setData(data);
+					form.setChanged(false);
+				} else if (data.action == "edit") {
+					//跨页面传递的数据对象，克隆后才可以安全使用
+					data = mini.clone(data);
+					$.ajax({
+						url : "${base_url}/system/button_config/" + data.id,
+						cache : false,
+						success : function(text) {
+							var o = mini.decode(text);
+							report_config_id = o.reportConfig.id;
+							form.setData(o);
+							form.setChanged(false);
+							form.validate();
+							onTypeChanged({});
+							//onRowNeedChanged({});
+							grid.load({buttonConfig:data.id});
+						}
+					});
+				}
+			}
+
+			function GetData() {
+				var o = form.getData();
+				return o;
+			}
+
+			function CloseWindow(action) {
+				if(action == "close" && form.isChanged()) {
+					if(confirm("数据被修改了，是否先保存？")) {
+						return false;
+					}
+				}
+				if(window.CloseOwnerWindow)
+					return window.CloseOwnerWindow(action);
+				else
+					window.close();
+			}
+
+			function onOk(e) {
+				SaveData();
+			}
+
+			function onCancel(e) {
+				CloseWindow("cancel");
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,267 @@
+#set($parent_id = $P.param('parent_id','0'))
+#set($parent_name = $P.param('parent_name',''))
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title>存储过程参数配置维护</title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+	</head>
+	<body>
+
+		<div class="mini-toolbar" style="border-bottom:0;padding:0px;">
+			<table style="width:100%;">
+				<tr>
+					<td style="width:100%;">
+						<a class="mini-button" iconCls="icon-add" onclick="add()">增加</a>
+						<a class="mini-button" iconCls="icon-edit" onclick="edit()">编辑</a>
+						<a class="mini-button" iconCls="icon-remove" onclick="remove()">删除</a>
+						<a class="mini-button" iconCls="icon-export" onclick="exportExcel()">导出</a>
+					</td>
+					<td style="white-space:nowrap;"></td>
+				</tr>
+			</table>
+		</div>
+		<div class="mini-fit">
+			<div id="procedureParamConfig-datagrid" class="mini-datagrid" style="width:100%;height:100%;" allowResize="false"
+			url="${base_url}/system/procedure_param_config/list#if(${parent_id} != '0')?reportConfig=${parent_id}#end"  idField="id" multiSelect="true"
+			sizeList="[20,50,100,300,500]" pageSize="20" contextMenu="#contextMenu" showColumnsMenu="true" 							>
+				<div property="columns">
+					<div type="indexcolumn" field="indexcolumn" align="right" width="30"></div>
+					<div type="checkcolumn" width="25"></div>
+
+					<div field="reportConfig"  displayField="reportConfig.title"   width="0"  headerAlign="center" allowSort="true">
+						所属报表
+					</div>
+
+					<div field="type"  displayField="typeDesc"   width="120"  headerAlign="center" allowSort="true">
+						参数类型
+					</div>
+
+					<div field="valueType"  displayField="valueTypeDesc"   width="120"  headerAlign="center" allowSort="true">
+						取值方式
+					</div>
+
+					<div field="paramName"  displayField="paramName"   width="120"  headerAlign="center" allowSort="true">
+						参数名
+					</div>
+					
+					<div field="dataType"  displayField="dataTypeDesc" align="center" width="80"  headerAlign="center" allowSort="true">数据类型
+						<input property="editor" class="mini-combobox" showNullItem="true" data='[{"text":"日期","value":"date"},{"text":"整数","value":"int"},{"text":"小数","value":"float"},{"text":"文本","value":"text"}]' textField="text" valueField="value" style="width:100%;" />
+					</div>
+					
+					<div field="sort"  displayField="sort"   align="right" width="120"  headerAlign="center" allowSort="true">
+						排序
+					</div>
+					
+					<div field="paramValue"  displayField="paramValue"   width="120"  headerAlign="center" allowSort="true">
+						备用值
+					</div>
+				</div>
+			</div>
+			<ul id="contextMenu" class="mini-contextmenu">
+				<li name="fix" iconCls="icon-unlock" onclick="onFix" >
+					锁定列
+				</li>
+				<li name="unfix" iconCls="icon-lock" onclick="onUnfix" >
+					取消锁定列
+				</li>
+			</ul>
+		</div>
+
+		<script type="text/javascript">
+			mini.parse();
+			var grid = mini.get("procedureParamConfig-datagrid");
+			function onUnfix() {
+				grid.unFrozenColumns();
+			}
+
+			function onFix() {
+				mini.prompt("请输入要锁定的列数,比如：2", "请输入", function(action, value) {
+					if(action == "ok" && value) {
+						try {
+							var end = parseInt(value);
+							if(end < 0)
+								end = 0;
+							grid.frozenColumns(0, end);
+						} catch(e) {
+						}
+					}
+				});
+			}
+
+
+			grid.on("drawcell", function(e) {
+				if(false) {
+					var c = "";
+					if(e.value == true)
+						c = "checked=checked";
+					e.cellHtml = "<center><input disabled=disabled type='checkbox' " + c + "/></center>";
+				}
+				if(e.field == "indexcolumn") {
+					e.cellStyle = "background:#ecedef";
+				}
+			});
+
+			grid.load();
+
+			function onChooseReportConfig(e) {
+				var btnEdit = this;
+				mini.open({
+					url : "${base_url}/report/reportConfig/select",
+					title : "选择在线开发配置",
+					width : 1000,
+					height : 600,
+					ondestroy : function(action) {
+						if(action == "ok") {
+							var iframe = this.getIFrameEl();
+							var data = iframe.contentWindow.GetData();
+							data = mini.clone(data);
+							//必须
+							if(data) {
+								btnEdit.setValue(data.id);
+								btnEdit.setText(data.title);
+							}
+						}
+					}
+				});
+			}
+
+			function add() {
+				mini.open({
+					url : "${base_url}/system/procedure_param_config/edit",
+					title : "新增存储过程参数配置",
+					width : 810,
+					height : 320,
+					showModal : false,
+					onload : function() {
+						var iframe = this.getIFrameEl();
+
+						var data = {
+							action : "new",
+							reportConfig : {
+								id : "${parent_id}",
+								title : "${parent_name}"
+							},
+							sort : grid.data.length +　1
+						};
+						iframe.contentWindow.SetData(data);
+					},
+					ondestroy : function(action) {
+						grid.reload();
+					}
+				});
+			}
+
+			function edit() {
+
+				var row = grid.getSelected();
+				if(row) {
+					mini.open({
+						url : "${base_url}/system/procedure_param_config/edit",
+						title : "编辑存储过程参数配置",
+						width : 900,
+						height : 320,
+						showModal : false,
+						onload : function() {
+							var iframe = this.getIFrameEl();
+							var data = {
+								action : "edit",
+								id : row.id,
+								reportConfig : {
+									id : "${parent_id}",
+									title : "${parent_name}"
+								},
+							};
+							iframe.contentWindow.SetData(data);
+						},
+						ondestroy : function(action) {
+							grid.reload();
+						}
+					});
+
+				} else {
+					mini.alert("请选中一条记录", "提示");
+				}
+			}
+
+			function remove() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定删除选中记录？", "确定？", function(action) {
+						if(action == "ok") {
+							var ids = [];
+							for(var i = 0, l = rows.length; i < l; i++) {
+								var r = rows[i];
+								ids.push(r.id);
+							}
+							var id = ids.join(',');
+							grid.loading("操作中，请稍后......");
+							$.ajax({
+								url : "${base_url}/system/procedure_param_config/delete?id=" + id,
+								type : 'post',
+								success : function(text) {
+									mini.alert("删除选中记录，操作成功", "提示");
+									grid.reload();
+								},
+								error : function(jqXHR, textStatus, errorThrown) {
+									grid.unmask();
+									//400,403,500错误已经统一在sys.js处理
+									if(400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+										return;
+									var text = "操作失败，" + jqXHR.responseText;
+									mini.alert(text, "提示");
+								}
+							});
+						}
+					});
+				} else {
+					mini.alert("请选中一条记录", "提示");
+				}
+			}
+
+			//导出
+			function exportExcel() {
+				var rows = grid.getSelecteds();
+				if(rows.length > 0) {
+					mini.confirm("确定导出选中记录？", "确定？", function(action) {
+						if(action == "ok") {
+							var ids = [];
+							for(var i = 0, l = rows.length; i < l; i++) {
+								var r = rows[i];
+								ids.push(r.id);
+							}
+							var id = ids.join(',');
+							location.href = "${base_url}/system/procedure_param_config/export?ids=" + id;
+						}
+					});
+				} else {
+					if(grid.totalCount > 0) {
+						mini.confirm("确定导出记录？", "确定？", function(action) {
+							if(action == "ok") {
+								var json = _getSearchJSON();
+								var queryString = $.param(json);
+								var url = "${base_url}/system/procedure_param_config/export?" + queryString;
+								location.href = url;
+							}
+						});
+					} else {
+						mini.alert("没有数据可以导出", "提示");
+					}
+				}
+			}
+
+		</script>
+	</body>
+</html>

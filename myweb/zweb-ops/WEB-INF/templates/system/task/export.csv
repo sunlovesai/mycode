@@ -1,0 +1,5 @@
+																																																								
+序号,任务名称,任务描述,处理类,调度类型,间隔时间,延缓时间,首次执行时间,结束时间,Cron表达式
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,,,,,,
+${status.index+1},${item.name},${item.description},${item.clazz},${item.scheduleTypeDesc},${item.period},${item.delay},${item.firstTime},${item.endTime},${item.cron}
+</jx:forEach>,,,,,,,,,

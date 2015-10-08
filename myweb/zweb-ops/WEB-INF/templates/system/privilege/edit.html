@@ -1,0 +1,208 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>权限定义编辑面板</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script src="${base_url}/js/boot.js" type="text/javascript"></script>
+		<style type="text/css">
+			html, body {
+				font-size: 12px;
+				padding: 0;
+				margin: 0;
+				border: 0;
+				height: 100%;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="mini-panel" style="width:100%;height:100%;"
+			showToolbar="true" showHeader="false" showCloseButton="false" showFooter="true"
+		>
+			<div property="footer" style="">
+				<div style="text-align:center;padding:5px 3px 8px 3px;">
+					<a class="mini-button" id="btn-save" onclick="onOk" style="width:60px;margin-right:15px;">确定</a>
+					<a class="mini-button" onclick="onCancel" style="width:60px;">取消</a>
+				</div>
+			</div>
+			<form id="edit-privilege-form" method="post" style="padding:15px;">
+				<input name="id" class="mini-hidden" />
+				<table style="table-layout:fixed;">
+					<tr>
+						<td style="width:100px;">功能路径：</td>
+						<td style="width:210px;">
+							<input style="width:200px;" name="uri" class="mini-textbox" required="true"  emptyText="请输入请求路径"/>
+						</td>
+					</tr>
+					<tr>
+						<td style="width:100px;">所属菜单：</td>
+						<td style="width:210px;">
+							<input style="width:200px;" class="mini-buttonedit" onbuttonclick="onSelectMenu" name="menu.id" textName="menu.name" emptyText="请选择菜单" />
+						</td>
+					</tr>
+					<tr>
+						<td style="width:100px;">开发负责人：</td>
+						<td style="width:210px;">
+							<input style="width:200px;" name="developer" class="mini-textbox" required="false"  emptyText="请输入开发负责人"/>
+						</td>
+					</tr>
+					<tr>
+						<td style="width:100px;">功能名：</td>
+						<td style="width:210px;">
+							<input style="width:200px;" name="name" class="mini-textbox" required="true"  emptyText="请输入权限名"/>
+						</td>
+					</tr>
+					<tr>
+						<td style="width:100px;">排序：</td>
+						<td style="width:210px;">
+							<input style="width:200px;" name="sort" class="mini-spinner" value="0" minValue="0" maxValue="9999999999999" required="true"  emptyText="请输入排序数字"/>
+						</td>
+					</tr>
+					<tr>
+						<td style="width:100px;">类型：</td>
+						<td style="width:210px;">
+							<input name="type" style="width:200px" id="type-combo" class="mini-combobox" textField="text" valueField="value" 
+								emptyText="请选择..." showNullItem="true" nullItemText="未知" url="${base_url}/system/privilege/categories" />     
+						</td>
+					</tr>
+					<tr>
+						<td style="width:100px;">设置：</td>
+						<td style="width:170px;">
+						<input style="width:160px;" class="mini-checkbox" text="显示在授权面板" name="isDisplayOnPannel" />
+						<br />
+						<input style="width:160px;" class="mini-checkbox" text="开启多机构模式" name="isOpenTenant" />
+						<br />
+						<input style="width:160px;" class="mini-checkbox" text="记录操作日志" name="needLog" />
+						<br />
+						<input style="width:160px;" class="mini-checkbox" text="共享查询" name="isSharedDataQuery" />
+						<input style="width:160px;" class="mini-checkbox" text="共享操作" name="isSharedDataOp" />
+						</td>
+					</tr>
+					<tr>
+						<td style="width:100px;">备注：</td>
+						<td style="width:210px;">
+							<textarea name="remark" style="width:200px; height:50px;" class="mini-textarea" emptyText="请输入备注"></textarea>
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
+		<script type="text/javascript">
+			mini.parse();
+
+			var form = new mini.Form("edit-privilege-form");
+			var el = mini.getbyName("name");
+			zweb.onESC(form.el, el, function(){
+				CloseWindow("close")
+			});
+			zweb.onEnter(form.el, el, function(){
+				SaveData()
+			});
+			
+			function SaveData() {
+				var o = form.getData();
+
+				form.validate();
+				if(form.isValid() == false)
+					return;
+				//---控制表单数据不能重复提交
+				var btnSave = mini.get("btn-save");
+				if (!btnSave.getEnabled())
+				    return ;
+				btnSave.setEnabled(false);
+				//-----------------------
+				var json = mini.encode(o);
+				$.ajax({
+					url : "${base_url}/system/privilege/save",
+					type : 'post',
+					data : {
+						data : json
+					},
+					cache : false,
+					success : function(text) {
+						CloseWindow("save");
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						btnSave.setEnabled(true);
+						if (400 == jqXHR.status || 403 == jqXHR.status || 500 == jqXHR.status)
+							return;
+						var text = "操作失败，" + jqXHR.responseText;
+						mini.alert(text);
+					}
+				});
+			}
+
+			////////////////////
+			//标准方法接口定义
+			function SetData(data) {
+				if (data.action == "new") {
+					//跨页面传递的数据对象，克隆后才可以安全使用
+					data = mini.clone(data);
+					form.setData(data);
+					form.setChanged(false);
+				} else if(data.action == "edit") {
+					//跨页面传递的数据对象，克隆后才可以安全使用
+					data = mini.clone(data);
+
+					$.ajax({
+						url : "${base_url}/system/privilege/" + data.id,
+						cache : false,
+						success : function(text) {
+							var o = mini.decode(text);
+							form.setData(o);
+							form.setChanged(false);
+							form.validate();
+							mini.getbyName('uri').setEnabled(false);
+						}
+					});
+				}
+			}
+
+			function GetData() {
+				var o = form.getData();
+				return o;
+			}
+
+			function CloseWindow(action) {
+				if(action == "close" && form.isChanged()) {
+					if(confirm("数据被修改了，是否先保存？")) {
+						return false;
+					}
+				}
+				if(window.CloseOwnerWindow)
+					return window.CloseOwnerWindow(action);
+				else
+					window.close();
+			}
+
+			function onOk(e) {
+				SaveData();
+			}
+
+			function onCancel(e) {
+				CloseWindow("cancel");
+			}
+			function onSelectMenu(e) {
+	            var btnEdit = this;
+	            mini.open({
+	                url: "${base_url}/system/menu/select",
+	                title: "选择菜单",
+	                width: 400,
+	                height: 600,
+	                ondestroy: function (action) {
+	                    if (action == "ok") {
+	                        var iframe = this.getIFrameEl();
+	                        var data = iframe.contentWindow.GetData();
+	                        data = mini.clone(data);    //必须
+	                        if (data) {
+	                            btnEdit.setValue(data.id);
+	                            btnEdit.setText(data.name);
+	                        }
+	                    }
+	                }
+	            });            
+	        }
+		</script>
+	</body>
+</html>

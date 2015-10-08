@@ -1,0 +1,21 @@
+Dept: 
+  list: >
+    SELECT
+      *
+    FROM
+      ${app.solidbase_catalog}.sys_dept t0
+    WHERE 1=1
+    #if ($args[0].deptName && $args[0].deptName != '')
+      #if ($args[0].id && $args[0].id != '')
+          AND pid = :id 
+          AND name LIKE :%deptName%
+      #else
+          AND name LIKE :%deptName%
+      #end
+    #else
+      #if ($args[0].id && $args[0].id != '')
+        AND pid = :id
+      #else
+        AND pid IS NULL
+      #end
+    #end

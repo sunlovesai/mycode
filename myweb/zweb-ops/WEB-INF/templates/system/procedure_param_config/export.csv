@@ -1,0 +1,5 @@
+																																				
+序号,所属报表,参数类型,取值方式,参数名,排序
+<jx:forEach items="${data}" var="item" varStatus="status">,,,,,
+${status.index+1},${item.reportConfig.title},${item.typeDesc},${item.valueTypeDesc},${item.paramName},${item.sort}
+</jx:forEach>,,,,,

@@ -1,0 +1,27 @@
+Subscriber:
+  list: > 
+    SELECT
+        tenant_id,
+        price_policy_id,
+        start_date,
+        end_date,
+        remainder,
+        subscribe_date,
+        id
+    FROM
+        ${app.name}_solidbase_db.sys_subscriber t0
+    WHERE 1=1
+              
+        #if ($args[0].tenant && $args[0].tenant!="")
+        AND tenant_id = :tenant
+        #end
+          
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #elseif ($args[0].key && $args[0].key!="")
+        AND ( 1<>1
+                      
+        )
+        #else
+          
+        #end

@@ -1,0 +1,37 @@
+ColumnGroupConfig:
+  list: > 
+    SELECT
+        *
+    FROM
+        ${app.solidbase_catalog}.sys_column_group_config t0
+    WHERE 1=1
+          
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #elseif ($args[0].key && $args[0].key!="")
+        AND ( 1<>1
+                           
+            OR title like :%key% 
+                                          
+            OR report_config_id = :key
+                                
+        )
+        #else
+                   
+        #if ($args[0].title && $args[0].title!="") 
+        AND title like :%title% 
+        #end 
+                         
+        #if ($args[0].reportConfig && $args[0].reportConfig!="") 
+        AND report_config_id = :reportConfig
+        #end 
+        
+        #if ($args[0].isType && $args[0].isType!="") 
+        AND is_type = :isType
+        #end
+        
+        #if ($args[0].id && $args[0].id!="") 
+        AND id != :id
+        #end
+                
+        #end

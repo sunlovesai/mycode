@@ -1,0 +1,56 @@
+ActionLog:
+  list: > 
+    SELECT
+      *
+    FROM
+        ${app.solidbase_catalog}.sys_action_log t0
+    WHERE 1=1
+          
+        #if ($args[0].ids && $args[0].ids!="")
+        AND id in ($args[0].ids)
+        #elseif ($args[0].key && $args[0].key!="")
+        AND ( 1<>1
+                           
+            OR user_id like :%key% 
+            OR user_name like :%key% 
+            OR user_login_name like :%key% 
+            OR user_email like :%key% 
+            OR uri like :%key% 
+            OR level = :level
+            OR menu_id in ( SELECT id FROM ${app.solidbase_catalog}.sys_menu WHERE name like :%key% )
+        )
+        #else
+                   
+        #if ($args[0].userId && $args[0].userId!="") 
+        AND user_id like :%userId% 
+        #end 
+                         
+        #if ($args[0].userName && $args[0].userName!="") 
+        AND user_name like :%userName% 
+        #end 
+                         
+        #if ($args[0].userLoginName && $args[0].userLoginName!="") 
+        AND user_login_name like :%userLoginName% 
+        #end 
+                         
+        #if ($args[0].userEmail && $args[0].userEmail!="") 
+        AND user_email like :%userEmail% 
+        #end 
+                         
+        #if ($args[0].uri && $args[0].uri!="") 
+        AND uri like :%uri% 
+        #end 
+        
+        #if ($args[0].level && $args[0].level!="") 
+        AND level = :level 
+        #end
+        
+        #if ($args[0].timeStart && $args[0].timeStart!="") 
+        AND time >= :timeStart
+        #end 
+        
+        #if ($args[0].timeEnd && $args[0].timeEnd!="") 
+        AND time <= :timeEnd
+        #end 
+                
+        #end
