@@ -44,76 +44,112 @@ public class UserController {
 		User user = null;
 		user = mIUserService.findUserById(id);
 		if (null == user) {
-			return new User();
+			System.out.println("---find--user1--"+user.toString());
+			user.setMessage("用户不存在");
+			user.setStatus("0");
+			System.out.println("---find--user2--"+user.toString());
+			return user;
+		}else{
+			user.setMessage("用户存在");
+			user.setStatus("1");
+			System.out.println("---find--user3--"+user.toString());
+			return user;
 		}
-		System.out.println("-UserController--");
-		return user;
 	}
-	
+
 	@RequestMapping(value = "/findAll", method = RequestMethod.GET)
 	@ResponseBody
-	public List<User> findAllUser(){
+	public List<User> findAllUser() {
 		List<User> users = null;
 		users = mIUserService.findAllUser();
-		if(null == users){
+		if (null == users) {
 			return new ArrayList<User>();
 		}
 		return users;
 	}
-	
+
 	@RequestMapping(value = "/del", method = RequestMethod.GET)
 	@ResponseBody
-	public int deleteUserById(@RequestParam(value = "userId")int id){
-		int status = 0;
+	public User deleteUserById(@RequestParam(value = "userId") int id) {
+		User user = new User();
 		try {
 			mIUserService.deleteUserById(id);
-			status = -1;
+			user.setMessage("删除成功");
+			user.setStatus("1");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			status = -2;
+			user.setMessage("删除失败");
+			user.setStatus("0");
 		}
-		
-		return status;
+
+		return user;
 	}
-	
+
+	@RequestMapping(value = "/delete", method = RequestMethod.GET)
+	@ResponseBody
+	public User deleteUserPhoneByPhone(@RequestParam(value = "userPhone") String userPhone) {
+		// String jsonStr1 = "{\"status\":\"1\",\"message\":\"删除成功\"}";
+		// String jsonStr2 = "{\"status\":\"0\",\"message\":\"删除失败\"}";
+		User user = new User();
+		try {
+			mIUserService.deleteUserByPhone(userPhone);
+			user.setMessage("删除成功");
+			user.setStatus("1");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			user.setMessage("删除失败");
+			user.setStatus("0");
+		}
+		return user;
+	}
+
 	@RequestMapping(value = "/update", method = RequestMethod.GET)
 	@ResponseBody
-	public int updateUser(@Validated User user, BindingResult result){
-		int status = 0;
-		if(result.hasErrors()){
-			return -3;
+	public User updateUser(@Validated User user, BindingResult result) {
+	//	User user = new User();
+		if (result.hasErrors()) {
+			user.setMessage("更新失败");
+			user.setStatus("0");
+			return user;
 		}
-//		user.setRegisterDate(new Date());
+		// user.setRegisterDate(new Date());
 		user.setRegisterDate(DateHelper.getCurrentDate());
 		try {
 			mIUserService.updateUser(user);
-			status = 1;
+			user.setMessage("更新成功");
+			user.setStatus("1");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			status = -1;
+			user.setMessage("更新失败");
+			user.setStatus("0");
 		}
-		return status;
+		return user;
 	}
-	
+
 	@RequestMapping(value = "/add", method = RequestMethod.GET)
 	@ResponseBody
-	public int addUser(@Validated User user, BindingResult result){
-		int status = 0;
-//		user.setRegisterDate(new Date());
+	public User addUser(@Validated User user, BindingResult result) {
+	//	User user = new User();
+		// user.setRegisterDate(new Date());
 		user.setRegisterDate(DateHelper.getCurrentDate());
-		if(result.hasErrors()){
-			 return -1;
+		if (result.hasErrors()) {
+			user.setMessage("添加失败");
+			user.setStatus("0");
+			return user;
 		}
 		try {
 			mIUserService.addUser(user);
-			status = 1;
+			user.setMessage("添加成功");
+			user.setStatus("1");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			status = 2;
+			user.setMessage("添加失败");
+			user.setStatus("0");
 		}
-		return status;
+		return user;
 	}
 }

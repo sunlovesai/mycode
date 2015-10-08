@@ -50,13 +50,19 @@ public class UserServiceTest {
 		User user = new User();
 	//	user.setUserId(4);
 		user.setUserName("ixue105");
+		user.setUserPhone("15507526881");
 		user.setPassword("654321");
 		userService.addUser(user);
 	}
 	
 	@Test
-	public void deleteUserTest(){
-		userService.deleteUserById(9);
+	public void deleteUserByIdTest(){
+		userService.deleteUserById(3);
+	}
+	
+	@Test 
+	public void deleteUserByPhoneTest(){
+		userService.deleteUserByPhone("13007521543");
 	}
 	
 	@Test
@@ -64,7 +70,8 @@ public class UserServiceTest {
 		User user = new User();
 		user.setUserId(10);
 		user.setUserName("ixuess");
-		user.setPassword("15507526881");
+		user.setUserPhone("13007521546");
+		user.setPassword("13007521546");
 		userService.updateUser(user);
 	}
 }

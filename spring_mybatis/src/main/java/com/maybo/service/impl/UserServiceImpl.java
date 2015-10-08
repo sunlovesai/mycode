@@ -1,4 +1,5 @@
 package com.maybo.service.impl;
+
 /**
  * @author 赛
  */
@@ -7,6 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.maybo.dao.UserInfor;
 import com.maybo.model.User;
 import com.maybo.service.IUserService;
@@ -15,16 +17,16 @@ public class UserServiceImpl implements IUserService {
 
 	@Autowired
 	private UserInfor userInfor;
-	
+
 	public User findUserById(int userId) {
 		// TODO Auto-generated method stub
 		User user = null;
 		try {
 			user = userInfor.findUserById(userId);
-			
+
 		} catch (Exception e) {
 			// TODO: handle exception
-			System.out.println("--userserviceimpl--异常--"+e.toString());
+			System.out.println("--userserviceimpl--异常--" + e.toString());
 		}
 		return user;
 	}
@@ -56,6 +58,12 @@ public class UserServiceImpl implements IUserService {
 	public void updateUser(User user) {
 		// TODO Auto-generated method stub
 		userInfor.updateUser(user);
+	}
+
+	@Transactional
+	public void deleteUserByPhone(String userPhone) {
+		// TODO Auto-generated method stub
+		userInfor.deleteUserByPhone(userPhone);
 	}
 
 }

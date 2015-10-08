@@ -20,5 +20,7 @@ public interface UserInfor {
 	public void addUser(User user);
 
 	public void updateUser(User user);
+	
+	public void deleteUserByPhone(String userPhone);
 
 }

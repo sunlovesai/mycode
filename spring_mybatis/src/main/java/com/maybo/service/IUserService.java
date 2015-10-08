@@ -16,4 +16,5 @@ public interface IUserService {
 	public abstract void deleteUserById(int userId);
 	public abstract void addUser(User user);
 	public abstract void updateUser(User user);
+	public abstract void deleteUserByPhone(String userPhone);
 }

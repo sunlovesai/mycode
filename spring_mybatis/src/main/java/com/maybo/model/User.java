@@ -14,15 +14,18 @@ public class User {
 	 */
 	private int userId;
 	private String userName;
+	private String userPhone;
 	private String password;
 	private String registerDate;
-
-	public void setUserId(int userId) {
-		this.userId = userId;
-	}
+	private String status;// 状态
+	private String message;// 返回的消息
 
 	public int getUserId() {
 		return userId;
+	}
+
+	public void setUserId(int userId) {
+		this.userId = userId;
 	}
 
 	public String getUserName() {
@@ -31,6 +34,14 @@ public class User {
 
 	public void setUserName(String userName) {
 		this.userName = userName;
+	}
+
+	public String getUserPhone() {
+		return userPhone;
+	}
+
+	public void setUserPhone(String userPhone) {
+		this.userPhone = userPhone;
 	}
 
 	public String getPassword() {
@@ -49,10 +60,26 @@ public class User {
 		this.registerDate = registerDate;
 	}
 
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
 	@Override
 	public String toString() {
-		return "User [userId=" + userId + ", userName=" + userName + ", password=" + password + ", registerDate="
-				+ registerDate + "]";
+		return "User [userId=" + userId + ", userName=" + userName + ", userPhone=" + userPhone + ", password=" + password
+				+ ", registerDate=" + registerDate + ", status=" + status + ", message=" + message + "]";
 	}
 
 	/*
