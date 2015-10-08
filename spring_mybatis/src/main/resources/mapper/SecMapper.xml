@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.maybo.dao.SecDao">
+    <select id="findSecById" parameterType="int" resultType="com.maybo.model.Sec">
+        select * from user_infor s where s.userId=#{id}
+    </select>
+    <select id="findAllSec" resultType="com.maybo.model.Sec">
+        select *from user_infor
+    </select>
+    <insert id="addSec" parameterType="com.maybo.model.Sec">
+        insert into user_infor (username,password)values(#{username},#{password})
+    </insert>
+    <delete id="delSecById" parameterType="int">
+        delete from user_infor where userId=#{id}
+    </delete>
+    <update id="updateSec" parameterType="com.maybo.model.Sec">
+        update user_infor set username=#{sec_code},password=#{sec_name} where userId=#{id}
+    </update>
+</mapper>

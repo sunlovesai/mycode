@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.maybo.dao.PersonDao">
+    <resultMap type="com.maybo.model.Person" id="personMap">
+        <id column="id" property="id"/>
+        <result column="user" property="userName"/>
+        <result  column="age" property="age"/>
+    </resultMap>
+    <select id="findPerson" parameterType="int" resultType="com.maybo.model.Person">
+        select * from person p where p.id=#{id}
+    </select>
+    <insert id="addPerson" parameterType="com.maybo.model.Person">
+        insert into person(id,user,age)values(#{id},#{userName},#{age})
+    </insert>
+</mapper>
