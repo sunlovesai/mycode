@@ -42,26 +42,46 @@ public class UserController {
 	@ResponseBody
 	public User findUserById(@RequestParam(value = "userId") int id) {
 		User user = null;
-		user = mIUserService.findUserById(id);
-		if (null == user) {
-			System.out.println("---find--user1--"+user.toString());
+		try {
+			user = mIUserService.findUserById(id);
+			if (null == user) {
+				user = new User();
+				System.out.println("---find--user1--"+user.toString());
+				user.setMessage("用户不存在");
+				user.setStatus("0");
+				System.out.println("---find--user2--"+user.toString());
+			}else{
+				user.setMessage("用户存在");
+				user.setStatus("1");
+				System.out.println("---find--user3--"+user.toString());
+				
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			user = new User();
 			user.setMessage("用户不存在");
 			user.setStatus("0");
-			System.out.println("---find--user2--"+user.toString());
-			return user;
-		}else{
-			user.setMessage("用户存在");
-			user.setStatus("1");
-			System.out.println("---find--user3--"+user.toString());
-			return user;
+			System.out.println("---find--user4--"+user.toString());
 		}
+		return user;
 	}
 
 	@RequestMapping(value = "/findAll", method = RequestMethod.GET)
 	@ResponseBody
 	public List<User> findAllUser() {
 		List<User> users = null;
-		users = mIUserService.findAllUser();
+		try {
+			users = mIUserService.findAllUser();
+			if(null == users){
+				
+			}else{
+				
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if (null == users) {
 			return new ArrayList<User>();
 		}
