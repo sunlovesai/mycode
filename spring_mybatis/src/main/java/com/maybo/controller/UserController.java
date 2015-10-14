@@ -128,48 +128,48 @@ public class UserController {
 	@RequestMapping(value = "/update", method = RequestMethod.GET)
 	@ResponseBody
 	public User updateUser(@Validated User user, BindingResult result) {
-	//	User user = new User();
+		User user1 = new User();
 		if (result.hasErrors()) {
-			user.setMessage("更新失败");
-			user.setStatus("0");
-			return user;
+			user1.setMessage("更新失败");
+			user1.setStatus("0");
+			return user1;
 		}
 		// user.setRegisterDate(new Date());
 		user.setRegisterDate(DateHelper.getCurrentDate());
 		try {
 			mIUserService.updateUser(user);
-			user.setMessage("更新成功");
-			user.setStatus("1");
+			user1.setMessage("更新成功");
+			user1.setStatus("1");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			user.setMessage("更新失败");
-			user.setStatus("0");
+			user1.setMessage("更新失败");
+			user1.setStatus("0");
 		}
-		return user;
+		return user1;
 	}
 
 	@RequestMapping(value = "/add", method = RequestMethod.GET)
 	@ResponseBody
 	public User addUser(@Validated User user, BindingResult result) {
-	//	User user = new User();
+		User user1 = new User();
 		// user.setRegisterDate(new Date());
 		user.setRegisterDate(DateHelper.getCurrentDate());
 		if (result.hasErrors()) {
-			user.setMessage("添加失败");
-			user.setStatus("0");
-			return user;
+			user1.setMessage("添加失败");
+			user1.setStatus("0");
+			return user1;
 		}
 		try {
 			mIUserService.addUser(user);
-			user.setMessage("添加成功");
-			user.setStatus("1");
+			user1.setMessage("添加成功");
+			user1.setStatus("1");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			user.setMessage("添加失败");
-			user.setStatus("0");
+			user1.setMessage("添加失败");
+			user1.setStatus("0");
 		}
-		return user;
+		return user1;
 	}
 }
